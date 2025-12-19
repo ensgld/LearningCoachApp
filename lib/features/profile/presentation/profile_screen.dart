@@ -31,13 +31,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           const Center(
             child: Text(
-              "Öğrenci Adı",
+              'Öğrenci Adı',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 32),
-          
-          Text(AppStrings.profileSettings, style: Theme.of(context).textTheme.titleLarge),
+
+          Text(
+            AppStrings.profileSettings,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 16),
 
           // Daily Goal
@@ -55,8 +58,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(AppStrings.dailyGoalLabel, style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text("${_dailyGoal.round()} dk"),
+                      const Text(
+                        AppStrings.dailyGoalLabel,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text('${_dailyGoal.round()} dk'),
                     ],
                   ),
                   Slider(
@@ -87,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
 
           // Language
-           ListTile(
+          ListTile(
             title: const Text(AppStrings.languageLabel),
             subtitle: Text(_language),
             leading: const Icon(Icons.language),

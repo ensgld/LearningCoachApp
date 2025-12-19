@@ -19,10 +19,7 @@ class DocumentDetailScreen extends StatelessWidget {
           children: [
             _buildStatusBadge(context, document.status),
             const SizedBox(height: 24),
-            Text(
-              "Özet",
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
+            Text('Özet', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
@@ -31,7 +28,9 @@ class DocumentDetailScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
-                document.summary.isNotEmpty ? document.summary : "Özet hazırlanıyor...",
+                document.summary.isNotEmpty
+                    ? document.summary
+                    : 'Özet hazırlanıyor...',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
@@ -87,7 +86,10 @@ class DocumentDetailScreen extends StatelessWidget {
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+          Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );

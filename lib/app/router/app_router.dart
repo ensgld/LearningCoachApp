@@ -21,9 +21,13 @@ part 'app_router.g.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHome = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
-final _shellNavigatorStudy = GlobalKey<NavigatorState>(debugLabel: 'shellStudy');
+final _shellNavigatorStudy = GlobalKey<NavigatorState>(
+  debugLabel: 'shellStudy',
+);
 final _shellNavigatorDocs = GlobalKey<NavigatorState>(debugLabel: 'shellDocs');
-final _shellNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+final _shellNavigatorProfile = GlobalKey<NavigatorState>(
+  debugLabel: 'shellProfile',
+);
 
 @riverpod
 GoRouter goRouter(Ref ref) {
@@ -93,8 +97,8 @@ GoRouter goRouter(Ref ref) {
                     path: 'chat',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) {
-                       final doc = state.extra as Document;
-                       return DocumentChatScreen(document: doc);
+                      final doc = state.extra as Document;
+                      return DocumentChatScreen(document: doc);
                     },
                   ),
                 ],

@@ -54,12 +54,13 @@ class _SessionRunningScreenState extends State<SessionRunningScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.timerRunning),
-        leading: const SizedBox(), // Hide back button to prevent accidental exit
+        leading:
+            const SizedBox(), // Hide back button to prevent accidental exit
         actions: [
           IconButton(
-             icon: const Icon(Icons.close),
-             onPressed: () => context.pop(), // Abort
-          )
+            icon: const Icon(Icons.close),
+            onPressed: () => context.pop(), // Abort
+          ),
         ],
       ),
       body: Padding(
@@ -84,15 +85,15 @@ class _SessionRunningScreenState extends State<SessionRunningScreen> {
                 Text(
                   _timerString,
                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontFeatures: [const FontFeature.tabularFigures()],
-                      ),
+                    fontWeight: FontWeight.bold,
+                    fontFeatures: [const FontFeature.tabularFigures()],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 32),
-             Text(
-              "Hedef: Flutter İleri Seviye Öğrenme",
+            Text(
+              'Hedef: Flutter İleri Seviye Öğrenme',
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
@@ -113,7 +114,10 @@ class _SessionRunningScreenState extends State<SessionRunningScreen> {
                 ElevatedButton(
                   onPressed: () => context.go('/study/quiz'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                   ),
                   child: const Text(AppStrings.sessionFinishBtn),
                 ),

@@ -29,11 +29,11 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSection("Dün ne yaptım?", _didController),
+            _buildSection('Dün ne yaptım?', _didController),
             const SizedBox(height: 24),
-            _buildSection("Beni ne engelledi?", _blockedController),
+            _buildSection('Beni ne engelledi?', _blockedController),
             const SizedBox(height: 24),
-            _buildSection("Bugün neyi daha iyi yapacağım?", _todoController),
+            _buildSection('Bugün neyi daha iyi yapacağım?', _todoController),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,
@@ -41,10 +41,12 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
                 onPressed: () {
                   context.pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Kaizen kaydedildi! Yarın için başarılar.")),
+                    const SnackBar(
+                      content: Text('Kaizen kaydedildi! Yarın için başarılar.'),
+                    ),
                   );
                 },
-                child: const Text("Kaydet ve Bitir"),
+                child: const Text('Kaydet ve Bitir'),
               ),
             ),
           ],
@@ -57,14 +59,17 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: "Buraya yazın...",
-          ),
+          decoration: const InputDecoration(hintText: 'Buraya yazın...'),
         ),
       ],
     );

@@ -1,30 +1,40 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:learning_coach/main.dart';
+import 'package:learning_coach/shared/data/mock_data_repository.dart';
+import 'package:learning_coach/shared/models/models.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('Mock Data Repository Tests', () {
+    test('Goals data is not empty', () {
+      expect(MockDataRepository.goals, isNotEmpty);
+      expect(MockDataRepository.goals.length, greaterThan(0));
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('Documents data is not empty', () {
+      expect(MockDataRepository.documents, isNotEmpty);
+      expect(MockDataRepository.documents.length, greaterThan(0));
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('Goal model has correct structure', () {
+      final goal = MockDataRepository.goals.first;
+      expect(goal.title, isNotEmpty);
+      expect(goal.description, isNotEmpty);
+      expect(goal.progress, isA<double>());
+      expect(goal.progress, greaterThanOrEqualTo(0.0));
+      expect(goal.progress, lessThanOrEqualTo(1.0));
+    });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    test('Document model has correct structure', () {
+      final doc = MockDataRepository.documents.first;
+      expect(doc.title, isNotEmpty);
+      expect(doc.status, isA<DocStatus>());
+      expect(doc.uploadedAt, isA<DateTime>());
+    });
+
+    test('Initial chat messages exist', () {
+      expect(MockDataRepository.initialChat, isNotEmpty);
+      final message = MockDataRepository.initialChat.first;
+      expect(message.text, isNotEmpty);
+      expect(message.isUser, isFalse); // First message is from coach
+    });
   });
 }

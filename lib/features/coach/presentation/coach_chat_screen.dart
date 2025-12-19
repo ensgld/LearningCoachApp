@@ -28,8 +28,8 @@ class CoachChatScreen extends ConsumerWidget {
                 Text(
                   AppStrings.coachChatTitle,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -39,7 +39,7 @@ class CoachChatScreen extends ConsumerWidget {
             ),
           ),
           const Divider(height: 1),
-          
+
           // Chat List
           Expanded(
             child: ListView.separated(
@@ -60,17 +60,23 @@ class CoachChatScreen extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                ActionChip(label: const Text("Plan oluştur"), onPressed: () {}),
+                ActionChip(label: const Text('Plan oluştur'), onPressed: () {}),
                 const SizedBox(width: 8),
-                ActionChip(label: const Text("Quiz üret"), onPressed: () {}),
+                ActionChip(label: const Text('Quiz üret'), onPressed: () {}),
                 const SizedBox(width: 8),
-                ActionChip(label: const Text("Bugün zorlandım"), onPressed: () {}),
+                ActionChip(
+                  label: const Text('Bugün zorlandım'),
+                  onPressed: () {},
+                ),
                 const SizedBox(width: 8),
-                ActionChip(label: const Text("Motivasyon ver"), onPressed: () {}),
+                ActionChip(
+                  label: const Text('Motivasyon ver'),
+                  onPressed: () {},
+                ),
               ],
             ),
           ),
-          
+
           // Input Area mockup
           const Divider(height: 1),
           Padding(
@@ -114,7 +120,9 @@ class _ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.isUser;
-    final color = isUser ? Theme.of(context).colorScheme.primary : Colors.grey.shade100;
+    final color = isUser
+        ? Theme.of(context).colorScheme.primary
+        : Colors.grey.shade100;
     final textColor = isUser ? Colors.white : Colors.black87;
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
 
@@ -130,10 +138,7 @@ class _ChatBubble extends StatelessWidget {
               bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
             ),
           ),
-          child: Text(
-            message.text,
-            style: TextStyle(color: textColor),
-          ),
+          child: Text(message.text, style: TextStyle(color: textColor)),
         ),
         if (!isUser && message.sources != null && message.sources!.isNotEmpty)
           Padding(
@@ -143,7 +148,7 @@ class _ChatBubble extends StatelessWidget {
                 // Show sources modal layout
               },
               icon: const Icon(Icons.source, size: 16),
-              label: Text(AppStrings.sourcesTitle),
+              label: const Text(AppStrings.sourcesTitle),
               style: OutlinedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
               ),

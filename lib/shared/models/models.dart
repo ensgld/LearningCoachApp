@@ -33,12 +33,9 @@ class GoalTask extends Equatable {
   final String title;
   final bool isCompleted;
 
-  GoalTask({
-    String? id,
-    required this.title,
-    this.isCompleted = false,
-  }) : id = id ?? uuid.v4();
-  
+  GoalTask({String? id, required this.title, this.isCompleted = false})
+    : id = id ?? uuid.v4();
+
   GoalTask copyWith({bool? isCompleted}) {
     return GoalTask(
       id: id,
@@ -71,7 +68,14 @@ class StudySession extends Equatable {
   }) : id = id ?? uuid.v4();
 
   @override
-  List<Object?> get props => [id, goalId, durationMinutes, startTime, actualDurationSeconds, quizScore];
+  List<Object?> get props => [
+    id,
+    goalId,
+    durationMinutes,
+    startTime,
+    actualDurationSeconds,
+    quizScore,
+  ];
 }
 
 // --- Document & Chat ---

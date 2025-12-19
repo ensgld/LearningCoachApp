@@ -19,14 +19,19 @@ class DocumentsScreen extends ConsumerWidget {
         onPressed: () {
           // TODO: Mock file picker
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Mock: Dosya Yüklendi...")),
+            const SnackBar(content: Text('Mock: Dosya Yüklendi...')),
           );
         },
         icon: const Icon(Icons.add),
         label: const Text(AppStrings.docsUploadBtn),
       ),
-      body: docs.isEmpty 
-          ? const Center(child: Text(AppStrings.docsEmptyState, textAlign: TextAlign.center))
+      body: docs.isEmpty
+          ? const Center(
+              child: Text(
+                AppStrings.docsEmptyState,
+                textAlign: TextAlign.center,
+              ),
+            )
           : ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: docs.length,
@@ -88,4 +93,3 @@ class _DocumentCard extends StatelessWidget {
     );
   }
 }
-

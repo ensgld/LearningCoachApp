@@ -14,7 +14,7 @@
 build/
 coverage/
 lib/generated_plugin_registrant.dart
-# For library packages, don’t commit the pubspec.lock file.
+# For library packages, don't commit the pubspec.lock file.
 # Regenerating the pubspec.lock file lets you test your package against the latest compatible versions of its dependencies.
 # See https://dart.dev/guides/libraries/private-files#pubspeclock
 #pubspec.lock
@@ -66,3 +66,54 @@ lib/generated_plugin_registrant.dart
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
 # End of https://www.toptal.com/developers/gitignore/api/flutter
+
+### Additional Rules for Learning Coach ###
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE - VS Code (keep settings and extensions for team)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.history/
+
+# IDE - IntelliJ/Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# NOTE: We DO commit generated files (*.g.dart, *.freezed.dart)
+# This ensures everyone has the same generated code without running build_runner
+# If you want to ignore them, uncomment below (not recommended for team projects):
+# **/*.g.dart
+# **/*.freezed.dart
