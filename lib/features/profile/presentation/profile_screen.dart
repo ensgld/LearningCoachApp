@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/features/auth/application/auth_controller.dart';
 
-class ProfileScreen extends StatefulWidget {
+/// Profile Screen
+///
+/// Kullanıcı profili ve ayarlar ekranı.
+/// Mock auth ile çıkış yapma özelliği eklendi.
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _notificationsEnabled = true;
   double _dailyGoal = 60;
   String _language = 'Türkçe';
@@ -107,6 +114,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Mock Language Switch
               setState(() {
                 _language = _language == 'Türkçe' ? 'English' : 'Türkçe';
+              });
+            },
+          ),
+
+          const SizedBox(height: 32),
+
+          // Çıkış Yap butonu
+          /// Logout Button
+          ///
+          /// Mock auth ile çıkış yap ve welcome ekranına dön.
+          /// Gerçekte: Secure storage'dan token temizlenir
+          ListTile(
+            title: const Text(
+              'Çıkış Yap',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            leading: const Icon(Icons.logout, color: Colors.red),
+            tileColor: Colors.red.shade50,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.red.shade100),
+            ),
+            onTap: () {
+              // Logout onayı göster
+              showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Çıkış Yap'),
+                  content: const Text(
+                    'Çıkış yapmak istediğinize emin misiniz?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('İptal'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text(
+                        'Çıkış Yap',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ).then((confirmed) {
+                if (confirmed == true) {
+                  // Logout yap
+                  ref.read(authControllerProvider.notifier).logout();
+                  // Welcome ekranına git
+                  context.go('/welcome');
+                }
               });
             },
           ),

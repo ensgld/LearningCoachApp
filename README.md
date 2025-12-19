@@ -6,13 +6,14 @@
 
 ## ✨ Özellikler
 
-- **Ana Sayfa**: Çalışma ilerlemesi, yaklaşan hedefler ve son aktivitelere genel bakış
+- **Kimlik Doğrulama**: Mock email/şifre girişi, sosyal giriş (Google/Apple), kayıt olma
+- **Ana Sayfa**: ÇAlışma ilerlemesi, yaklaşan hedefler ve son aktivitelere genel bakış
 - **Çalışma Seansları**: Pomodoro tarzı çalışma takibi ve odaklanma zamanlayıcıları
 - **Hedef Yönetimi**: Öğrenme hedeflerini belirleyin, takip edin ve görev listesiyle tamamlayın
 - **Kaizen Kontrolleri**: Günlük yansımalar ve sürekli gelişim takibi
 - **Doküman Kütüphanesi**: Çalışma materyallerinizi yükleyin, düzenleyin ve yönetin
 - **Doküman Soru-Cevap**: (Gelecek) RAG kullanarak dokümanlarınızla yapay zeka destekli sohbet
-- **Profil ve Ayarlar**: Kullanıcı tercihleri ve uygulama yapılandırması
+- **Profil ve Ayarlar**: Kullanıcı tercihleri, uygulama yapılandırması ve çıkış yapma
 
 ## 🏗️ Mimari
 
