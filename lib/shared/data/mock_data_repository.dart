@@ -37,22 +37,19 @@ class MockDataRepository {
   static final List<Document> documents = [
     Document(
       title: 'Flutter_Architecture_Guide.pdf',
-      summary:
-          'Flutter uygulamalarında Clean Architecture kullanımı, katmanların ayrılması ve bağımlılık yönetimi hakkında detaylı rehber.',
+      summary: 'Flutter uygulamalarında Clean Architecture kullanımı, katmanların ayrılması ve bağımlılık yönetimi hakkında detaylı rehber.',
       status: DocStatus.ready,
       uploadedAt: DateTime.now().subtract(const Duration(days: 2)),
     ),
     Document(
       title: 'Ders_Notlari_Vize.pdf',
-      summary:
-          'Vize konuları özet: Matematik, Fizik ve Lineer Cebir formülleri.',
+      summary: 'Vize konuları özet: Matematik, Fizik ve Lineer Cebir formülleri.',
       status: DocStatus.ready,
       uploadedAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
     Document(
       title: 'Proje_Gereksinimleri_v2.docx',
-      summary:
-          'Bitirme projesi için güncel gereksinim listesi ve teslim tarihleri.',
+      summary: 'Bitirme projesi için güncel gereksinim listesi ve teslim tarihleri.',
       status: DocStatus.processing,
       uploadedAt: DateTime.now().subtract(const Duration(minutes: 10)),
     ),
@@ -67,24 +64,21 @@ class MockDataRepository {
   // Chat
   static final List<CoachMessage> initialChat = [
     CoachMessage(
-      text:
-          'Merhaba! Bugün çalışma planın nasıl gidiyor? Yardımcı olabileceğim bir konu var mı?',
+      text: 'Merhaba! Bugün çalışma planın nasıl gidiyor? Yardımcı olabileceğim bir konu var mı?',
       isUser: false,
       timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
     ),
   ];
-
+  
   static final List<Source> mockSources = [
-    const Source(
+    Source(
       docTitle: 'Flutter_Architecture_Guide.pdf',
-      excerpt:
-          'Data layer should implement repositories defined in the domain layer to invert dependencies.',
+      excerpt: 'Data layer should implement repositories defined in the domain layer to invert dependencies.',
       pageLabel: 'Sayfa 12',
     ),
-    const Source(
+    Source(
       docTitle: 'Flutter_Architecture_Guide.pdf',
-      excerpt:
-          'Use UseCases to encapsulate business logic for specific features.',
+      excerpt: 'Use UseCases to encapsulate business logic for specific features.',
       pageLabel: 'Sayfa 14',
     ),
   ];

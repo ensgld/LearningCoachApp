@@ -19,13 +19,10 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
   void initState() {
     super.initState();
     // Initial greeting
-    _messages.add(
-      CoachMessage(
-        text:
-            "Merhaba! '${widget.document.title}' hakkında ne bilmek istersiniz?",
-        isUser: false,
-      ),
-    );
+    _messages.add(CoachMessage(
+      text: "Merhaba! '${widget.document.title}' hakkında ne bilmek istersiniz?",
+      isUser: false,
+    ));
   }
 
   void _sendMessage() {
@@ -41,25 +38,14 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
-          _messages.add(
-            CoachMessage(
-              text:
-                  'Bu konuda dokümanda şunlar geçiyor: Clean Architecture, bağımlılıkları dışarıdan içeriye doğru düzenler...',
-              isUser: false,
-              sources: const [
-                Source(
-                  docTitle: 'Flutter_Architecture.pdf',
-                  excerpt: 'Excerpt text 1...',
-                  pageLabel: 'p. 10',
-                ),
-                Source(
-                  docTitle: 'Flutter_Architecture.pdf',
-                  excerpt: 'Excerpt text 2...',
-                  pageLabel: 'p. 12',
-                ),
-              ],
-            ),
-          );
+          _messages.add(CoachMessage(
+            text: "Bu konuda dokümanda şunlar geçiyor: Clean Architecture, bağımlılıkları dışarıdan içeriye doğru düzenler...",
+            isUser: false,
+            sources: const [
+              Source(docTitle: "Flutter_Architecture.pdf", excerpt: "Excerpt text 1...", pageLabel: "p. 10"),
+              Source(docTitle: "Flutter_Architecture.pdf", excerpt: "Excerpt text 2...", pageLabel: "p. 12"),
+            ],
+          ));
         });
       }
     });
@@ -67,6 +53,8 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.document.title)),
       body: Column(
@@ -81,7 +69,7 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
               },
             ),
           ),
-          Divider(height: 1, color: Colors.grey.shade300),
+          Divider(height: 1, color: scheme.outlineVariant),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -109,20 +97,18 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
   }
 
   Widget _buildChatBubble(CoachMessage message) {
+    final scheme = Theme.of(context).colorScheme;
     final isUser = message.isUser;
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final bg = isUser
-        ? Theme.of(context).colorScheme.primaryContainer
-        : Colors.grey.shade200;
+    final bg = isUser ? scheme.primaryContainer : scheme.surfaceContainerHighest;
+    final fg = isUser ? scheme.onPrimaryContainer : scheme.onSurface;
 
     return Column(
       crossAxisAlignment: align,
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.75,
-          ),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(16).copyWith(
@@ -130,24 +116,22 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
               bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
             ),
           ),
-          child: Text(message.text),
+          child: Text(message.text, style: TextStyle(color: fg)),
         ),
         if (!isUser && message.sources != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: ActionChip(
-              avatar: const Icon(Icons.source, size: 16),
-              label: Text(
-                '${AppStrings.sourcesTitle} (${message.sources!.length})',
-              ),
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (_) => _SourcesSheet(sources: message.sources!),
-                );
-              },
-            ),
-          ),
+           Padding(
+             padding: const EdgeInsets.only(top: 4),
+             child: ActionChip(
+               avatar: const Icon(Icons.source, size: 16),
+               label: Text('${AppStrings.sourcesTitle} (${message.sources!.length})'),
+               onPressed: () {
+                 showModalBottomSheet(
+                   context: context, 
+                   builder: (_) => _SourcesSheet(sources: message.sources!),
+                 );
+               },
+             ),
+           )
       ],
     );
   }
@@ -160,58 +144,49 @@ class _SourcesSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            AppStrings.sourcesTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text(AppStrings.sourcesTitle, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),
-          ...sources.map(
-            (s) => Card(
-              elevation: 0,
-              color: Colors.grey.shade50,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          s.pageLabel,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.copy, size: 16),
-                          onPressed: () {},
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      s.excerpt,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+          ...sources.map((s) => Card(
+            elevation: 0,
+            color: scheme.surface,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        s.pageLabel,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 16),
+                         onPressed: () {}, 
+                         visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(s.excerpt, style: Theme.of(context).textTheme.bodySmall),
+                ],
               ),
             ),
-          ),
+          )),
         ],
       ),
     );

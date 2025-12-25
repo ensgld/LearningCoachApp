@@ -10,6 +10,8 @@ class DocumentDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: Text(document.title)),
       body: Padding(
@@ -19,18 +21,20 @@ class DocumentDetailScreen extends StatelessWidget {
           children: [
             _buildStatusBadge(context, document.status),
             const SizedBox(height: 24),
-            Text('Özet', style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              "Özet",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: scheme.surface,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: scheme.outlineVariant),
               ),
               child: Text(
-                document.summary.isNotEmpty
-                    ? document.summary
-                    : 'Özet hazırlanıyor...',
+                document.summary.isNotEmpty ? document.summary : "Özet hazırlanıyor...",
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
@@ -52,6 +56,8 @@ class DocumentDetailScreen extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context, DocStatus status) {
+    final scheme = Theme.of(context).colorScheme;
+
     Color color;
     String label;
     IconData icon;
@@ -77,19 +83,16 @@ class DocumentDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: scheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: color),
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
-          ),
+          Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
         ],
       ),
     );

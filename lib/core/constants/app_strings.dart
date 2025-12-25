@@ -28,8 +28,7 @@ class AppStrings {
   static const String quizSubmitBtn = 'Tamamla';
 
   // Docs
-  static const String docsEmptyState =
-      'Henüz doküman yok.\nPDF yükleyerek başlayın.';
+  static const String docsEmptyState = 'Henüz doküman yok.\nPDF yükleyerek başlayın.';
   static const String docsUploadBtn = 'Doküman Yükle';
   static const String docsSearchHint = 'Doküman ara...';
   static const String docStatusProcessing = 'İşleniyor';

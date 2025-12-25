@@ -143,3 +143,62 @@ abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
     element.handleValue(ref, created);
   }
 }
+
+/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+
+@ProviderFor(UserStatsNotifier)
+const userStatsProvider = UserStatsNotifierProvider._();
+
+/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+final class UserStatsNotifierProvider
+    extends $NotifierProvider<UserStatsNotifier, UserStats> {
+  /// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+  const UserStatsNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'userStatsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$userStatsNotifierHash();
+
+  @$internal
+  @override
+  UserStatsNotifier create() => UserStatsNotifier();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UserStats value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UserStats>(value),
+    );
+  }
+}
+
+String _$userStatsNotifierHash() => r'f1cbf288f959e1595f30d28933dd29364f843d4f';
+
+/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+
+abstract class _$UserStatsNotifier extends $Notifier<UserStats> {
+  UserStats build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<UserStats, UserStats>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<UserStats, UserStats>,
+              UserStats,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
