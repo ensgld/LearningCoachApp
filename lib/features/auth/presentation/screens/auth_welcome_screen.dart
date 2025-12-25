@@ -60,7 +60,7 @@ class AuthWelcomeScreen extends ConsumerWidget {
 
               // Primary: Giriş Yap butonu
               FilledButton(
-                onPressed: () => context.push('/auth/login'),
+                onPressed: () => context.go('/auth/login'),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
@@ -77,7 +77,7 @@ class AuthWelcomeScreen extends ConsumerWidget {
 
               // Secondary: Kayıt Ol butonu
               OutlinedButton(
-                onPressed: () => context.push('/auth/signup'),
+                onPressed: () => context.go('/auth/signup'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(

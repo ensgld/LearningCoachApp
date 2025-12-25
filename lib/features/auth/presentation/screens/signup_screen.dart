@@ -104,6 +104,46 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  /// Google ile kayıt (mock)
+  Future<void> _handleGoogleSignup() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).loginWithGoogle();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google ile kayıt: Yakında')),
+        );
+        context.go('/home');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  /// Apple ile kayıt (mock)
+  Future<void> _handleAppleSignup() async {
+    setState(() => _isLoading = true);
+
+    try {
+      await ref.read(authControllerProvider.notifier).loginWithApple();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Apple ile kayıt: Yakında')),
+        );
+        context.go('/home');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,20 +286,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 SocialButton(
                   icon: Icons.g_mobiledata,
                   label: 'Google ile kayıt ol',
-                  onPressed: () async {
-                    setState(() => _isLoading = true);
-                    await ref
-                        .read(authControllerProvider.notifier)
-                        .loginWithGoogle();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Google ile kayıt: Yakında'),
-                        ),
-                      );
-                      context.go('/home');
-                    }
-                  },
+                  onPressed: _handleGoogleSignup,
                 ),
 
                 const SizedBox(height: 12),
@@ -268,20 +295,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   SocialButton(
                     icon: Icons.apple,
                     label: 'Apple ile kayıt ol',
-                    onPressed: () async {
-                      setState(() => _isLoading = true);
-                      await ref
-                          .read(authControllerProvider.notifier)
-                          .loginWithApple();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Apple ile kayıt: Yakında'),
-                          ),
-                        );
-                        context.go('/home');
-                      }
-                    },
+                    onPressed: _handleAppleSignup,
                     backgroundColor: Colors.black,
                     iconColor: Colors.white,
                   ),
@@ -294,7 +308,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   children: [
                     const Text('Zaten hesabın var mı?'),
                     TextButton(
-                      onPressed: () => context.pushReplacement('/auth/login'),
+                      onPressed: () => context.go('/auth/login'),
                       child: const Text('Giriş yap'),
                     ),
                   ],

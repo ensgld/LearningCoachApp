@@ -28,6 +28,9 @@ class AuthController extends _$AuthController {
     // API çağrısını simüle et
     await Future<void>.delayed(const Duration(milliseconds: 800));
 
+    // Provider dispose edildiyse state'i güncelleme
+    if (!ref.mounted) return;
+
     // Mock success - gerçekte backend'den response gelir
     state = true;
   }
@@ -43,6 +46,9 @@ class AuthController extends _$AuthController {
   }) async {
     // API çağrısı simülasyonu
     await Future<void>.delayed(const Duration(milliseconds: 800));
+
+    // Provider dispose edildiyse state'i güncelleme
+    if (!ref.mounted) return;
 
     // Mock success
     state = true;
@@ -73,6 +79,9 @@ class AuthController extends _$AuthController {
     // OAuth redirect simülasyonu
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
+    // Provider dispose edildiyse state'i güncelleme
+    if (!ref.mounted) return;
+
     // Mock success
     state = true;
   }
@@ -85,6 +94,9 @@ class AuthController extends _$AuthController {
   Future<void> loginWithApple() async {
     // Apple OAuth simülasyonu
     await Future<void>.delayed(const Duration(milliseconds: 500));
+
+    // Provider dispose edildiyse state'i güncelleme
+    if (!ref.mounted) return;
 
     // Mock success
     state = true;

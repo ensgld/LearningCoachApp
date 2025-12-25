@@ -193,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     // Şifremi unuttum linki
                     TextButton(
-                      onPressed: () => context.push('/auth/forgot'),
+                      onPressed: () => context.go('/auth/forgot'),
                       child: const Text('Şifremi unuttum'),
                     ),
                   ],
@@ -254,7 +254,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     const Text('Hesabın yok mu?'),
                     TextButton(
-                      onPressed: () => context.pushReplacement('/auth/signup'),
+                      onPressed: () => context.go('/auth/signup'),
                       child: const Text('Kayıt ol'),
                     ),
                   ],
