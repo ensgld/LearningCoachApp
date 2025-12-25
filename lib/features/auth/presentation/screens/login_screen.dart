@@ -37,10 +37,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
 
   // Loading state
-  bool _isLoading = false;
 
   // "Beni hatırla" checkbox state (mock - şu an işlevsel değil)
-  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -52,88 +50,47 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// Login işlemi
   ///
   /// 1. Form validasyonu kontrol et
-  /// 2. Loading state başlat
-  /// 3. Mock auth controller'dan login çağır
-  /// 4. Success  → /home'a yönlendir
-  /// 5. Error → Snackbar göster (şu an error yok, her zaman success)
+  /// 2. AuthController.login çağır (otomatik loading state yönetir)
+  /// 3. Success → /home'a yönlendir (router guard otomatik yapacak)
+  /// 4. Error → Snackbar göster
   Future<void> _handleLogin() async {
     // Form validasyonu
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Loading başlat
-    setState(() => _isLoading = true);
+    // Login (controller içinde loading state yönetilir)
+    final error = await ref
+        .read(authControllerProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
 
-    try {
-      // Mock login (800ms delay)
-      await ref
-          .read(authControllerProvider.notifier)
-          .login(_emailController.text.trim(), _passwordController.text);
+    if (!mounted) return;
 
-      // Success - home'a git
-      if (mounted) {
-        context.go('/home');
-      }
-    } catch (e) {
-      // Error handling (mock'ta error olmaz ama gerçekte olabilir)
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
-      }
-    } finally {
-      // Loading bitir
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    // Error varsa göster
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: Colors.red),
+      );
     }
+    // Success durumunda router guard otomatik /home'a yönlendirir
+  }
+
+  /// Demo kullanıcı ile hızlı giriş
+  ///
+  /// demo@demo.com / 123456 ile otomatik giriş yapar
+  Future<void> _handleDemoLogin() async {
+    await ref.read(authControllerProvider.notifier).loginAsDemo();
+    // Router guard otomatik /home'a yönlendirir
   }
 
   /// Google ile giriş (mock)
-  ///
-  /// Gerçekte: google_sign_in paketi kullanılır
   Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authControllerProvider.notifier).loginWithGoogle();
-
-      if (mounted) {
-        // Mock success snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google ile giriş: Yakında')),
-        );
-        context.go('/home');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    await ref.read(authControllerProvider.notifier).loginWithGoogle();
   }
 
   /// Apple ile giriş (mock)
-  ///
-  /// Gerçekte: sign_in_with_apple paketi kullanılır
-  /// Sadece iOS platformunda çalışır
   Future<void> _handleAppleSignIn() async {
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authControllerProvider.notifier).loginWithApple();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Apple ile giriş: Yakında')),
-        );
-        context.go('/home');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    await ref.read(authControllerProvider.notifier).loginWithApple();
   }
 
   @override
@@ -177,35 +134,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 8),
 
-                // Row: "Beni hatırla" + "Şifremi unuttum"
-                Row(
-                  children: [
-                    // Beni hatırla checkbox (mock - şu an işlevsiz)
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() => _rememberMe = value ?? false);
-                      },
-                    ),
-                    const Text('Beni hatırla'),
-
-                    const Spacer(),
-
-                    // Şifremi unuttum linki
-                    TextButton(
-                      onPressed: () => context.go('/auth/forgot'),
-                      child: const Text('Şifremi unuttum'),
-                    ),
-                  ],
+                // Şifremi unuttum linki
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => context.go('/auth/forgot'),
+                    child: const Text('Şifremi unuttum'),
+                  ),
                 ),
 
                 const SizedBox(height: 24),
 
                 // Login butonu
-                AuthButton(
-                  label: 'Giriş Yap',
-                  onPressed: _handleLogin,
-                  isLoading: _isLoading,
+                Consumer(
+                  builder: (context, ref, _) {
+                    final isLoading = ref
+                        .watch(authControllerProvider.notifier)
+                        .isLoading;
+                    return AuthButton(
+                      label: 'Giriş Yap',
+                      onPressed: _handleLogin,
+                      isLoading: isLoading,
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                // Demo Login butonu
+                OutlinedButton.icon(
+                  onPressed: _handleDemoLogin,
+                  icon: const Icon(Icons.rocket_launch_outlined),
+                  label: const Text('Demo ile Giriş (demo@demo.com)'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
 
                 const SizedBox(height: 24),

@@ -71,12 +71,12 @@ class MockDataRepository {
   ];
   
   static final List<Source> mockSources = [
-    Source(
+    const Source(
       docTitle: 'Flutter_Architecture_Guide.pdf',
       excerpt: 'Data layer should implement repositories defined in the domain layer to invert dependencies.',
       pageLabel: 'Sayfa 12',
     ),
-    Source(
+    const Source(
       docTitle: 'Flutter_Architecture_Guide.pdf',
       excerpt: 'Use UseCases to encapsulate business logic for specific features.',
       pageLabel: 'Sayfa 14',

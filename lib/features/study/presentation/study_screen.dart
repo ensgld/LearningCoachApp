@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/shared/data/providers.dart';
-import 'dart:ui';
 
 class StudyScreen extends ConsumerStatefulWidget {
   const StudyScreen({super.key});

@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
 import 'package:learning_coach/shared/models/models.dart';
-import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 
 part 'providers.g.dart';

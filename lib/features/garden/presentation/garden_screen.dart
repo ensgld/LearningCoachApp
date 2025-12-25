@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/shared/data/providers.dart';
+import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 
 class GardenScreen extends ConsumerStatefulWidget {
@@ -27,13 +28,9 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
       vsync: this,
     )..repeat(reverse: true);
 
-    _floatingAnimation = Tween<double>(
-      begin: -8.0,
-      end: 8.0,
-    ).animate(CurvedAnimation(
-      parent: _floatingController,
-      curve: Curves.easeInOut,
-    ));
+    _floatingAnimation = Tween<double>(begin: -8.0, end: 8.0).animate(
+      CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut),
+    );
 
     // Breathing animation (scale)
     _breathingController = AnimationController(
@@ -41,13 +38,9 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
       vsync: this,
     )..repeat(reverse: true);
 
-    _breathingAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _breathingController,
-      curve: Curves.easeInOut,
-    ));
+    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -114,7 +107,10 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                    color: Colors.black87,
+                  ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -147,7 +143,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
     // Tree height is 35% of screen
     final treeHeight = screenHeight * 0.35;
     final treeWidth = treeHeight * 0.85;
-    
+
     // Pot height is smaller
     final potHeight = treeHeight * 0.42;
     final potWidth = treeWidth * 0.65;
@@ -183,19 +179,12 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.green[300]!,
-                          Colors.green[700]!,
-                        ],
+                        colors: [Colors.green[300]!, Colors.green[700]!],
                       ),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Center(
-                      child: Icon(
-                        Icons.park,
-                        size: 80,
-                        color: Colors.white70,
-                      ),
+                      child: Icon(Icons.park, size: 80, color: Colors.white70),
                     ),
                   );
                 },
@@ -204,10 +193,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
           ),
 
           // Pot Layer (Front, at bottom)
-          Positioned(
-            bottom: 0,
-            child: _buildPot(potWidth, potHeight),
-          ),
+          Positioned(bottom: 0, child: _buildPot(potWidth, potHeight)),
         ],
       ),
     );
@@ -221,11 +207,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.brown[400]!,
-            Colors.brown[600]!,
-            Colors.brown[800]!,
-          ],
+          colors: [Colors.brown[400]!, Colors.brown[600]!, Colors.brown[800]!],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(width * 0.15),
@@ -250,10 +232,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
               height: height * 0.15,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Colors.brown[300]!,
-                    Colors.brown[500]!,
-                  ],
+                  colors: [Colors.brown[300]!, Colors.brown[500]!],
                 ),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(width * 0.25),
@@ -280,7 +259,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
     );
   }
 
-  Widget _buildTopOverlay(userStats, stageFeatures) {
+  Widget _buildTopOverlay(UserStats userStats, StageFeatures stageFeatures) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
@@ -332,16 +311,19 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Stats Row
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Gold Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
@@ -378,12 +360,15 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // XP Badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [

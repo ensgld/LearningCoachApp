@@ -22,7 +22,7 @@ class DocumentDetailScreen extends StatelessWidget {
             _buildStatusBadge(context, document.status),
             const SizedBox(height: 24),
             Text(
-              "Özet",
+              'Özet',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
@@ -34,7 +34,7 @@ class DocumentDetailScreen extends StatelessWidget {
                 border: Border.all(color: scheme.outlineVariant),
               ),
               child: Text(
-                document.summary.isNotEmpty ? document.summary : "Özet hazırlanıyor...",
+                document.summary.isNotEmpty ? document.summary : 'Özet hazırlanıyor...',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),

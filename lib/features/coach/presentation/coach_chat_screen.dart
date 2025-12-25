@@ -68,7 +68,7 @@ class CoachChatScreen extends ConsumerWidget {
                             ),
                       ),
                       Text(
-                        "AI öğrenme asistanı",
+                        'AI öğrenme asistanı',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.white.withOpacity(0.9),
                               fontWeight: FontWeight.w500,
@@ -118,7 +118,7 @@ class CoachChatScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          "Merhaba! Size nasıl yardımcı olabilirim?",
+                          'Merhaba! Size nasıl yardımcı olabilirim?',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: scheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
@@ -145,35 +145,35 @@ class CoachChatScreen extends ConsumerWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
+              children: const [
                 _QuickChip(
-                  label: "Plan oluştur",
+                  label: 'Plan oluştur',
                   icon: Icons.event_note_rounded,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _QuickChip(
-                  label: "Quiz üret",
+                  label: 'Quiz üret',
                   icon: Icons.quiz_rounded,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Color(0xFFEC4899), Color(0xFFF43F5E)],
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _QuickChip(
-                  label: "Bugün zorlandım",
+                  label: 'Bugün zorlandım',
                   icon: Icons.help_outline_rounded,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 _QuickChip(
-                  label: "Motivasyon ver",
+                  label: 'Motivasyon ver',
                   icon: Icons.bolt_rounded,
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [Color(0xFF10B981), Color(0xFF14B8A6)],
                   ),
                 ),
@@ -196,11 +196,11 @@ class CoachChatScreen extends ConsumerWidget {
                       color: scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: TextField(
+                    child: const TextField(
                       decoration: InputDecoration(
                         hintText: AppStrings.askCoachHint,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
                         ),
@@ -360,20 +360,20 @@ class _ChatBubble extends StatelessWidget {
                 child: InkWell(
                   onTap: () {},
                   borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.source_rounded,
                           size: 16,
                           color: Color(0xFF10B981),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Text(
                           AppStrings.sourcesTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Color(0xFF10B981),
                             fontWeight: FontWeight.w600,
                             fontSize: 13,

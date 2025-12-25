@@ -141,7 +141,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "🎯 Hedef: Flutter İleri Seviye Öğrenme",
+                  '🎯 Hedef: Flutter İleri Seviye Öğrenme',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

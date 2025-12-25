@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:learning_coach/features/home/presentation/widgets/home_widgets.dart';
-import 'package:learning_coach/features/character/presentation/character_evolution_screen.dart';
 import 'package:learning_coach/features/garden/presentation/garden_screen.dart';
+import 'package:learning_coach/features/home/presentation/widgets/home_widgets.dart';
 import 'package:learning_coach/features/shop/presentation/shop_screen.dart';
 import 'package:learning_coach/shared/data/providers.dart';
+import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'package:learning_coach/shared/widgets/avatar_character.dart';
-import 'dart:ui';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -24,20 +23,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Breathing animation for character
     _breathingController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat(reverse: true);
-    
-    _breathingAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.06,
-    ).animate(CurvedAnimation(
-      parent: _breathingController,
-      curve: Curves.easeInOut,
-    ));
+
+    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -49,8 +44,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final userStats = ref.watch(userStatsProvider);
-    final levelProgress = GamificationService.levelProgress(userStats.xp, userStats.level);
-    final xpToNext = GamificationService.xpToNextLevel(userStats.xp, userStats.level);
+    final levelProgress = GamificationService.levelProgress(
+      userStats.xp,
+      userStats.level,
+    );
+    final xpToNext = GamificationService.xpToNextLevel(
+      userStats.xp,
+      userStats.level,
+    );
     final stageName = GamificationService.getAvatarStageName(userStats.stage);
     final stageFeatures = GamificationService.getStageFeatures(userStats.stage);
 
@@ -90,13 +91,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             );
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.95),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFFBBF24).withOpacity(0.3),
+                                  color: const Color(
+                                    0xFFFBBF24,
+                                  ).withOpacity(0.3),
                                   blurRadius: 12,
                                   offset: const Offset(0, 4),
                                 ),
@@ -104,7 +110,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             ),
                             child: Row(
                               children: [
-                                const Text('💰', style: TextStyle(fontSize: 20)),
+                                const Text(
+                                  '💰',
+                                  style: TextStyle(fontSize: 20),
+                                ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${userStats.gold}',
@@ -120,7 +129,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                         // Level Badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
@@ -131,7 +143,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: stageFeatures.primaryColor.withOpacity(0.3),
+                                color: stageFeatures.primaryColor.withOpacity(
+                                  0.3,
+                                ),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -139,7 +153,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                           child: Row(
                             children: [
-                              Text(stageFeatures.emoji, style: const TextStyle(fontSize: 20)),
+                              Text(
+                                stageFeatures.emoji,
+                                style: const TextStyle(fontSize: 20),
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Lv ${userStats.level}',
@@ -155,7 +172,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ],
                     ),
                     const SizedBox(height: 30),
-                    
+
                     // Tappable Tree & Pot with Breathing Animation
                     GestureDetector(
                       onTap: () {
@@ -180,12 +197,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Tap Hint
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: stageFeatures.primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -213,22 +233,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 20),
                     // Stage Name & XP Info
                     Text(
                       stageName,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: stageFeatures.primaryColor,
                             letterSpacing: -0.5,
                           ),
                     ),
                     const SizedBox(height: 8),
-                    
+
                     // Power Name
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: stageFeatures.primaryColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
@@ -242,11 +266,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Bonus Indicators
-                    if (stageFeatures.xpBonus > 0 || stageFeatures.goldBonus > 0)
+                    if (stageFeatures.xpBonus > 0 ||
+                        stageFeatures.goldBonus > 0)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -269,20 +294,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ],
                         ),
                       ),
-                    
+
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         'Sonraki seviyeye: $xpToNext XP',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -309,17 +339,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
   }
-  
-  Widget _buildTreeAndPotPreview(userStats) {
+
+  Widget _buildTreeAndPotPreview(UserStats userStats) {
     final treeAsset = GamificationService.getTreeAssetPath(userStats.level);
-    
+
     // Compact size for home screen preview
     const double containerSize = 150.0;
     const double treeHeight = containerSize * 0.75;
     const double potHeight = containerSize * 0.35;
     const double treeWidth = treeHeight * 0.85;
     const double potWidth = treeWidth * 0.65;
-    
+
     return SizedBox(
       width: containerSize,
       height: containerSize,
@@ -342,10 +372,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.green[300]!,
-                          Colors.green[700]!,
-                        ],
+                        colors: [Colors.green[300]!, Colors.green[700]!],
                       ),
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -357,7 +384,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
           ),
-          
+
           // Pot Layer (Front)
           Positioned(
             bottom: containerSize * 0.25,
@@ -368,10 +395,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.brown[400]!,
-                    Colors.brown[700]!,
-                  ],
+                  colors: [Colors.brown[400]!, Colors.brown[700]!],
                 ),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(12),
@@ -396,10 +420,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       height: potHeight * 0.2,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Colors.brown[300]!,
-                            Colors.brown[500]!,
-                          ],
+                          colors: [Colors.brown[300]!, Colors.brown[500]!],
                         ),
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
@@ -429,7 +450,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
   }
-  
+
   Widget _buildBonusBadge(String text, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

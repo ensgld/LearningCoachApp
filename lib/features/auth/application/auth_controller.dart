@@ -1,115 +1,211 @@
+import 'package:learning_coach/features/auth/data/auth_repository.dart';
+import 'package:learning_coach/features/auth/data/mock_auth_repository.dart';
+import 'package:learning_coach/features/auth/domain/auth_state.dart';
+import 'package:learning_coach/features/auth/domain/auth_user.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_controller.g.dart';
 
-/// Mock Auth Controller
+/// Auth Repository Provider
 ///
-/// Bu controller gerçek bir backend kullanmaz.
-/// Sadece UI akışını test etmek için mock state yönetimi sağlar.
+/// Provides the auth repository instance.
+/// In production, this would return the real Firebase/API implementation.
+@Riverpod(keepAlive: true)
+AuthRepository authRepository(Ref ref) {
+  return MockAuthRepository();
+}
+
+/// Auth Controller
 ///
-/// State: bool (isLoggedIn)
-/// - false: Kullanıcı giriş yapmamış
-/// - true: Kullanıcı giriş yapmış
-@riverpod
+/// Manages authentication state using AuthRepository.
+/// Uses keepAlive to prevent state from being disposed during navigation.
+///
+/// State: AuthState (authenticated/unauthenticated/loading)
+@Riverpod(keepAlive: true)
 class AuthController extends _$AuthController {
+  late final AuthRepository _repository;
+
   @override
-  bool build() {
-    // Başlangıçta kullanıcı giriş yapmamış
-    return false;
+  AuthState build() {
+    _repository = ref.read(authRepositoryProvider);
+
+    // Check for existing session on app init
+    _checkSession();
+
+    // Initially show unauthenticated state
+    // Will update if session exists
+    return const AuthStateUnauthenticated();
   }
 
-  /// Mock Login
-  ///
-  /// Gerçek bir API çağrısı simüle eder (800ms delay).
-  /// Email ve şifre validasyonu UI tarafında yapılır.
-  ///
-  /// Başarılı olursa state = true olur ve kullanıcı home'a yönlendirilir.
-  Future<void> login(String email, String password) async {
-    // API çağrısını simüle et
-    await Future<void>.delayed(const Duration(milliseconds: 800));
-
-    // Provider dispose edildiyse state'i güncelleme
-    if (!ref.mounted) return;
-
-    // Mock success - gerçekte backend'den response gelir
-    state = true;
+  /// Check if user session exists (called on app init)
+  Future<void> _checkSession() async {
+    final user = await _repository.getCurrentUser();
+    if (user != null && ref.mounted) {
+      state = AuthStateAuthenticated(user);
+    }
   }
 
-  /// Mock Signup
+  /// Login with email and password
   ///
-  /// Yeni kullanıcı kaydı simülasyonu.
-  /// Gerçekte backend'e POST request gönderilir.
-  Future<void> signup({
+  /// Shows loading state during login.
+  /// Updates state to authenticated on success.
+  /// Returns error message on failure.
+  Future<String?> login(String email, String password) async {
+    state = const AuthStateLoading();
+
+    try {
+      final user = await _repository.login(email: email, password: password);
+
+      if (!ref.mounted) return null;
+
+      state = AuthStateAuthenticated(user);
+      return null; // Success
+    } on InvalidCredentialsException catch (e) {
+      if (!ref.mounted) return null;
+      state = const AuthStateUnauthenticated();
+      return e.message;
+    } catch (e) {
+      if (!ref.mounted) return null;
+      state = const AuthStateUnauthenticated();
+      return 'Bir hata oluştu: $e';
+    }
+  }
+
+  /// Signup with email, password, and display name
+  ///
+  /// Validates email uniqueness and password strength.
+  /// Returns error message on failure.
+  Future<String?> signup({
     required String email,
     required String password,
     String? displayName,
   }) async {
-    // API çağrısı simülasyonu
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    state = const AuthStateLoading();
 
-    // Provider dispose edildiyse state'i güncelleme
+    try {
+      final user = await _repository.signup(
+        email: email,
+        password: password,
+        displayName: displayName,
+      );
+
+      if (!ref.mounted) return null;
+
+      state = AuthStateAuthenticated(user);
+      return null; // Success
+    } on EmailAlreadyExistsException catch (e) {
+      if (!ref.mounted) return null;
+      state = const AuthStateUnauthenticated();
+      return e.message;
+    } on WeakPasswordException catch (e) {
+      if (!ref.mounted) return null;
+      state = const AuthStateUnauthenticated();
+      return e.message;
+    } catch (e) {
+      if (!ref.mounted) return null;
+      state = const AuthStateUnauthenticated();
+      return 'Bir hata oluştu: $e';
+    }
+  }
+
+  /// Quick login as demo user (demo@demo.com / 123456)
+  ///
+  /// For testing and demonstration purposes.
+  Future<void> loginAsDemo() async {
+    state = const AuthStateLoading();
+
+    try {
+      final user = await _repository.loginAsDemo();
+
+      if (!ref.mounted) return;
+
+      state = AuthStateAuthenticated(user);
+    } catch (e) {
+      if (!ref.mounted) return;
+      state = const AuthStateUnauthenticated();
+    }
+  }
+
+  /// Login as guest
+  ///
+  /// Limited access without registration.
+  Future<void> loginAsGuest() async {
+    state = const AuthStateLoading();
+
+    try {
+      final user = await _repository.loginAsGuest();
+
+      if (!ref.mounted) return;
+
+      state = AuthStateAuthenticated(user);
+    } catch (e) {
+      if (!ref.mounted) return;
+      state = const AuthStateUnauthenticated();
+    }
+  }
+
+  /// Logout current user
+  ///
+  /// Clears authentication state.
+  Future<void> logout() async {
+    await _repository.logout();
+
     if (!ref.mounted) return;
 
-    // Mock success
-    state = true;
+    state = const AuthStateUnauthenticated();
   }
 
-  /// Logout
-  ///
-  /// Kullanıcıyı çıkış yapar.
-  /// Gerçekte token'ları temizler, secure storage'ı sıfırlar.
-  void logout() {
-    state = false;
-  }
-
-  /// Guest Login
-  ///
-  /// Misafir olarak giriş yap.
-  /// State'i true yapar, route guard'dan geçer.
-  /// Gerçekte limited access ile kullanıcı yaratılabilir.
-  void guestLogin() {
-    state = true;
-  }
-
-  /// Mock Google Login
-  ///
-  /// Google OAuth simülasyonu.
-  /// Gerçekte google_sign_in paketi kullanılır.
+  /// Mock Google Login (for UI flow testing)
   Future<void> loginWithGoogle() async {
-    // OAuth redirect simülasyonu
+    state = const AuthStateLoading();
+
+    // Simulate OAuth flow
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    // Provider dispose edildiyse state'i güncelleme
     if (!ref.mounted) return;
 
-    // Mock success
-    state = true;
+    // For now, login as demo user
+    await loginAsDemo();
   }
 
-  /// Mock Apple Login
-  ///
-  /// Apple Sign In simülasyonu.
-  /// Gerçekte sign_in_with_apple paketi kullanılır.
-  /// Sadece iOS platformunda çalışır.
+  /// Mock Apple Login (for UI flow testing)
   Future<void> loginWithApple() async {
-    // Apple OAuth simülasyonu
+    state = const AuthStateLoading();
+
+    // Simulate OAuth flow
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    // Provider dispose edildiyse state'i güncelleme
     if (!ref.mounted) return;
 
-    // Mock success
-    state = true;
+    // For now, login as demo user
+    await loginAsDemo();
   }
 
   /// Mock Forgot Password
   ///
-  /// Şifre sıfırlama email'i gönderme simülasyonu.
-  /// Gerçekte backend'e email gönderilir.
-  Future<void> sendPasswordResetEmail(String email) async {
-    // Email gönderme simülasyonu
+  /// Simulates sending password reset email.
+  Future<String?> sendPasswordResetEmail(String email) async {
+    // Simulate email sending
     await Future<void>.delayed(const Duration(milliseconds: 500));
 
-    // Mock success - gerçekte success/error response gelir
+    // Mock success
+    return null;
   }
+
+  /// Get current authenticated user
+  ///
+  /// Returns null if not authenticated.
+  AuthUser? get currentUser {
+    final currentState = state;
+    if (currentState is AuthStateAuthenticated) {
+      return currentState.user;
+    }
+    return null;
+  }
+
+  /// Check if user is currently authenticated
+  bool get isAuthenticated => state is AuthStateAuthenticated;
+
+  /// Check if authentication is in progress
+  bool get isLoading => state is AuthStateLoading;
 }

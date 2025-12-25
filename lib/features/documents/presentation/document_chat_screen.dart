@@ -39,11 +39,11 @@ class _DocumentChatScreenState extends State<DocumentChatScreen> {
       if (mounted) {
         setState(() {
           _messages.add(CoachMessage(
-            text: "Bu konuda dokümanda şunlar geçiyor: Clean Architecture, bağımlılıkları dışarıdan içeriye doğru düzenler...",
+            text: 'Bu konuda dokümanda şunlar geçiyor: Clean Architecture, bağımlılıkları dışarıdan içeriye doğru düzenler...',
             isUser: false,
             sources: const [
-              Source(docTitle: "Flutter_Architecture.pdf", excerpt: "Excerpt text 1...", pageLabel: "p. 10"),
-              Source(docTitle: "Flutter_Architecture.pdf", excerpt: "Excerpt text 2...", pageLabel: "p. 12"),
+              Source(docTitle: 'Flutter_Architecture.pdf', excerpt: 'Excerpt text 1...', pageLabel: 'p. 10'),
+              Source(docTitle: 'Flutter_Architecture.pdf', excerpt: 'Excerpt text 2...', pageLabel: 'p. 12'),
             ],
           ));
         });

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
+import 'package:learning_coach/app/shell/app_shell.dart';
 import 'package:learning_coach/features/auth/application/auth_controller.dart';
+import 'package:learning_coach/features/auth/domain/auth_state.dart';
 import 'package:learning_coach/features/auth/presentation/screens/auth_welcome_screen.dart';
 import 'package:learning_coach/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:learning_coach/features/auth/presentation/screens/login_screen.dart';
@@ -11,43 +11,64 @@ import 'package:learning_coach/features/documents/presentation/document_chat_scr
 import 'package:learning_coach/features/documents/presentation/document_detail_screen.dart';
 import 'package:learning_coach/features/documents/presentation/documents_screen.dart';
 import 'package:learning_coach/features/goals/presentation/goal_detail_screen.dart';
+import 'package:learning_coach/features/home/presentation/home_screen.dart';
 import 'package:learning_coach/features/kaizen/presentation/kaizen_checkin_screen.dart';
 import 'package:learning_coach/features/profile/presentation/profile_screen.dart';
 import 'package:learning_coach/features/shop/presentation/shop_screen.dart';
 import 'package:learning_coach/features/study/presentation/session_finish_screen.dart';
-import 'package:learning_coach/shared/models/models.dart'; // For Document type casting
-
 import 'package:learning_coach/features/study/presentation/session_running_screen.dart';
-import 'package:learning_coach/app/shell/app_shell.dart';
-import 'package:learning_coach/features/home/presentation/home_screen.dart';
 import 'package:learning_coach/features/study/presentation/session_summary_screen.dart';
 import 'package:learning_coach/features/study/presentation/study_screen.dart';
+import 'package:learning_coach/shared/models/models.dart'; // For Document type casting
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'app_router.g.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorHome = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
-final _shellNavigatorStudy = GlobalKey<NavigatorState>(debugLabel: 'shellStudy');
+final _shellNavigatorStudy = GlobalKey<NavigatorState>(
+  debugLabel: 'shellStudy',
+);
 final _shellNavigatorDocs = GlobalKey<NavigatorState>(debugLabel: 'shellDocs');
-final _shellNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+final _shellNavigatorProfile = GlobalKey<NavigatorState>(
+  debugLabel: 'shellProfile',
+);
 
-@riverpod
+@Riverpod(keepAlive: true)
 GoRouter goRouter(Ref ref) {
+  // Create a notifier to refresh router on auth state changes
+  final notifier = ValueNotifier<AuthState>(ref.read(authControllerProvider));
+
+  // Listen to auth state changes and update the notifier
+  ref.listen<AuthState>(authControllerProvider, (_, next) {
+    notifier.value = next;
+  });
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     // İlk açılışta welcome ekranı
     initialLocation: '/welcome',
+    // Router will refresh when auth state changes
+    refreshListenable: notifier,
 
-    /// Route Guard (Mock Auth)
+    /// Route Guard (Auth State Based)
     ///
     /// Kullanıcı giriş durumuna göre sayfa erişimini kontrol eder.
     ///
     /// Kurallar:
-    /// 1. Giriş yapmadıysa (/welcome, /auth/*  dışındaki tüm sayfalar) → /welcome'a yönlendir
-    /// 2. Giriş yaptıysa (welcome veya auth sayfalarında) → /home'a yönlendir
+    /// 1. Loading sırasında redirect yapma (state henüz netleşmedi)
+    /// 2. Giriş yapmadıysa (/welcome, /auth/* dışındaki tüm sayfalar) → /welcome'a yönlendir
+    /// 3. Giriş yaptıysa (welcome veya auth sayfalarında) → /home'a yönlendir
     redirect: (context, state) {
       // Auth state'i kontrol et
-      final isLoggedIn = ref.read(authControllerProvider);
+      final authState = ref.read(authControllerProvider);
+
+      // Loading sırasında redirect yapma
+      if (authState is AuthStateLoading) {
+        return null;
+      }
+
+      final isLoggedIn = authState is AuthStateAuthenticated;
 
       // Auth route'larını kontrol et
       final isAuthRoute =
@@ -165,8 +186,8 @@ GoRouter goRouter(Ref ref) {
                     path: 'chat',
                     parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) {
-                       final doc = state.extra as Document;
-                       return DocumentChatScreen(document: doc);
+                      final doc = state.extra as Document;
+                      return DocumentChatScreen(document: doc);
                     },
                   ),
                 ],

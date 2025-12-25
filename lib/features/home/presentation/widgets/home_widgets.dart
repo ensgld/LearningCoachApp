@@ -113,7 +113,7 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
               ),
               const SizedBox(height: 18),
               Text(
-                "⚔️ Bugünün Macerasına Hazır Ol!",
+                '⚔️ Bugünün Macerasına Hazır Ol!',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.white.withOpacity(0.95),
                       fontWeight: FontWeight.w500,
@@ -142,9 +142,9 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
                           ),
                         ),
                         icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                        label: Text(
+                        label: const Text(
                           '🎯 Göreve Başla',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -634,7 +634,7 @@ class _CoachTipCardState extends State<CoachTipCard> with SingleTickerProviderSt
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              "Pomodoro tekniği ile dikkatinizi canlı tutun.",
+                              'Pomodoro tekniği ile dikkatinizi canlı tutun.',
                               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                     color: Colors.white.withOpacity(0.95),
                                     height: 1.6,

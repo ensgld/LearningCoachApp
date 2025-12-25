@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/shared/data/providers.dart';
-import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'package:learning_coach/shared/models/gamification_models.dart';
+import 'package:learning_coach/shared/services/gamification_service.dart';
 
 /// Character Evolution Screen - Evolution Tree Display
 class CharacterEvolutionScreen extends ConsumerStatefulWidget {
   const CharacterEvolutionScreen({super.key});
 
   @override
-  ConsumerState<CharacterEvolutionScreen> createState() => _CharacterEvolutionScreenState();
+  ConsumerState<CharacterEvolutionScreen> createState() =>
+      _CharacterEvolutionScreenState();
 }
 
-class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScreen>
+class _CharacterEvolutionScreenState
+    extends ConsumerState<CharacterEvolutionScreen>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _glowController;
@@ -22,23 +24,23 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
   @override
   void initState() {
     super.initState();
-    
+
     // Pulse animation for current stage
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    
+
     // Glow animation
     _glowController = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     )..repeat(reverse: true);
-    
+
     _glowAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
@@ -54,7 +56,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
   @override
   Widget build(BuildContext context) {
     final userStats = ref.watch(userStatsProvider);
-    final currentFeatures = GamificationService.getStageFeatures(userStats.stage);
+    final currentFeatures = GamificationService.getStageFeatures(
+      userStats.stage,
+    );
     final currentLevel = userStats.level;
 
     return Scaffold(
@@ -69,13 +73,14 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
               ],
             ),
-            child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Colors.black87,
+              size: 20,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -85,10 +90,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
             color: Colors.white,
             fontWeight: FontWeight.bold,
             shadows: [
-              Shadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 8,
-              ),
+              Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 8),
             ],
           ),
         ),
@@ -112,17 +114,17 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
             child: Column(
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Current Stage Card
                 _buildCurrentStageCard(userStats, currentFeatures),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Evolution Tree
                 _buildEvolutionTree(currentLevel),
-                
+
                 const SizedBox(height: 30),
-                
+
                 // Stage Bonuses Info
                 _buildBonusesCard(currentFeatures),
               ],
@@ -133,11 +135,19 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
     );
   }
 
-  Widget _buildCurrentStageCard(userStats, StageFeatures features) {
-    final assetPath = GamificationService.getCharacterAssetPath(userStats.stage);
-    final levelProgress = GamificationService.levelProgress(userStats.xp, userStats.level);
-    final xpToNext = GamificationService.xpToNextLevel(userStats.xp, userStats.level);
-    
+  Widget _buildCurrentStageCard(UserStats userStats, StageFeatures features) {
+    final assetPath = GamificationService.getCharacterAssetPath(
+      userStats.stage,
+    );
+    final levelProgress = GamificationService.levelProgress(
+      userStats.xp,
+      userStats.level,
+    );
+    final xpToNext = GamificationService.xpToNextLevel(
+      userStats.xp,
+      userStats.level,
+    );
+
     return AnimatedBuilder(
       animation: _pulseAnimation,
       builder: (context, child) {
@@ -181,7 +191,10 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
-                              colors: [features.primaryColor, features.secondaryColor],
+                              colors: [
+                                features.primaryColor,
+                                features.secondaryColor,
+                              ],
                             ),
                           ),
                           child: Center(
@@ -195,9 +208,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Title
                 Text(
                   features.title,
@@ -207,12 +220,15 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     color: features.primaryColor,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Power Name
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: features.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -226,9 +242,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Description
                 Text(
                   features.description,
@@ -239,20 +255,28 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     height: 1.5,
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Stats Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildStatBadge('Seviye', '${userStats.level}', features.primaryColor),
-                    _buildStatBadge('Altın', '${userStats.gold}', const Color(0xFFF59E0B)),
+                    _buildStatBadge(
+                      'Seviye',
+                      '${userStats.level}',
+                      features.primaryColor,
+                    ),
+                    _buildStatBadge(
+                      'Altın',
+                      '${userStats.gold}',
+                      const Color(0xFFF59E0B),
+                    ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Progress to Next Level
                 Column(
                   children: [
@@ -284,7 +308,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                         value: levelProgress,
                         minHeight: 10,
                         backgroundColor: Colors.grey[200],
-                        valueColor: AlwaysStoppedAnimation(features.primaryColor),
+                        valueColor: AlwaysStoppedAnimation(
+                          features.primaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -308,13 +334,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
       ],
     );
   }
@@ -338,7 +358,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
             ),
           ),
           const SizedBox(height: 20),
-          
+
           _buildEvolutionStage(AvatarStage.forest, 36, currentLevel),
           _buildTreeBranch(),
           _buildEvolutionStage(AvatarStage.tree, 26, currentLevel),
@@ -353,11 +373,15 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
     );
   }
 
-  Widget _buildEvolutionStage(AvatarStage stage, int requiredLevel, int currentLevel) {
+  Widget _buildEvolutionStage(
+    AvatarStage stage,
+    int requiredLevel,
+    int currentLevel,
+  ) {
     final features = GamificationService.getStageFeatures(stage);
     final isUnlocked = currentLevel >= requiredLevel;
     final isCurrent = GamificationService.getAvatarStage(currentLevel) == stage;
-    
+
     return AnimatedBuilder(
       animation: isCurrent ? _glowAnimation : const AlwaysStoppedAnimation(0.0),
       builder: (context, child) {
@@ -366,13 +390,17 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isCurrent 
-                  ? features.primaryColor.withOpacity(0.1 + (_glowAnimation.value * 0.1))
+              color: isCurrent
+                  ? features.primaryColor.withOpacity(
+                      0.1 + (_glowAnimation.value * 0.1),
+                    )
                   : Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isCurrent 
-                    ? features.primaryColor.withOpacity(0.3 + (_glowAnimation.value * 0.3))
+                color: isCurrent
+                    ? features.primaryColor.withOpacity(
+                        0.3 + (_glowAnimation.value * 0.3),
+                      )
                     : Colors.grey[300]!,
                 width: isCurrent ? 2 : 1,
               ),
@@ -384,7 +412,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isUnlocked ? features.primaryColor : Colors.grey[400],
+                    color: isUnlocked
+                        ? features.primaryColor
+                        : Colors.grey[400],
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -394,9 +424,9 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 12),
-                
+
                 // Info
                 Expanded(
                   child: Column(
@@ -409,13 +439,18 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: isUnlocked ? features.primaryColor : Colors.grey[600],
+                              color: isUnlocked
+                                  ? features.primaryColor
+                                  : Colors.grey[600],
                             ),
                           ),
                           if (isCurrent) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: features.primaryColor,
                                 borderRadius: BorderRadius.circular(10),
@@ -435,10 +470,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                       const SizedBox(height: 4),
                       Text(
                         'Seviye $requiredLevel${stage == AvatarStage.forest ? '+' : ''}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       if (isUnlocked) ...[
                         const SizedBox(height: 4),
@@ -454,7 +486,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                     ],
                   ),
                 ),
-                
+
                 // Lock/Unlock Icon
                 Icon(
                   isUnlocked ? Icons.check_circle : Icons.lock,
@@ -474,13 +506,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 2,
-            height: 20,
-            color: Colors.grey[300],
-          ),
-        ],
+        children: [Container(width: 2, height: 20, color: Colors.grey[300])],
       ),
     );
   }
@@ -504,23 +530,23 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
             ),
           ),
           const SizedBox(height: 16),
-          
+
           _buildBonusRow(
             '⚡ XP Bonusu',
             '+${features.xpBonus}%',
             'Her çalışmada ekstra XP kazan',
             features.primaryColor,
           ),
-          
+
           const Divider(height: 24),
-          
+
           _buildBonusRow(
             '💰 Altın Bonusu',
             '+${features.goldBonus}%',
             'Görevlerden daha fazla altın kazan',
             const Color(0xFFF59E0B),
           ),
-          
+
           if (features.xpBonus == 0 && features.goldBonus == 0) ...[
             const SizedBox(height: 8),
             Container(
@@ -537,10 +563,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
                   Expanded(
                     child: Text(
                       'Seviye atladıkça bonusların artacak!',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                     ),
                   ),
                 ],
@@ -552,7 +575,12 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
     );
   }
 
-  Widget _buildBonusRow(String title, String value, String description, Color color) {
+  Widget _buildBonusRow(
+    String title,
+    String value,
+    String description,
+    Color color,
+  ) {
     return Row(
       children: [
         Container(
@@ -588,10 +616,7 @@ class _CharacterEvolutionScreenState extends ConsumerState<CharacterEvolutionScr
               ),
               Text(
                 description,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ],
           ),

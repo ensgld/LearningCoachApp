@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/data/providers.dart';
-import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'dart:ui';
 
 class ShopScreen extends ConsumerStatefulWidget {

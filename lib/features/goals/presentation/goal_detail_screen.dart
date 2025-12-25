@@ -64,7 +64,7 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
            const SizedBox(height: 24),
            _buildProgressIndicator(progress),
            const SizedBox(height: 32),
-           Text("Alt Görevler", style: Theme.of(context).textTheme.titleLarge),
+           Text('Alt Görevler', style: Theme.of(context).textTheme.titleLarge),
            const SizedBox(height: 16),
            ..._tasks.asMap().entries.map((entry) {
              final index = entry.key;
@@ -88,11 +88,11 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
              onPressed: () {
                // Mock Add Task
                setState(() {
-                 _tasks.add(GoalTask(title: "Yeni Görev ${_tasks.length + 1}"));
+                 _tasks.add(GoalTask(title: 'Yeni Görev ${_tasks.length + 1}'));
                });
              },
              icon: const Icon(Icons.add),
-             label: const Text("Görev Ekle"),
+             label: const Text('Görev Ekle'),
            ),
         ],
       ),
@@ -108,8 +108,8 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("İlerleme"),
-            Text("%${(progress * 100).toInt()}"),
+            const Text('İlerleme'),
+            Text('%${(progress * 100).toInt()}'),
           ],
         ),
         const SizedBox(height: 8),

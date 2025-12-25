@@ -15,17 +15,17 @@ class SessionFinishScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Öğrendiklerini Pekiştir",
+              'Öğrendiklerini Pekiştir',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
             _buildMCQ(context, 1, "Flutter'da 'State' neyi temsil eder?", [
-              "Uygulamanın o anki durumu",
+              'Uygulamanın o anki durumu',
               "Bir widget'ın rengi",
-              "Veritabanı bağlantısı"
+              'Veritabanı bağlantısı'
             ]),
             const SizedBox(height: 24),
-             _buildTextField(context, 2, "State Management neden gereklidir?"),
+             _buildTextField(context, 2, 'State Management neden gereklidir?'),
              const SizedBox(height: 32),
              SizedBox(
                width: double.infinity,
@@ -47,7 +47,7 @@ class SessionFinishScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Soru $index", style: Theme.of(context).textTheme.labelLarge),
+            Text('Soru $index', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             Text(question, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
@@ -71,13 +71,13 @@ class SessionFinishScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Soru $index", style: Theme.of(context).textTheme.labelLarge),
+            Text('Soru $index', style: Theme.of(context).textTheme.labelLarge),
             const SizedBox(height: 8),
             Text(question, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             const TextField(
               maxLines: 3,
-              decoration: InputDecoration(hintText: "Cevabınızı yazın..."),
+              decoration: InputDecoration(hintText: 'Cevabınızı yazın...'),
             ),
           ],
         ),

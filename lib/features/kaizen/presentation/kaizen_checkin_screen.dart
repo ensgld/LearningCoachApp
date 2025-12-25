@@ -61,7 +61,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
           children: [
             _buildSection(
               context,
-              "Dün ne yaptım?",
+              'Dün ne yaptım?',
               _didController,
               Icons.check_circle_rounded,
               const LinearGradient(
@@ -73,7 +73,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
             const SizedBox(height: 24),
             _buildSection(
               context,
-              "Beni ne engelledi?",
+              'Beni ne engelledi?',
               _blockedController,
               Icons.block_rounded,
               const LinearGradient(
@@ -85,7 +85,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
             const SizedBox(height: 24),
             _buildSection(
               context,
-              "Bugün neyi daha iyi yapacağım?",
+              'Bugün neyi daha iyi yapacağım?',
               _todoController,
               Icons.lightbulb_rounded,
               const LinearGradient(
@@ -120,7 +120,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text("Kaizen kaydedildi! Yarın için başarılar."),
+                        content: const Text('Kaizen kaydedildi! Yarın için başarılar.'),
                         backgroundColor: const Color(0xFF10B981),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -132,13 +132,13 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Icon(Icons.save_rounded, color: Colors.white, size: 24),
                         SizedBox(width: 12),
                         Text(
-                          "Kaydet ve Bitir",
+                          'Kaydet ve Bitir',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -212,7 +212,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
             controller: controller,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: "Buraya yazın...",
+              hintText: 'Buraya yazın...',
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               border: OutlineInputBorder(

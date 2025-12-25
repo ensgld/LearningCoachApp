@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "Öğrenci Adı",
+                  'Öğrenci Adı',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -110,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "ogrenci@email.com",
+                    'ogrenci@email.com',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withOpacity(0.95),
                           fontWeight: FontWeight.w500,
@@ -262,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        "${_dailyGoal.round()} dk",
+                        '${_dailyGoal.round()} dk',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: scheme.primary,
@@ -347,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Switch(
                         value: _notificationsEnabled,
                         onChanged: (val) => setState(() => _notificationsEnabled = val),
-                        activeColor: scheme.primary,
+                        activeThumbColor: scheme.primary,
                       ),
                     ],
                   ),

@@ -61,15 +61,15 @@ class DocumentsScreen extends ConsumerWidget {
           child: InkWell(
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Mock: Dosya Yüklendi...")),
+                const SnackBar(content: Text('Mock: Dosya Yüklendi...')),
               );
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Icon(Icons.add_rounded, color: Colors.white, size: 24),
                   SizedBox(width: 8),
                   Text(

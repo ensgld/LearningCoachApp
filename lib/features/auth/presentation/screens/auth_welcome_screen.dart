@@ -98,7 +98,7 @@ class AuthWelcomeScreen extends ConsumerWidget {
               TextButton(
                 onPressed: () {
                   // Misafir olarak giriş yap
-                  ref.read(authControllerProvider.notifier).guestLogin();
+                  ref.read(authControllerProvider.notifier).loginAsGuest();
                   // Route guard izin verir, /home'a git
                   context.go('/home');
                 },
