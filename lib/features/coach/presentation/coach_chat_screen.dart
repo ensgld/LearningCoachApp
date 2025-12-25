@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
-import 'dart:ui';
 
 class CoachChatScreen extends ConsumerWidget {
   const CoachChatScreen({super.key});

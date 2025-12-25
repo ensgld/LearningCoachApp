@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/shared/widgets/avatar_character.dart';
 import 'package:learning_coach/shared/widgets/reward_popups.dart';
 import 'package:learning_coach/shared/data/providers.dart';
