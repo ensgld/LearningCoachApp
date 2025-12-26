@@ -1,4 +1,5 @@
 // Health endpoint tests
+import { describe } from 'node:test';
 import request from 'supertest';
 import app from '../app';
 import { pool, testDatabaseConnection } from '../db/pool';

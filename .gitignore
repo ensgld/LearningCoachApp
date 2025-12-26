@@ -117,3 +117,5 @@ Desktop.ini
 # If you want to ignore them, uncomment below (not recommended for team projects):
 # **/*.g.dart
 # **/*.freezed.dart
+
+.fake
