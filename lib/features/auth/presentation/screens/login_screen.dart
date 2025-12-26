@@ -50,7 +50,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// Login işlemi
   ///
   /// 1. Form validasyonu kontrol et
-  /// 2. AuthController.login çağır (otomatik loading state yönetir)
+  /// 2. Backend API'ye login request gönder
   /// 3. Success → /home'a yönlendir (router guard otomatik yapacak)
   /// 4. Error → Snackbar göster
   Future<void> _handleLogin() async {
@@ -59,20 +59,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    // Login (controller içinde loading state yönetilir)
-    final error = await ref
-        .read(authControllerProvider.notifier)
-        .login(_emailController.text.trim(), _passwordController.text);
+    // Backend API call (via AuthController)
+    try {
+      final error = await ref
+          .read(authControllerProvider.notifier)
+          .login(_emailController.text.trim(), _passwordController.text);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    // Error varsa göster
-    if (error != null) {
+      if (error != null) {
+        // Hata mesajı dönülürse göster
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      } else {
+        // Success - Router guard will automatically redirect to /home
+        // because AuthController state will change to Authenticated
+        print(
+          '✅ Login successful, state updated. Waiting for router redirect...',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Beklenmeyen bir hata oluştu: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
-    // Success durumunda router guard otomatik /home'a yönlendirir
   }
 
   /// Demo kullanıcı ile hızlı giriş

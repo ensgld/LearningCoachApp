@@ -1,18 +1,20 @@
+import 'package:learning_coach/features/auth/data/api_auth_repository.dart';
 import 'package:learning_coach/features/auth/data/auth_repository.dart';
-import 'package:learning_coach/features/auth/data/mock_auth_repository.dart';
 import 'package:learning_coach/features/auth/domain/auth_state.dart';
 import 'package:learning_coach/features/auth/domain/auth_user.dart';
+import 'package:learning_coach/shared/providers/auth_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_controller.g.dart';
 
 /// Auth Repository Provider
 ///
-/// Provides the auth repository instance.
-/// In production, this would return the real Firebase/API implementation.
+/// Provides the REAL API auth repository instance.
+/// Uses ApiService from shared providers for backend communication.
 @Riverpod(keepAlive: true)
 AuthRepository authRepository(Ref ref) {
-  return MockAuthRepository();
+  final apiService = ref.read(apiServiceProvider);
+  return ApiAuthRepository(apiService);
 }
 
 /// Auth Controller
