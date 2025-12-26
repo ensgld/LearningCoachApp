@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
 import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
+import 'package:learning_coach/shared/services/api_service.dart'; // Yeni servisi import et
 
 part 'providers.g.dart';
 
@@ -17,32 +18,66 @@ List<Document> documents(Ref ref) {
   return MockDataRepository.documents;
 }
 
-// Chat
-@riverpod
+// --- CHAT PROVIDER GÜNCELLEMESİ ---
+@Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
+  final _apiService = ApiService();
+
   @override
   List<CoachMessage> build() {
+    // Başlangıçta boş veya mock datadan ilk mesajı getirebilirsin
     return List.from(MockDataRepository.initialChat);
   }
 
-  void addMessage(CoachMessage message) {
-    state = [...state, message];
+  Future<void> sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    // 1. Kullanıcı mesajını hemen ekrana ekle (Optimistic UI)
+    final userMessage = CoachMessage(
+      text: text,
+      isUser: true,
+      timestamp: DateTime.now(),
+    );
+
+    // Mevcut listeye kullanıcı mesajını ekle
+    state = [...state, userMessage];
+
+    try {
+      // 2. Yükleniyor durumu eklemek istersen burada "typing" animasyonu eklenebilir
+      // Şimdilik direkt isteği atıyoruz.
+
+      final responseText = await _apiService.sendChatMessage(text);
+
+      // 3. AI Cevabını listeye ekle
+      final aiMessage = CoachMessage(
+        text: responseText,
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+
+      state = [...state, aiMessage];
+    } catch (e) {
+      // Hata durumunda kullanıcıya bilgi ver
+      final errorMessage = CoachMessage(
+        text: "Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}",
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+      state = [...state, errorMessage];
+    }
   }
 }
 
-// --- Enhanced Gamification Providers ---
-
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+// --- Enhanced Gamification Providers (Aynen Kalıyor) ---
 @riverpod
 class UserStatsNotifier extends _$UserStatsNotifier {
   @override
   UserStats build() {
-    // Initial stats - can be loaded from storage later
     return const UserStats(
       currentLevel: 1,
       currentXP: 0,
-      totalGold: 100, // Starting gold
-      stage: AvatarStage.seed,  // Başlangıç evresi: Tohum
+      totalGold: 100,
+      stage: AvatarStage.seed,
       equippedItems: {},
       purchasedItemIds: [],
     );
@@ -51,13 +86,13 @@ class UserStatsNotifier extends _$UserStatsNotifier {
   /// Add XP and automatically handle leveling up
   void addXP(int amount) {
     if (amount <= 0) return;
-    
+
     int newXP = state.currentXP + amount;
     int newLevel = GamificationService.calculateLevel(newXP);
-    
+
     // Update stage based on new level
     final newStage = GamificationService.getAvatarStage(newLevel);
-    
+
     state = state.copyWith(
       currentXP: newXP,
       currentLevel: newLevel,
@@ -78,9 +113,14 @@ class UserStatsNotifier extends _$UserStatsNotifier {
 
   /// Award XP and Gold for study session
   void awardStudyRewards(int studyMinutes) {
-    final xpGained = GamificationService.calculateXpReward(studyMinutes, state.stage);
-    final goldGained = GamificationService.calculateSessionGoldReward(state.stage);
-    
+    final xpGained = GamificationService.calculateXpReward(
+      studyMinutes,
+      state.stage,
+    );
+    final goldGained = GamificationService.calculateSessionGoldReward(
+      state.stage,
+    );
+
     addXP(xpGained);
     addGold(goldGained);
   }
@@ -122,4 +162,3 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     state = newStats;
   }
 }
-

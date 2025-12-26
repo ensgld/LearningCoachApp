@@ -102,7 +102,7 @@ final class ChatMessagesProvider
         argument: null,
         retry: null,
         name: r'chatMessagesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -123,7 +123,7 @@ final class ChatMessagesProvider
   }
 }
 
-String _$chatMessagesHash() => r'caddb75e427cd7a9ac6790126879081d69875a57';
+String _$chatMessagesHash() => r'15bf25de7d2e227916744b29d58d0f01acd279f4';
 
 abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
   List<CoachMessage> build();
@@ -144,15 +144,11 @@ abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
   }
 }
 
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
-
 @ProviderFor(UserStatsNotifier)
 const userStatsProvider = UserStatsNotifierProvider._();
 
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
 final class UserStatsNotifierProvider
     extends $NotifierProvider<UserStatsNotifier, UserStats> {
-  /// Main Gamification Notifier with complete XP, Leveling, and Gold logic
   const UserStatsNotifierProvider._()
     : super(
         from: null,
@@ -181,8 +177,6 @@ final class UserStatsNotifierProvider
 }
 
 String _$userStatsNotifierHash() => r'f1cbf288f959e1595f30d28933dd29364f843d4f';
-
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
 
 abstract class _$UserStatsNotifier extends $Notifier<UserStats> {
   UserStats build();
