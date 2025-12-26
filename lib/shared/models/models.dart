@@ -53,7 +53,24 @@ class GoalTask extends Equatable {
   List<Object?> get props => [id, title, isCompleted];
 }
 
-// --- Study Session ---
+// --- Study Session & Quiz ---
+
+class QuizQuestion extends Equatable {
+  final String id;
+  final String question;
+  final List<String> options;
+  final int correctOptionIndex;
+
+  QuizQuestion({
+    String? id,
+    required this.question,
+    required this.options,
+    required this.correctOptionIndex,
+  }) : id = id ?? uuid.v4();
+
+  @override
+  List<Object?> get props => [id, question, options, correctOptionIndex];
+}
 
 class StudySession extends Equatable {
   final String id;
@@ -62,6 +79,8 @@ class StudySession extends Equatable {
   final DateTime startTime;
   final int? actualDurationSeconds;
   final int? quizScore;
+  final List<QuizQuestion>? questions;
+  final Map<String, int>? selectedAnswers; // questionId -> selectedOptionIndex
 
   StudySession({
     String? id,
@@ -70,10 +89,39 @@ class StudySession extends Equatable {
     required this.startTime,
     this.actualDurationSeconds,
     this.quizScore,
+    this.questions,
+    this.selectedAnswers,
   }) : id = id ?? uuid.v4();
 
+  StudySession copyWith({
+    int? actualDurationSeconds,
+    int? quizScore,
+    List<QuizQuestion>? questions,
+    Map<String, int>? selectedAnswers,
+  }) {
+    return StudySession(
+      id: id,
+      goalId: goalId,
+      durationMinutes: durationMinutes,
+      startTime: startTime,
+      actualDurationSeconds: actualDurationSeconds ?? this.actualDurationSeconds,
+      quizScore: quizScore ?? this.quizScore,
+      questions: questions ?? this.questions,
+      selectedAnswers: selectedAnswers ?? this.selectedAnswers,
+    );
+  }
+
   @override
-  List<Object?> get props => [id, goalId, durationMinutes, startTime, actualDurationSeconds, quizScore];
+  List<Object?> get props => [
+        id,
+        goalId,
+        durationMinutes,
+        startTime,
+        actualDurationSeconds,
+        quizScore,
+        questions,
+        selectedAnswers,
+      ];
 }
 
 // --- Document & Chat ---

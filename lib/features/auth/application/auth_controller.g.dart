@@ -114,7 +114,7 @@ final class AuthControllerProvider
   }
 }
 
-String _$authControllerHash() => r'dd9fda4f13364ab057a5378dfc69041d72f65af5';
+String _$authControllerHash() => r'232656f6bd214b51e1d86dc1ab053825b7b4a0d1';
 
 /// Auth Controller
 ///

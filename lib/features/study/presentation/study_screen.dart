@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/features/study/application/study_controller.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 
 class StudyScreen extends ConsumerStatefulWidget {
@@ -302,6 +303,13 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                 onTap: _selectedGoalId == null
                     ? null
                     : () {
+                        final selectedGoal =
+                            goals.firstWhere((g) => g.id == _selectedGoalId);
+                        ref.read(studyControllerProvider.notifier).startSession(
+                              _selectedGoalId!,
+                              selectedGoal.title,
+                              _duration.round(),
+                            );
                         context.go('/study/running');
                       },
                 borderRadius: BorderRadius.circular(20),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:learning_coach/features/study/application/study_controller.dart';
 import 'package:learning_coach/shared/widgets/avatar_character.dart';
 import 'package:learning_coach/shared/widgets/reward_popups.dart';
 import 'package:learning_coach/shared/data/providers.dart';
@@ -15,14 +16,18 @@ class SessionRunningScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
-  // Mock Timer
-  int _secondsRemaining = 25 * 60;
+  late int _secondsRemaining;
+  late int _totalSeconds;
   Timer? _timer;
   bool _isPaused = false;
+  DateTime _startTime = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    final studyState = ref.read(studyControllerProvider);
+    _totalSeconds = (studyState?.durationMinutes ?? 25) * 60;
+    _secondsRemaining = _totalSeconds;
     _startTimer();
   }
 
@@ -34,7 +39,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
             _secondsRemaining--;
           } else {
             _timer?.cancel();
-            // Auto finish or notify
+            _finishSession();
           }
         });
       }
@@ -55,6 +60,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final studyState = ref.watch(studyControllerProvider);
     final scheme = Theme.of(context).colorScheme;
     final userStats = ref.watch(userStatsProvider);
 
@@ -78,7 +84,6 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                // Close button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -95,7 +100,6 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                   ],
                 ),
                 const Spacer(),
-                // Training Avatar with Progress
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -103,13 +107,12 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                       width: 280,
                       height: 280,
                       child: CircularProgressIndicator(
-                        value: 1 - (_secondsRemaining / (25 * 60)),
+                        value: 1 - (_secondsRemaining / _totalSeconds),
                         strokeWidth: 12,
                         backgroundColor: scheme.surfaceContainerHighest,
                         color: scheme.primary,
                       ),
                     ),
-                    // Animated Avatar in Training Pose
                     AvatarCharacter(
                       stage: userStats.stage.name,
                       size: 180,
@@ -118,7 +121,6 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                   ],
                 ),
                 const SizedBox(height: 32),
-                // Timer Display
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   decoration: BoxDecoration(
@@ -140,14 +142,13 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '🎯 Hedef: Flutter İleri Seviye Öğrenme',
+                  '🎯 Hedef: ${studyState?.goalId != null ? ref.read(goalsProvider).firstWhere((g) => g.id == studyState!.goalId).title : "Çalışma Seansı"}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                   textAlign: TextAlign.center,
                 ),
                 const Spacer(),
-                // Controls
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -186,8 +187,12 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
   void _finishSession() async {
     _timer?.cancel();
     
-    // Calculate study time
-    final studyMinutes = ((25 * 60) - _secondsRemaining) ~/ 60;
+    // Calculate actual study time in seconds
+    final actualSeconds = _totalSeconds - _secondsRemaining;
+    final studyMinutes = actualSeconds ~/ 60;
+    
+    // Update study controller
+    ref.read(studyControllerProvider.notifier).finishSession(actualSeconds);
     
     // Award rewards
     final currentStats = ref.read(userStatsProvider);
