@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/features/auth/application/auth_controller.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _notificationsEnabled = true;
   double _dailyGoal = 60;
-  String _language = 'Türkçe';
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final locale = ref.watch(localeProvider);
+    final language = locale == 'tr' ? 'Türkçe' : 'English';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -25,22 +29,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.navProfile,
+              AppStrings.getNavProfile(locale),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.8,
-                  ),
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.8,
+              ),
             ),
             Text(
-              'Ayarlarınızı yönetin',
+              AppStrings.getProfileSubtitle(locale),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
         toolbarHeight: 80,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFFEF4444), Color(0xFFF43F5E)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFFEF4444).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () async {
+                  final shouldLogout = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(AppStrings.getLogoutTitle(locale)),
+                      content: Text(AppStrings.getLogoutMessage(locale)),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(AppStrings.getCancel(locale)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(AppStrings.getLogoutBtn(locale)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldLogout == true && mounted) {
+                    await ref.read(authControllerProvider.notifier).logout();
+                    if (mounted) {
+                      context.go('/welcome');
+                    }
+                  }
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        AppStrings.getLogoutBtn(locale),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
@@ -96,14 +177,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   'Öğrenci Adı',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: -0.5,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(20),
@@ -111,9 +195,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Text(
                     'ogrenci@email.com',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.95),
-                          fontWeight: FontWeight.w500,
-                        ),
+                      color: Colors.white.withOpacity(0.95),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ],
@@ -159,22 +243,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '🛍️ Mağaza',
-                              style: TextStyle(
+                              AppStrings.getShopTitle(locale),
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              'Avatarını özelleştir!',
-                              style: TextStyle(
+                              AppStrings.getCustomizeAvatar(locale),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white,
                               ),
@@ -199,11 +283,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Text(
-              AppStrings.profileSettings,
+              AppStrings.getProfileSettings(locale),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -243,14 +327,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        AppStrings.dailyGoalLabel,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        AppStrings.getDailyGoalLabel(locale),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
@@ -262,7 +348,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Text(
                         '${_dailyGoal.round()} dk',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: scheme.primary,
                             ),
@@ -274,8 +361,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SliderTheme(
                   data: SliderThemeData(
                     trackHeight: 6,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 12,
+                    ),
+                    overlayShape: const RoundSliderOverlayShape(
+                      overlayRadius: 24,
+                    ),
                     activeTrackColor: scheme.primary,
                     inactiveTrackColor: scheme.primary.withOpacity(0.2),
                     thumbColor: scheme.primary,
@@ -311,7 +402,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () => setState(() => _notificationsEnabled = !_notificationsEnabled),
+                onTap: () => setState(
+                  () => _notificationsEnabled = !_notificationsEnabled,
+                ),
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
                   padding: const EdgeInsets.all(18.0),
@@ -337,15 +430,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
-                          AppStrings.notificationsLabel,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          AppStrings.getNotificationsLabel(locale),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Switch(
                         value: _notificationsEnabled,
-                        onChanged: (val) => setState(() => _notificationsEnabled = val),
+                        onChanged: (val) =>
+                            setState(() => _notificationsEnabled = val),
                         activeThumbColor: scheme.primary,
                       ),
                     ],
@@ -374,9 +467,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  setState(() {
-                    _language = _language == 'Türkçe' ? 'English' : 'Türkçe';
-                  });
+                  // Toggle language
+                  ref.read(localeProvider.notifier).toggle();
+
+                  final newLocale = locale == 'tr' ? 'en' : 'tr';
+                  final newLanguage = newLocale == 'tr' ? 'Türkçe' : 'English';
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppStrings.getLanguageChanged(newLocale, newLanguage),
+                      ),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
                 },
                 borderRadius: BorderRadius.circular(20),
                 child: Padding(
@@ -406,15 +509,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              AppStrings.languageLabel,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              AppStrings.getLanguageLabel(locale),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _language,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              language,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
                                     color: scheme.onSurfaceVariant,
                                     fontWeight: FontWeight.w500,
                                   ),

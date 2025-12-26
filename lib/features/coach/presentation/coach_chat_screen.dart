@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
@@ -10,6 +11,7 @@ class CoachChatScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = ref.watch(chatMessagesProvider);
+    final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -29,7 +31,9 @@ class CoachChatScreen extends ConsumerWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF6366F1).withOpacity(0.3),
@@ -59,19 +63,19 @@ class CoachChatScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppStrings.coachChatTitle,
+                        AppStrings.getCoachChatTitle(locale),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: -0.5,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
+                        ),
                       ),
                       Text(
-                        'AI öğrenme asistanı',
+                        AppStrings.getCoachSubtitle(locale),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w500,
-                            ),
+                          color: Colors.white.withOpacity(0.9),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -83,7 +87,11 @@ class CoachChatScreen extends ConsumerWidget {
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
@@ -117,8 +125,9 @@ class CoachChatScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Merhaba! Size nasıl yardımcı olabilirim?',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          AppStrings.getCoachGreeting(locale),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 color: scheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -144,35 +153,35 @@ class CoachChatScreen extends ConsumerWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: const [
+              children: [
                 _QuickChip(
-                  label: 'Plan oluştur',
+                  label: AppStrings.getCreatePlan(locale),
                   icon: Icons.event_note_rounded,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _QuickChip(
-                  label: 'Quiz üret',
+                  label: AppStrings.getGenerateQuiz(locale),
                   icon: Icons.quiz_rounded,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFFEC4899), Color(0xFFF43F5E)],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _QuickChip(
-                  label: 'Bugün zorlandım',
+                  label: AppStrings.getStruggledToday(locale),
                   icon: Icons.help_outline_rounded,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFFF59E0B), Color(0xFFF97316)],
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 _QuickChip(
-                  label: 'Motivasyon ver',
+                  label: AppStrings.getMotivateMe(locale),
                   icon: Icons.bolt_rounded,
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Color(0xFF10B981), Color(0xFF14B8A6)],
                   ),
                 ),
@@ -185,7 +194,9 @@ class CoachChatScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: scheme.surface,
-              border: Border(top: BorderSide(color: scheme.outlineVariant.withOpacity(0.3))),
+              border: Border(
+                top: BorderSide(color: scheme.outlineVariant.withOpacity(0.3)),
+              ),
             ),
             child: Row(
               children: [
@@ -195,11 +206,11 @@ class CoachChatScreen extends ConsumerWidget {
                       color: scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(24),
                     ),
-                    child: const TextField(
+                    child: TextField(
                       decoration: InputDecoration(
-                        hintText: AppStrings.askCoachHint,
+                        hintText: AppStrings.getAskCoachHint(locale),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,
                         ),
@@ -292,13 +303,14 @@ class _QuickChip extends StatelessWidget {
   }
 }
 
-class _ChatBubble extends StatelessWidget {
+class _ChatBubble extends ConsumerWidget {
   final CoachMessage message;
 
   const _ChatBubble({required this.message});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
     final isUser = message.isUser;
     final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
@@ -359,20 +371,23 @@ class _ChatBubble extends StatelessWidget {
                 child: InkWell(
                   onTap: () {},
                   borderRadius: BorderRadius.circular(12),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.source_rounded,
                           size: 16,
                           color: Color(0xFF10B981),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
-                          AppStrings.sourcesTitle,
-                          style: TextStyle(
+                          AppStrings.getSourcesTitle(locale),
+                          style: const TextStyle(
                             color: Color(0xFF10B981),
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
