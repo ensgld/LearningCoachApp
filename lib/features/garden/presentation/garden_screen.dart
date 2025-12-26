@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
@@ -52,9 +53,14 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     final userStats = ref.watch(userStatsProvider);
     final treeAsset = GamificationService.getTreeAssetPath(userStats.level);
     final stageFeatures = GamificationService.getStageFeatures(userStats.stage);
+    final stageName = GamificationService.getLocalizedStageName(
+      userStats.stage,
+      locale,
+    );
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -87,7 +93,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
           ),
 
           // Top Overlay: Stats
-          _buildTopOverlay(userStats, stageFeatures),
+          _buildTopOverlay(userStats, stageFeatures, stageName),
 
           // Back Button
           SafeArea(
@@ -259,7 +265,11 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
     );
   }
 
-  Widget _buildTopOverlay(UserStats userStats, StageFeatures stageFeatures) {
+  Widget _buildTopOverlay(
+    UserStats userStats,
+    StageFeatures stageFeatures,
+    String stageName,
+  ) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
@@ -291,7 +301,7 @@ class _GardenScreenState extends ConsumerState<GardenScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        stageFeatures.title,
+                        stageName,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

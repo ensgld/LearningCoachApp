@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:learning_coach/shared/models/gamification_models.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
-import 'dart:ui';
+import 'package:learning_coach/shared/models/gamification_models.dart';
 
 class ShopScreen extends ConsumerStatefulWidget {
   const ShopScreen({super.key});
@@ -11,7 +14,8 @@ class ShopScreen extends ConsumerStatefulWidget {
   ConsumerState<ShopScreen> createState() => _ShopScreenState();
 }
 
-class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProviderStateMixin {
+class _ShopScreenState extends ConsumerState<ShopScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   ItemCategory _selectedCategory = ItemCategory.pot;
 
@@ -53,7 +57,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
       goldCost: 600,
       assetPath: 'pot_crystal',
     ),
-    
+
     // Backgrounds (Arka Planlar)
     const InventoryItem(
       id: 'bg_night',
@@ -90,7 +94,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
       goldCost: 700,
       assetPath: 'rainbow_bg',
     ),
-    
+
     // Companions (Dostlar)
     const InventoryItem(
       id: 'comp_cat',
@@ -148,8 +152,11 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     final userStats = ref.watch(userStatsProvider);
-    final filteredItems = _shopItems.where((item) => item.category == _selectedCategory).toList();
+    final filteredItems = _shopItems
+        .where((item) => item.category == _selectedCategory)
+        .toList();
 
     return Scaffold(
       body: Container(
@@ -180,15 +187,17 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
                     ),
                     const Spacer(),
                     Text(
-                      '🛍️ Mağaza',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      AppStrings.getShopTitle(locale),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const Spacer(),
                     // Gold Balance
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
@@ -221,7 +230,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
                   ],
                 ),
               ),
-              
+
               // Category Tabs
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -243,18 +252,18 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
                       ),
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.black54,
-                      tabs: const [
-                        Tab(text: '🪴 Saksılar'),
-                        Tab(text: '🖼️ Arka Planlar'),
-                        Tab(text: '🐾 Dostlar'),
+                      tabs: [
+                        Tab(text: AppStrings.getPotsTab(locale)),
+                        Tab(text: AppStrings.getBackgroundsTab(locale)),
+                        const Tab(text: '🐾 Dostlar'),
                       ],
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Items Grid
               Expanded(
                 child: GridView.builder(
@@ -268,16 +277,25 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
                   itemCount: filteredItems.length,
                   itemBuilder: (context, index) {
                     final item = filteredItems[index];
-                    final isPurchased = userStats.purchasedItemIds.contains(item.id);
-                    final isEquipped = userStats.equippedItems[item.category.name] == item.id;
+                    final isPurchased = userStats.purchasedItemIds.contains(
+                      item.id,
+                    );
+                    final isEquipped =
+                        userStats.equippedItems[item.category.name] == item.id;
                     final canAfford = userStats.gold >= item.goldCost;
-                    
+
                     return _ShopItemCard(
                       item: item,
                       isPurchased: isPurchased,
                       isEquipped: isEquipped,
                       canAfford: canAfford,
-                      onTap: () => _handleItemTap(item, isPurchased, isEquipped, canAfford),
+                      onTap: () => _handleItemTap(
+                        item,
+                        isPurchased,
+                        isEquipped,
+                        canAfford,
+                        locale,
+                      ),
                     );
                   },
                 ),
@@ -289,7 +307,13 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
     );
   }
 
-  void _handleItemTap(InventoryItem item, bool isPurchased, bool isEquipped, bool canAfford) {
+  void _handleItemTap(
+    InventoryItem item,
+    bool isPurchased,
+    bool isEquipped,
+    bool canAfford,
+    String locale,
+  ) {
     if (!isPurchased) {
       // Purchase item
       if (canAfford) {
@@ -298,21 +322,27 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
           builder: (context) => _PurchaseConfirmDialog(
             item: item,
             onConfirm: () {
-              ref.read(userStatsProvider.notifier).purchaseItem(item.id, item.goldCost);
+              ref
+                  .read(userStatsProvider.notifier)
+                  .purchaseItem(item.id, item.goldCost);
               Navigator.of(context).pop();
-              _showPurchaseSuccess(item);
+              _showPurchaseSuccess(item, locale);
             },
           ),
         );
       } else {
-        _showInsufficientFunds(item);
+        _showInsufficientFunds(item, locale);
       }
     } else if (!isEquipped) {
       // Equip item
-      ref.read(userStatsProvider.notifier).equipItem(item.category.name, item.id);
+      ref
+          .read(userStatsProvider.notifier)
+          .equipItem(item.category.name, item.id);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${item.name} kuşanıldı!'),
+          content: Text(
+            '${AppStrings.getShopItemName(item.id, locale)} ${AppStrings.getItemEquipped(locale)}',
+          ),
           backgroundColor: const Color(0xFF10B981),
           behavior: SnackBarBehavior.floating,
         ),
@@ -320,7 +350,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
     }
   }
 
-  void _showPurchaseSuccess(InventoryItem item) {
+  void _showPurchaseSuccess(InventoryItem item, String locale) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -336,11 +366,15 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.shopping_bag_rounded, size: 64, color: Colors.white),
+              const Icon(
+                Icons.shopping_bag_rounded,
+                size: 64,
+                color: Colors.white,
+              ),
               const SizedBox(height: 16),
-              const Text(
-                '🎉 Satın Alındı!',
-                style: TextStyle(
+              Text(
+                AppStrings.getPurchased(locale),
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -348,7 +382,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
               ),
               const SizedBox(height: 8),
               Text(
-                item.name,
+                AppStrings.getShopItemName(item.id, locale),
                 style: const TextStyle(fontSize: 18, color: Colors.white),
                 textAlign: TextAlign.center,
               ),
@@ -368,12 +402,17 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
     );
   }
 
-  void _showInsufficientFunds(InventoryItem item) {
+  void _showInsufficientFunds(InventoryItem item, String locale) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('💰 Yetersiz Altın'),
-        content: Text('Bu eşyayı satın almak için ${item.goldCost - ref.read(userStatsProvider).gold} altına daha ihtiyacınız var!'),
+        content: Text(
+          AppStrings.getInsufficientGold(
+            locale,
+            item.goldCost - ref.read(userStatsProvider).gold,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -385,7 +424,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> with SingleTickerProvid
   }
 }
 
-class _ShopItemCard extends StatelessWidget {
+class _ShopItemCard extends ConsumerWidget {
   final InventoryItem item;
   final bool isPurchased;
   final bool isEquipped;
@@ -401,7 +440,8 @@ class _ShopItemCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -440,7 +480,7 @@ class _ShopItemCard extends StatelessWidget {
                   ),
                 ),
               ),
-            
+
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -461,7 +501,10 @@ class _ShopItemCard extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        item.name.split(' ')[0],
+                        AppStrings.getShopItemName(
+                          item.id,
+                          locale,
+                        ).split(' ')[0],
                         style: const TextStyle(fontSize: 40),
                       ),
                     ),
@@ -469,10 +512,13 @@ class _ShopItemCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   // Item Name
                   Text(
-                    item.name.split(' ').skip(1).join(' '),
+                    AppStrings.getShopItemName(
+                      item.id,
+                      locale,
+                    ).split(' ').skip(1).join(' '),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -481,16 +527,19 @@ class _ShopItemCard extends StatelessWidget {
                   // Status/Price
                   if (isEquipped)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        '✓ Kuşanılmış',
-                        style: TextStyle(
+                      child: Text(
+                        AppStrings.getEquipped(locale),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -499,14 +548,17 @@ class _ShopItemCard extends StatelessWidget {
                     )
                   else if (isPurchased)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF10B981).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Kuşan',
-                        style: TextStyle(
+                      child: Text(
+                        AppStrings.getEquip(locale),
+                        style: const TextStyle(
                           color: Color(0xFF10B981),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -515,7 +567,10 @@ class _ShopItemCard extends StatelessWidget {
                     )
                   else
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: canAfford
                             ? const Color(0xFFFBBF24).withOpacity(0.2)
@@ -530,7 +585,9 @@ class _ShopItemCard extends StatelessWidget {
                           Text(
                             '${item.goldCost}',
                             style: TextStyle(
-                              color: canAfford ? const Color(0xFFF59E0B) : Colors.grey,
+                              color: canAfford
+                                  ? const Color(0xFFF59E0B)
+                                  : Colors.grey,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
@@ -548,27 +605,25 @@ class _ShopItemCard extends StatelessWidget {
   }
 }
 
-class _PurchaseConfirmDialog extends StatelessWidget {
+class _PurchaseConfirmDialog extends ConsumerWidget {
   final InventoryItem item;
   final VoidCallback onConfirm;
 
-  const _PurchaseConfirmDialog({
-    required this.item,
-    required this.onConfirm,
-  });
+  const _PurchaseConfirmDialog({required this.item, required this.onConfirm});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     return AlertDialog(
-      title: const Text('Satın Al'),
+      title: Text(AppStrings.getBuyBtn(locale)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            item.name,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            AppStrings.getShopItemName(item.id, locale),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
@@ -591,11 +646,11 @@ class _PurchaseConfirmDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('İptal'),
+          child: Text(AppStrings.getCancel(locale)),
         ),
         ElevatedButton(
           onPressed: onConfirm,
-          child: const Text('Satın Al'),
+          child: Text(AppStrings.getBuyBtn(locale)),
         ),
       ],
     );

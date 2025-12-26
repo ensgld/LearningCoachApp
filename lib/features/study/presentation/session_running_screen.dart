@@ -1,17 +1,21 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:learning_coach/shared/widgets/avatar_character.dart';
-import 'package:learning_coach/shared/widgets/reward_popups.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
+import 'package:learning_coach/shared/widgets/avatar_character.dart';
+import 'package:learning_coach/shared/widgets/reward_popups.dart';
 
 class SessionRunningScreen extends ConsumerStatefulWidget {
   const SessionRunningScreen({super.key});
 
   @override
-  ConsumerState<SessionRunningScreen> createState() => _SessionRunningScreenState();
+  ConsumerState<SessionRunningScreen> createState() =>
+      _SessionRunningScreenState();
 }
 
 class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
@@ -55,6 +59,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
     final userStats = ref.watch(userStatsProvider);
 
@@ -83,10 +88,10 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '⚡ Eğitim Modu',
+                      '⚡ ${AppStrings.getTrainingMode(locale)}',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close_rounded),
@@ -120,7 +125,10 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                 const SizedBox(height: 32),
                 // Timer Display
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -133,17 +141,17 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                   child: Text(
                     _timerString,
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontFeatures: [const FontFeature.tabularFigures()],
-                        ),
+                      fontWeight: FontWeight.bold,
+                      fontFeatures: [const FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '🎯 Hedef: Flutter İleri Seviye Öğrenme',
+                  '${AppStrings.getGoalPrefix(locale)}: Flutter İleri Seviye Öğrenme',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const Spacer(),
@@ -159,7 +167,9 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                       },
                       backgroundColor: scheme.primaryContainer,
                       child: Icon(
-                        _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                        _isPaused
+                            ? Icons.play_arrow_rounded
+                            : Icons.pause_rounded,
                         size: 36,
                       ),
                     ),
@@ -167,10 +177,13 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                     ElevatedButton.icon(
                       onPressed: () => _finishSession(),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 20,
+                        ),
                       ),
                       icon: const Icon(Icons.check_circle_rounded),
-                      label: const Text('Bitir'),
+                      label: Text(AppStrings.getFinishBtn(locale)),
                     ),
                   ],
                 ),
@@ -185,25 +198,33 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
 
   void _finishSession() async {
     _timer?.cancel();
-    
+
     // Calculate study time
     final studyMinutes = ((25 * 60) - _secondsRemaining) ~/ 60;
-    
+
     // Award rewards
     final currentStats = ref.read(userStatsProvider);
-    final newStats = GamificationService.awardStudyRewards(currentStats, studyMinutes);
+    final newStats = GamificationService.awardStudyRewards(
+      currentStats,
+      studyMinutes,
+    );
     final leveledUp = newStats.level > currentStats.level;
-    
+
     // Update stats
     ref.read(userStatsProvider.notifier).updateStats(newStats);
-    
+
     // Show victory popup
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => VictoryPopup(
-        xpEarned: GamificationService.calculateXpReward(studyMinutes, currentStats.stage),
-        goldEarned: GamificationService.calculateSessionGoldReward(currentStats.stage),
+        xpEarned: GamificationService.calculateXpReward(
+          studyMinutes,
+          currentStats.stage,
+        ),
+        goldEarned: GamificationService.calculateSessionGoldReward(
+          currentStats.stage,
+        ),
         newLevel: newStats.level,
         leveledUp: leveledUp,
         onContinue: () {

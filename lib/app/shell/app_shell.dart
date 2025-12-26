@@ -1,16 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:learning_coach/core/constants/app_strings.dart';
-import 'package:learning_coach/features/coach/presentation/coach_chat_screen.dart';
 import 'dart:ui';
 
-class AppShell extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/features/coach/presentation/coach_chat_screen.dart';
+
+class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -37,71 +40,208 @@ class AppShell extends StatelessWidget {
                 initialLocation: index == navigationShell.currentIndex,
               ),
               backgroundColor: scheme.surface.withOpacity(0.85),
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home_rounded),
-                  label: AppStrings.navHome,
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home_rounded),
+                  label: AppStrings.getNavHome(ref.watch(localeProvider)),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.timer_outlined),
-                  selectedIcon: Icon(Icons.timer_rounded),
-                  label: AppStrings.navStudy,
+                  icon: const Icon(Icons.timer_outlined),
+                  selectedIcon: const Icon(Icons.timer_rounded),
+                  label: AppStrings.getNavStudy(ref.watch(localeProvider)),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.description_outlined),
-                  selectedIcon: Icon(Icons.description_rounded),
-                  label: AppStrings.navDocs,
+                  icon: const Icon(Icons.description_outlined),
+                  selectedIcon: const Icon(Icons.description_rounded),
+                  label: AppStrings.getNavDocs(ref.watch(localeProvider)),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person_rounded),
-                  label: AppStrings.navProfile,
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person_rounded),
+                  label: AppStrings.getNavProfile(ref.watch(localeProvider)),
                 ),
               ],
             ),
           ),
         ),
       ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.45),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-              spreadRadius: -2,
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const CoachChatScreen(),
-              );
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              width: 64,
-              height: 64,
-              alignment: Alignment.center,
+      floatingActionButton: navigationShell.currentIndex == 2
+          ? FloatingActionButton(
+              onPressed: () {
+                _showUploadOptions(context, ref.watch(localeProvider));
+              },
+              backgroundColor: const Color(0xFF6366F1),
+              elevation: 8,
               child: const Icon(
-                Icons.chat_bubble_rounded,
+                Icons.add_rounded,
                 color: Colors.white,
                 size: 28,
               ),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withOpacity(0.45),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                    spreadRadius: -2,
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => const CoachChatScreen(),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.chat_bubble_rounded,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
             ),
+    );
+  }
+}
+
+void _showUploadOptions(BuildContext context, String locale) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (BuildContext context) {
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _UploadOptionTile(
+              icon: Icons.upload_file_rounded,
+              title: AppStrings.getUploadFile(locale),
+              subtitle: AppStrings.getUploadFileSubtitle(locale),
+              color: const Color(0xFF6366F1),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mock: Dosya seçiliyor...')),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            _UploadOptionTile(
+              icon: Icons.camera_alt_rounded,
+              title: AppStrings.getTakePhoto(locale),
+              subtitle: AppStrings.getTakePhotoSubtitle(locale),
+              color: const Color(0xFFEC4899),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mock: Kamera açılıyor...')),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _UploadOptionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _UploadOptionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: color.withOpacity(0.2)),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, color: color, size: 16),
+            ],
           ),
         ),
       ),
