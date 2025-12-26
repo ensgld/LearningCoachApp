@@ -256,8 +256,57 @@ Push yapmadan önce yerel olarak çalıştırın:
 dart format .
 ```
 
+- [ ] Gelişmiş analitik panosu
+
+## 🗄️ Backend ve Veritabanı
+
+Learning Coach, PostgreSQL veritabanı şeması ve migration altyapısı içerir. Backend API henüz geliştirilmemiş olsa da, veritabanı tasarımı hazırdır.
+
+### Hızlı Başlangıç
+
+```bash
+# Backend klasörüne git
+cd backend
+
+# Bağımlılıkları yükle
+npm install
+
+# .env dosyasını yapılandır
+cp ../.env.example ../.env
+# .env dosyasını açıp DATABASE_URL'i düzenleyin
+
+# Tek komutla veritabanını kur!
+npm run db:setup
+
+# (Opsiyonel) Demo veri ile birlikte:
+npm run db:setup:seed
+```
+
+**Not**: PostgreSQL'in kurulu ve çalışır olması gerekir. Detaylar için [backend/QUICKSTART.md](backend/QUICKSTART.md).
+
+### Veritabanı Özellikleri
+
+- **PostgreSQL 14+** with **pgvector** extension (RAG için)
+- **UUID** primary keys
+- **Soft delete** ve **timestamp tracking**
+- **Auto-update triggers**
+- **Performance indexes** (pgvector HNSW dahil)
+- **16 tablo**: users, goals, study_sessions, documents, chat_messages, gamification ve daha fazlası
+
+### npm Scriptleri
+
+- `npm run db:setup` - **Tek komutla kurulum** (otomatik validation + migration)
+- `npm run db:setup:seed` - Kurulum + demo veri
+- `npm run db:migrate` - Migration'ları uygula
+- `npm run db:reset` - DB'yi sıfırla (drop + migrate + seed)
+- `npm run db:status` - Migration durumunu göster
+- `npm run docker:up` - PostgreSQL Docker container'ı başlat
+
+Detaylı dokümantasyon için [backend/README.md](backend/README.md) dosyasına bakınız.
+
 ## 🔮 Gelecek Yol Haritası
 
+- [x] PostgreSQL veritabanı tasarımı ve migration'lar
 - [ ] Backend entegrasyonu (Node.js/Python)
 - [ ] Doküman soru-cevap için RAG implementasyonu
 - [ ] Kullanıcı kimlik doğrulama (Firebase/Supabase)
