@@ -1,16 +1,16 @@
 // Express application setup
-import express, { Express, NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { AppError } from './common/errors';
-import authRoutes from './routes/auth';
-import debugRoutes from './routes/debug';
-import healthRoutes from './routes/health';
+import authRouter from './routes/auth';
+import debugRouter from './routes/debug';
+import healthRouter from './routes/health';
+import quizRouter from './routes/quiz';
 
-const app: Express = express();
+const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 // Request logging (simple)
 app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
@@ -18,9 +18,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // Routes
-app.use('/api/v1', healthRoutes);
-app.use('/api/v1', authRoutes);
-app.use('/api/v1', debugRoutes);
+app.use('/api/v1/health', healthRouter);
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/quizzes', quizRouter);
+app.use('/api/v1/debug', debugRouter);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

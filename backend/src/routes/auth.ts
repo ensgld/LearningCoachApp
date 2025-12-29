@@ -20,8 +20,8 @@ function validateEmail(email: string): boolean {
     return emailRegex.test(email);
 }
 
-// POST /auth/register
-router.post('/auth/register', async (req: Request, res: Response, next: NextFunction) => {
+// POST /register
+router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password, displayName } = req.body;
         console.log('📝 Register request received:', { email, displayName });
@@ -57,8 +57,8 @@ router.post('/auth/register', async (req: Request, res: Response, next: NextFunc
     }
 });
 
-// POST /auth/login
-router.post('/auth/login', async (req: Request, res: Response, next: NextFunction) => {
+// POST /login
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
 
@@ -71,16 +71,19 @@ router.post('/auth/login', async (req: Request, res: Response, next: NextFunctio
             email: email.toLowerCase().trim(),
             password,
         };
+        // Note: LoginDTO in previous file didn't have displayName, checking file content again... 
+        // File content at 70: const dto: LoginDTO = ... It takes email and password. 
+        // I will stick to what was there but remove /auth path.
 
-        const result = await loginUser(dto);
+        const result = await loginUser({ email: email.toLowerCase().trim(), password });
         res.status(200).json(result);
     } catch (error) {
         next(error);
     }
 });
 
-// POST /auth/refresh
-router.post('/auth/refresh', async (req: Request, res: Response, next: NextFunction) => {
+// POST /refresh
+router.post('/refresh', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { refreshToken } = req.body;
 
@@ -95,8 +98,8 @@ router.post('/auth/refresh', async (req: Request, res: Response, next: NextFunct
     }
 });
 
-// GET /auth/me (protected)
-router.get('/auth/me', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+// GET /me (protected)
+router.get('/me', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         if (!req.user) {
             throw new BadRequestError('User not authenticated');
@@ -109,8 +112,8 @@ router.get('/auth/me', authMiddleware, async (req: AuthRequest, res: Response, n
     }
 });
 
-// POST /auth/logout (protected)
-router.post('/auth/logout', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
+// POST /logout (protected)
+router.post('/logout', authMiddleware, async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         if (!req.user) {
             throw new BadRequestError('User not authenticated');

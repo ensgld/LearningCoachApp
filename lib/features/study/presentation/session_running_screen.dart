@@ -11,7 +11,8 @@ import 'package:learning_coach/shared/widgets/avatar_character.dart';
 import 'package:learning_coach/shared/widgets/reward_popups.dart';
 
 class SessionRunningScreen extends ConsumerStatefulWidget {
-  const SessionRunningScreen({super.key});
+  final int initialDurationMinutes;
+  const SessionRunningScreen({super.key, this.initialDurationMinutes = 25});
 
   @override
   ConsumerState<SessionRunningScreen> createState() =>
@@ -20,13 +21,14 @@ class SessionRunningScreen extends ConsumerStatefulWidget {
 
 class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
   // Mock Timer
-  int _secondsRemaining = 25 * 60;
+  late int _secondsRemaining;
   Timer? _timer;
   bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
+    _secondsRemaining = widget.initialDurationMinutes * 60;
     _startTimer();
   }
 
@@ -108,7 +110,10 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                       width: 280,
                       height: 280,
                       child: CircularProgressIndicator(
-                        value: 1 - (_secondsRemaining / (25 * 60)),
+                        value:
+                            1 -
+                            (_secondsRemaining /
+                                (widget.initialDurationMinutes * 60)),
                         strokeWidth: 12,
                         backgroundColor: scheme.surfaceContainerHighest,
                         color: scheme.primary,
@@ -200,7 +205,8 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
     _timer?.cancel();
 
     // Calculate study time
-    final studyMinutes = ((25 * 60) - _secondsRemaining) ~/ 60;
+    final studyMinutes =
+        ((widget.initialDurationMinutes * 60) - _secondsRemaining) ~/ 60;
 
     // Award rewards
     final currentStats = ref.read(userStatsProvider);
@@ -229,7 +235,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
         leveledUp: leveledUp,
         onContinue: () {
           Navigator.of(context).pop();
-          context.go('/study/quiz');
+          context.go('/study/quiz', extra: 'Flutter');
         },
       ),
     );

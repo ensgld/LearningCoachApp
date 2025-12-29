@@ -234,7 +234,7 @@ CREATE TABLE document_chunks (
     metadata JSONB, -- {"page": 5, "section_title": "Introduction", "start_char": 120, "end_char": 520}
     
     -- Embedding vector (dimension configurable, typically 768 or 1536)
-    embedding vector(768), -- OpenAI ada-002: 1536, sentence-transformers: 768
+    embedding float8[], -- vector(768), -- OpenAI ada-002: 1536, sentence-transformers: 768
     
     -- Timestamps
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

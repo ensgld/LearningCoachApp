@@ -150,17 +150,33 @@ GoRouter goRouter(Ref ref) {
                   GoRoute(
                     path: 'running',
                     parentNavigatorKey: _rootNavigatorKey, // Hide bottom nav
-                    builder: (context, state) => const SessionRunningScreen(),
+                    builder: (context, state) {
+                      final duration =
+                          state.extra as int?; // Pass duration as int
+                      return SessionRunningScreen(
+                        initialDurationMinutes: duration ?? 25,
+                      );
+                    },
                   ),
                   GoRoute(
                     path: 'quiz',
                     parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) => const SessionFinishScreen(),
+                    builder: (context, state) {
+                      final topic = state.extra as String?;
+                      return SessionFinishScreen(topic: topic);
+                    },
                   ),
                   GoRoute(
                     path: 'summary',
                     parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) => const SessionSummaryScreen(),
+                    builder: (context, state) {
+                      final data = state.extra as Map<String, dynamic>? ?? {};
+                      return SessionSummaryScreen(
+                        correctAnswers: (data['correctAnswers'] as int?) ?? 0,
+                        totalQuestions: (data['totalQuestions'] as int?) ?? 0,
+                        score: (data['score'] as int?) ?? 0,
+                      );
+                    },
                   ),
                 ],
               ),

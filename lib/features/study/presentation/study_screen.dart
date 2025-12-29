@@ -316,7 +316,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                 onTap: _selectedGoalId == null
                     ? null
                     : () {
-                        context.go('/study/running');
+                        context.go('/study/running', extra: _duration.round());
                       },
                 borderRadius: BorderRadius.circular(20),
                 child: Container(

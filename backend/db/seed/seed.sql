@@ -109,13 +109,13 @@ INSERT INTO document_chunks (id, document_id, chunk_text, chunk_index, metadata,
  'Clean Architecture bağımlılıkları tersine çevirerek domain katmanını framework''den bağımsız tutar. Bu sayede iş mantığı UI veya database değişikliklerinden etkilenmez.',
  0,
  '{"page": 12, "section_title": "Clean Architecture Principles"}'::jsonb,
- array_fill(0.1::real, ARRAY[768])::vector), -- Mock embedding (replace with real)
+  ARRAY[0.1]::float8[]), -- Mock embedding (replace with real)
  
 ('66666666-6666-6666-6666-666666666667', '55555555-5555-5555-5555-555555555555',
  'Riverpod, Flutter için compile-time safe state yönetim çözümüdür. Provider pattern üzerine kurulmuştur ve test edilebilirliği artırır.',
  1,
  '{"page": 15, "section_title": "State Management with Riverpod"}'::jsonb,
- array_fill(0.2::real, ARRAY[768])::vector) -- Mock embedding
+  ARRAY[0.2]::float8[]) -- Mock embedding
 ON CONFLICT (document_id, chunk_index) DO NOTHING;
 
 -- Seed Chat Thread
@@ -154,3 +154,40 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO user_inventory (user_id, item_id, is_equipped, purchased_at) VALUES
 ('11111111-1111-1111-1111-111111111111', '99999999-9999-9999-9999-999999999991', TRUE, NOW() - INTERVAL '30 days')
 ON CONFLICT (user_id, item_id) DO NOTHING;
+
+-- ============================================================================
+-- ADDITIONAL QUIZZES (Requested by User)
+-- ============================================================================
+
+-- 1. Flutter Quiz
+INSERT INTO quizzes (id, user_id, title, total_questions) VALUES
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Flutter Temelleri', 3)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO quiz_questions (quiz_id, question_text, options, correct_answer_index, position) VALUES
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Flutter''da "StatefulWidget" ne zaman kullanılır?', '["Arayüz, kullanıcı etkileşimi ile değiştiğinde", "Sabit, değişmeyen bir arayüz olduğunda", "Sadece API çağrılarında", "Hiçbir zaman"]'::jsonb, 0, 1),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Hot Reload özelliğinin temel amacı nedir?', '["Uygulamayı sıfırdan başlatmak", "Kod değişikliklerini anında arayüze yansıtmak", "Veritabanını temizlemek", "Testleri çalıştırmak"]'::jsonb, 1, 2),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Flutter hangi programlama dilini kullanır?', '["Java", "Kotlin", "Dart", "Swift"]'::jsonb, 2, 3)
+ON CONFLICT DO NOTHING;
+
+-- 2. English Quiz
+INSERT INTO quizzes (id, user_id, title, total_questions) VALUES
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'English Grammar: Tenses', 3)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO quiz_questions (quiz_id, question_text, options, correct_answer_index, position) VALUES
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Which sentence is in the Present Continuous Tense?', '["I eat an apple.", "I am eating an apple.", "I have eaten an apple.", "I ate an apple."]'::jsonb, 1, 1),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Choose the correct form: She _____ (go) to school every day.', '["go", "going", "goes", "went"]'::jsonb, 2, 2),
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'What is the past participle of "write"?', '["wrote", "written", "writed", "writing"]'::jsonb, 1, 3)
+ON CONFLICT DO NOTHING;
+
+-- 3. Algorithms Quiz
+INSERT INTO quizzes (id, user_id, title, total_questions) VALUES
+('cccccccc-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', 'Algorithm Patterns', 3)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO quiz_questions (quiz_id, question_text, options, correct_answer_index, position) VALUES
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'Which sorting algorithm has the best average time complexity?', '["Bubble Sort", "Insertion Sort", "Merge Sort", "Selection Sort"]'::jsonb, 2, 1),
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'What data structure uses LIFO (Last In First Out)?', '["Queue", "Stack", "Linkedin List", "Tree"]'::jsonb, 1, 2),
+('cccccccc-cccc-cccc-cccc-cccccccccccc', 'In Big O notation, what represents constant time complexity?', '["O(n)", "O(log n)", "O(1)", "O(n^2)"]'::jsonb, 2, 3)
+ON CONFLICT DO NOTHING;

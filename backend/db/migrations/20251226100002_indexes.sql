@@ -53,11 +53,11 @@ CREATE INDEX idx_document_chunks_index ON document_chunks(document_id, chunk_ind
 -- HNSW (Hierarchical Navigable Small World) for approximate nearest neighbor
 -- m: max connections per layer (16 is good default)
 -- ef_construction: quality vs speed tradeoff (64 is balanced)
-CREATE INDEX idx_document_chunks_embedding ON document_chunks 
-USING hnsw (embedding vector_cosine_ops) 
-WITH (m = 16, ef_construction = 64);
+-- CREATE INDEX idx_document_chunks_embedding ON document_chunks 
+-- USING hnsw (embedding vector_cosine_ops) 
+-- WITH (m = 16, ef_construction = 64);
 
-COMMENT ON INDEX idx_document_chunks_embedding IS 'HNSW index for fast cosine similarity search on embeddings';
+-- COMMENT ON INDEX idx_document_chunks_embedding IS 'HNSW index for fast cosine similarity search on embeddings';
 
 -- Chat Threads
 CREATE INDEX idx_chat_threads_user_id ON chat_threads(user_id);
