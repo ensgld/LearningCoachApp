@@ -78,7 +78,10 @@ lib/generated_plugin_registrant.dart
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!.vscode/launch.json
 .history/
+
+*.pdf
 
 # IDE - IntelliJ/Android Studio
 .idea/

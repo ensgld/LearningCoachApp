@@ -82,9 +82,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           .signup(
             email: _emailController.text.trim(),
             password: _passwordController.text,
-            displayName: _nameController.text.trim().isEmpty
-                ? null
-                : _nameController.text.trim(),
+            displayName: _nameController.text.trim(),
           );
 
       // Success
@@ -158,15 +156,23 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
               children: [
                 const SizedBox(height: 16),
 
-                // İsim (opsiyonel)
+                // İsim (Zorunlu)
                 AuthTextField(
                   label: 'Ad Soyad',
-                  hint: 'Opsiyonel',
+                  hint: 'Adınız ve Soyadınız',
                   controller: _nameController,
                   prefixIcon: Icons.person_outline,
                   keyboardType: TextInputType.name,
                   textInputAction: TextInputAction.next,
-                  validator: AuthValidators.displayNameValidator,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Ad Soyad girilmesi zorunludur';
+                    }
+                    if (value.trim().length < 2) {
+                      return 'En az 2 karakter olmalı';
+                    }
+                    return null;
+                  },
                 ),
 
                 const SizedBox(height: 16),

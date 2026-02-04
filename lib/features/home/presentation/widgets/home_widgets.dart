@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/shared/data/providers.dart';
 
 // --- Today Plan Card ---
 class TodayPlanCard extends ConsumerStatefulWidget {
@@ -322,6 +323,7 @@ class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
 }
 
 // --- Progress Summary Card ---
+// --- Progress Summary Card ---
 class ProgressSummaryCard extends ConsumerWidget {
   const ProgressSummaryCard({super.key});
 
@@ -329,6 +331,8 @@ class ProgressSummaryCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
+
+    final progressAsync = ref.watch(userProgressProvider);
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -339,99 +343,108 @@ class ProgressSummaryCard extends ConsumerWidget {
           offset: Offset(0, 20 * (1 - value)),
           child: Opacity(
             opacity: value,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 32,
-                    offset: const Offset(0, 12),
-                    spreadRadius: -8,
-                  ),
-                  BoxShadow(
-                    color: scheme.primary.withOpacity(0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                    spreadRadius: -4,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacity(0.95),
-                          Colors.white.withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+            child: GestureDetector(
+              onTap: () => context.push('/home/stats-detail'),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
+                      spreadRadius: -8,
                     ),
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: scheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.trending_up_rounded,
-                                color: scheme.primary,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Text(
-                              AppStrings.getAdventureLog(locale),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                  ),
-                            ),
+                    BoxShadow(
+                      color: scheme.primary.withOpacity(0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                      spreadRadius: -4,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.95),
+                            Colors.white.withOpacity(0.7),
                           ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(height: 26),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(
-                              context,
-                              '120',
-                              AppStrings.getTotalMinutes(locale),
-                              Icons.timer_rounded,
-                              scheme,
+                      ),
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.trending_up_rounded,
+                                  color: scheme.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Text(
+                                AppStrings.getAdventureLog(locale),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 26),
+                          progressAsync.when(
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
                             ),
-                            _buildDivider(scheme),
-                            _buildStatItem(
-                              context,
-                              '4',
-                              AppStrings.getSessions(locale),
-                              Icons.event_note_rounded,
-                              scheme,
+                            error: (err, _) => const Text('--'),
+                            data: (data) => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildStatItem(
+                                  context,
+                                  '${data['totalStudyMinutes']}',
+                                  AppStrings.getTotalMinutes(locale),
+                                  Icons.timer_rounded,
+                                  scheme,
+                                ),
+                                _buildDivider(scheme),
+                                _buildStatItem(
+                                  context,
+                                  '${data['completedSessions']}',
+                                  AppStrings.getSessions(locale),
+                                  Icons.event_note_rounded,
+                                  scheme,
+                                ),
+                                _buildDivider(scheme),
+                                _buildStatItem(
+                                  context,
+                                  '${data['averageScore'] ?? 0}%',
+                                  AppStrings.getAvgScore(locale),
+                                  Icons.star_rounded,
+                                  scheme,
+                                ),
+                              ],
                             ),
-                            _buildDivider(scheme),
-                            _buildStatItem(
-                              context,
-                              '85%',
-                              AppStrings.getAvgScore(locale),
-                              Icons.star_rounded,
-                              scheme,
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

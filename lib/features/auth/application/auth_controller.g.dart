@@ -10,24 +10,24 @@ part of 'auth_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Auth Repository Provider
 ///
-/// Provides the auth repository instance.
-/// In production, this would return the real Firebase/API implementation.
+/// Provides the REAL API auth repository instance.
+/// Uses ApiService from shared providers for backend communication.
 
 @ProviderFor(authRepository)
 const authRepositoryProvider = AuthRepositoryProvider._();
 
 /// Auth Repository Provider
 ///
-/// Provides the auth repository instance.
-/// In production, this would return the real Firebase/API implementation.
+/// Provides the REAL API auth repository instance.
+/// Uses ApiService from shared providers for backend communication.
 
 final class AuthRepositoryProvider
     extends $FunctionalProvider<AuthRepository, AuthRepository, AuthRepository>
     with $Provider<AuthRepository> {
   /// Auth Repository Provider
   ///
-  /// Provides the auth repository instance.
-  /// In production, this would return the real Firebase/API implementation.
+  /// Provides the REAL API auth repository instance.
+  /// Uses ApiService from shared providers for backend communication.
   const AuthRepositoryProvider._()
     : super(
         from: null,
@@ -61,7 +61,7 @@ final class AuthRepositoryProvider
   }
 }
 
-String _$authRepositoryHash() => r'dd2d5c56f899f86f1d0e24d22dc2f7ef4778dfba';
+String _$authRepositoryHash() => r'af7e1e21f5256064de1996da7153c117944ecc07';
 
 /// Auth Controller
 ///

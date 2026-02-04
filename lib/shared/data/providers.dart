@@ -1,20 +1,45 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:learning_coach/shared/data/api_document_repository.dart';
+import 'package:learning_coach/shared/data/api_goal_repository.dart';
+import 'package:learning_coach/shared/data/api_stats_repository.dart';
+import 'package:learning_coach/shared/data/api_study_session_repository.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
 import 'package:learning_coach/shared/models/models.dart';
+import 'package:learning_coach/shared/providers/auth_provider.dart'; // For apiServiceProvider
 import 'package:learning_coach/shared/services/gamification_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'providers.g.dart';
 
+@riverpod
+ApiGoalRepository apiGoalRepository(Ref ref) {
+  return ApiGoalRepository(ref.watch(apiServiceProvider));
+}
+
+@riverpod
+ApiStudySessionRepository apiStudySessionRepository(Ref ref) {
+  return ApiStudySessionRepository(ref.watch(apiServiceProvider));
+}
+
+@riverpod
+ApiDocumentRepository apiDocumentRepository(Ref ref) {
+  return ApiDocumentRepository(ref.watch(apiServiceProvider));
+}
+
+@riverpod
+ApiStatsRepository apiStatsRepository(Ref ref) {
+  return ApiStatsRepository(ref.watch(apiServiceProvider));
+}
+
 // Goals
 @riverpod
-List<Goal> goals(Ref ref) {
-  return MockDataRepository.goals;
+Future<List<Goal>> goals(Ref ref) async {
+  return ref.watch(apiGoalRepositoryProvider).getGoals();
 }
 
 // Documents
 @riverpod
-List<Document> documents(Ref ref) {
-  return MockDataRepository.documents;
+Future<List<Document>> documents(Ref ref) async {
+  return ref.watch(apiDocumentRepositoryProvider).getDocuments();
 }
 
 // Chat
@@ -30,6 +55,16 @@ class ChatMessages extends _$ChatMessages {
   }
 }
 
+@riverpod
+Future<Map<String, dynamic>> userProgress(Ref ref) async {
+  return ref.watch(apiStatsRepositoryProvider).getUserProgress();
+}
+
+@riverpod
+Future<List<DailyStats>> dailyStats(Ref ref) async {
+  return ref.watch(apiStatsRepositoryProvider).getDailyStats();
+}
+
 // --- Enhanced Gamification Providers ---
 
 /// Main Gamification Notifier with complete XP, Leveling, and Gold logic
@@ -37,27 +72,39 @@ class ChatMessages extends _$ChatMessages {
 class UserStatsNotifier extends _$UserStatsNotifier {
   @override
   UserStats build() {
-    // Initial stats - can be loaded from storage later
+    // Attempt to load stats from API
+    _loadStats();
+
+    // Initial stats (placeholder while loading)
     return const UserStats(
       currentLevel: 1,
       currentXP: 0,
       totalGold: 100, // Starting gold
-      stage: AvatarStage.seed,  // Başlangıç evresi: Tohum
+      stage: AvatarStage.seed, // Başlangıç evresi: Tohum
       equippedItems: {},
       purchasedItemIds: [],
     );
   }
 
+  Future<void> _loadStats() async {
+    try {
+      final stats = await ref.read(apiStatsRepositoryProvider).getUserStats();
+      state = stats;
+    } catch (e) {
+      print('Error loading stats: $e');
+    }
+  }
+
   /// Add XP and automatically handle leveling up
   void addXP(int amount) {
     if (amount <= 0) return;
-    
+
     int newXP = state.currentXP + amount;
     int newLevel = GamificationService.calculateLevel(newXP);
-    
+
     // Update stage based on new level
     final newStage = GamificationService.getAvatarStage(newLevel);
-    
+
     state = state.copyWith(
       currentXP: newXP,
       currentLevel: newLevel,
@@ -78,9 +125,14 @@ class UserStatsNotifier extends _$UserStatsNotifier {
 
   /// Award XP and Gold for study session
   void awardStudyRewards(int studyMinutes) {
-    final xpGained = GamificationService.calculateXpReward(studyMinutes, state.stage);
-    final goldGained = GamificationService.calculateSessionGoldReward(state.stage);
-    
+    final xpGained = GamificationService.calculateXpReward(
+      studyMinutes,
+      state.stage,
+    );
+    final goldGained = GamificationService.calculateSessionGoldReward(
+      state.stage,
+    );
+
     addXP(xpGained);
     addGold(goldGained);
   }
@@ -122,4 +174,3 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     state = newStats;
   }
 }
-

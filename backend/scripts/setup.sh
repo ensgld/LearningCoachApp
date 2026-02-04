@@ -25,12 +25,12 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # .env dosyası kontrolü
-if [ ! -f "../.env" ]; then
+if [ ! -f ".env" ]; then
     echo -e "${RED}❌ Hata: .env dosyası bulunamadı!${NC}"
     echo ""
     echo "Lütfen önce .env dosyasını oluşturun:"
-    echo "  1. Proje kök dizinine gidin: cd .."
-    echo "  2. .env.example'ı kopyalayın: cp .env.example .env"
+    echo "  1. Backend dizinine gidin: cd backend"
+    echo "  2. .env.example varsa kopyalayın yoksa oluşturun."
     echo "  3. .env dosyasını düzenleyin ve DATABASE_URL'i ayarlayın"
     echo ""
     echo "Örnek DATABASE_URL:"
@@ -42,7 +42,7 @@ fi
 # .env dosyasını load et
 echo -e "${BLUE}📄 .env dosyası yükleniyor...${NC}"
 set -a
-source ../.env
+source .env
 set +a
 
 # DATABASE_URL kontrolü

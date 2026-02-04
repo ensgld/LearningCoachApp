@@ -3,7 +3,11 @@ import express, { Express, NextFunction, Request, Response } from 'express';
 import { AppError } from './common/errors';
 import authRoutes from './routes/auth';
 import debugRoutes from './routes/debug';
+import documentRoutes from './routes/documents';
+import goalRoutes from './routes/goals';
 import healthRoutes from './routes/health';
+import statsRoutes from './routes/stats';
+import studySessionRoutes from './routes/study-sessions';
 
 const app: Express = express();
 
@@ -20,6 +24,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Routes
 app.use('/api/v1', healthRoutes);
 app.use('/api/v1', authRoutes);
+app.use('/api/v1/goals', goalRoutes);
+app.use('/api/v1/study-sessions', studySessionRoutes);
+app.use('/api/v1/documents', documentRoutes);
+app.use('/api/v1/user', statsRoutes);
 app.use('/api/v1', debugRoutes);
 
 // 404 handler

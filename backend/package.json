@@ -17,7 +17,7 @@
     "db:status": "dbmate --url \"$DATABASE_URL\" --migrations-dir ./db/migrations status",
     "db:create": "dbmate --url \"$DATABASE_URL\" --migrations-dir ./db/migrations create",
     "db:drop": "dbmate --url \"$DATABASE_URL\" --migrations-dir ./db/migrations drop",
-    "db:reset": "npm run db:drop && npm run db:migrate && npm run db:seed",
+    "db:reset": "npm run db:drop && npm run db:create && npm run db:setup -- seed",
     "db:seed": "psql \"$DATABASE_URL\" -f ./db/seed/seed.sql",
     "db:psql": "psql \"$DATABASE_URL\"",
     "docker:up": "docker-compose up -d",
@@ -25,10 +25,14 @@
     "docker:logs": "docker-compose logs -f postgres"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.6.13",
     "bcrypt": "^6.0.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "form-data": "^4.0.5",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "node-fetch": "^2.7.0",
     "pg": "^8.11.3"
   },
   "devDependencies": {
@@ -36,6 +40,7 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^20.10.6",
     "@types/pg": "^8.10.9",
     "@types/supertest": "^6.0.3",

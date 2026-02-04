@@ -12,12 +12,11 @@ import 'package:learning_coach/features/documents/presentation/document_detail_s
 import 'package:learning_coach/features/documents/presentation/documents_screen.dart';
 import 'package:learning_coach/features/goals/presentation/goal_detail_screen.dart';
 import 'package:learning_coach/features/home/presentation/home_screen.dart';
+import 'package:learning_coach/features/home/presentation/stats_detail_screen.dart';
 import 'package:learning_coach/features/kaizen/presentation/kaizen_checkin_screen.dart';
 import 'package:learning_coach/features/profile/presentation/profile_screen.dart';
 import 'package:learning_coach/features/shop/presentation/shop_screen.dart';
-import 'package:learning_coach/features/study/presentation/session_finish_screen.dart';
 import 'package:learning_coach/features/study/presentation/session_running_screen.dart';
-import 'package:learning_coach/features/study/presentation/session_summary_screen.dart';
 import 'package:learning_coach/features/study/presentation/study_screen.dart';
 import 'package:learning_coach/shared/models/models.dart'; // For Document type casting
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -136,6 +135,13 @@ GoRouter goRouter(Ref ref) {
               GoRoute(
                 path: '/home',
                 builder: (context, state) => const HomeScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'stats-detail',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) => const StatsDetailScreen(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -150,17 +156,13 @@ GoRouter goRouter(Ref ref) {
                   GoRoute(
                     path: 'running',
                     parentNavigatorKey: _rootNavigatorKey, // Hide bottom nav
-                    builder: (context, state) => const SessionRunningScreen(),
-                  ),
-                  GoRoute(
-                    path: 'quiz',
-                    parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) => const SessionFinishScreen(),
-                  ),
-                  GoRoute(
-                    path: 'summary',
-                    parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) => const SessionSummaryScreen(),
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>;
+                      return SessionRunningScreen(
+                        goalId: extra['goalId'] as String,
+                        durationMinutes: extra['duration'] as int,
+                      );
+                    },
                   ),
                 ],
               ),

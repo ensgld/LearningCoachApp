@@ -11,7 +11,14 @@ import 'package:learning_coach/shared/widgets/avatar_character.dart';
 import 'package:learning_coach/shared/widgets/reward_popups.dart';
 
 class SessionRunningScreen extends ConsumerStatefulWidget {
-  const SessionRunningScreen({super.key});
+  final String goalId;
+  final int durationMinutes;
+
+  const SessionRunningScreen({
+    super.key,
+    required this.goalId,
+    required this.durationMinutes,
+  });
 
   @override
   ConsumerState<SessionRunningScreen> createState() =>
@@ -19,14 +26,15 @@ class SessionRunningScreen extends ConsumerStatefulWidget {
 }
 
 class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
-  // Mock Timer
-  int _secondsRemaining = 25 * 60;
+  // Timer
+  late int _secondsRemaining;
   Timer? _timer;
   bool _isPaused = false;
 
   @override
   void initState() {
     super.initState();
+    _secondsRemaining = widget.durationMinutes * 60;
     _startTimer();
   }
 
@@ -38,12 +46,14 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
             _secondsRemaining--;
           } else {
             _timer?.cancel();
-            // Auto finish or notify
+            _finishSession();
           }
         });
       }
     });
   }
+
+  // ... (keep existing dispose and _timerString)
 
   @override
   void dispose() {
@@ -59,6 +69,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ... (keep existing build logic but use widget.durationMinutes for progress calculation)
     final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
     final userStats = ref.watch(userStatsProvider);
@@ -73,7 +84,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
               const Color(0xFFF5F3FF),
               const Color(0xFFFDF4FF),
               const Color(0xFFF0FDFA),
-              scheme.surface.withOpacity(0.95),
+              scheme.surface.withValues(alpha: 0.95),
             ],
             stops: const [0.0, 0.33, 0.66, 1.0],
           ),
@@ -108,7 +119,9 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                       width: 280,
                       height: 280,
                       child: CircularProgressIndicator(
-                        value: 1 - (_secondsRemaining / (25 * 60)),
+                        value:
+                            1 -
+                            (_secondsRemaining / (widget.durationMinutes * 60)),
                         strokeWidth: 12,
                         backgroundColor: scheme.surfaceContainerHighest,
                         color: scheme.primary,
@@ -132,8 +145,8 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        scheme.primaryContainer.withOpacity(0.6),
-                        scheme.secondaryContainer.withOpacity(0.6),
+                        scheme.primaryContainer.withValues(alpha: 0.6),
+                        scheme.secondaryContainer.withValues(alpha: 0.6),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -148,7 +161,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  '${AppStrings.getGoalPrefix(locale)}: Flutter İleri Seviye Öğrenme',
+                  '${AppStrings.getGoalPrefix(locale)}: ...', // Could fetch goal title if we want
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -199,39 +212,67 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
   void _finishSession() async {
     _timer?.cancel();
 
-    // Calculate study time
-    final studyMinutes = ((25 * 60) - _secondsRemaining) ~/ 60;
+    // Calculate study time based on elapsed time (not just full duration if finished early)
+    // Assuming button press finishes session with current elapsed time?
+    // User requested: "bu hedefin ilerlemesini ne kadar süre çalıştığını db'ye kaydedilsin"
+    // Usually "finish" means "done for now".
 
-    // Award rewards
-    final currentStats = ref.read(userStatsProvider);
-    final newStats = GamificationService.awardStudyRewards(
-      currentStats,
-      studyMinutes,
-    );
-    final leveledUp = newStats.level > currentStats.level;
+    final elapsedSeconds = (widget.durationMinutes * 60) - _secondsRemaining;
+    final elapsedMinutes = elapsedSeconds ~/ 60;
 
-    // Update stats
-    ref.read(userStatsProvider.notifier).updateStats(newStats);
+    // Minimum 1 minutes to record? or just record whatever.
+    // Let's record.
 
-    // Show victory popup
-    await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => VictoryPopup(
-        xpEarned: GamificationService.calculateXpReward(
-          studyMinutes,
-          currentStats.stage,
-        ),
-        goldEarned: GamificationService.calculateSessionGoldReward(
-          currentStats.stage,
-        ),
-        newLevel: newStats.level,
-        leveledUp: leveledUp,
-        onContinue: () {
-          Navigator.of(context).pop();
-          context.go('/study/quiz');
-        },
-      ),
-    );
+    try {
+      await ref
+          .read(apiStudySessionRepositoryProvider)
+          .createSession(
+            goalId: widget.goalId,
+            durationMinutes: widget.durationMinutes, // Planned duration
+            actualDurationSeconds: elapsedSeconds, // Actual duration
+          );
+
+      // Award rewards
+      final currentStats = ref.read(userStatsProvider);
+      final newStats = GamificationService.awardStudyRewards(
+        currentStats,
+        elapsedMinutes > 0
+            ? elapsedMinutes
+            : 1, // Minimum 1 minute for reward calc
+      );
+      final leveledUp = newStats.level > currentStats.level;
+
+      // Update stats
+      ref.read(userStatsProvider.notifier).updateStats(newStats);
+
+      // Show victory popup
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => VictoryPopup(
+            xpEarned: GamificationService.calculateXpReward(
+              elapsedMinutes > 0 ? elapsedMinutes : 1,
+              currentStats.stage,
+            ),
+            goldEarned: GamificationService.calculateSessionGoldReward(
+              currentStats.stage,
+            ),
+            newLevel: newStats.level,
+            leveledUp: leveledUp,
+            onContinue: () {
+              Navigator.of(context).pop(); // Close dialog
+              context.pop(); // Close running screen, return to study menu
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Kayıt hatası: $e')));
+      }
+    }
   }
 }

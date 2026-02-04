@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/shared/data/api_document_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
@@ -12,7 +17,7 @@ class DocumentsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final docs = ref.watch(documentsProvider);
+    final docsAsync = ref.watch(documentsProvider);
     final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
 
@@ -39,49 +44,106 @@ class DocumentsScreen extends ConsumerWidget {
           ],
         ),
         toolbarHeight: 80,
+        actions: [
+          IconButton(
+            onPressed: () => _showUploadOptions(context, ref),
+            icon: const Icon(Icons.add_circle, size: 32),
+            color: scheme.primary,
+          ),
+          const SizedBox(width: 16),
+        ],
       ),
-      body: docs.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          scheme.primaryContainer.withOpacity(0.3),
-                          scheme.secondaryContainer.withOpacity(0.3),
-                        ],
+      body: docsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Hata: $err')),
+        data: (docs) => docs.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            scheme.primaryContainer.withOpacity(0.3),
+                            scheme.secondaryContainer.withOpacity(0.3),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
                       ),
-                      shape: BoxShape.circle,
+                      child: Icon(
+                        Icons.description_outlined,
+                        size: 64,
+                        color: scheme.primary,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.description_outlined,
-                      size: 64,
-                      color: scheme.primary,
+                    const SizedBox(height: 24),
+                    Text(
+                      AppStrings.getDocsEmptyState(locale),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    AppStrings.getDocsEmptyState(locale),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  ],
+                ),
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+                itemCount: docs.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final doc = docs[index];
+                  return Dismissible(
+                    key: Key(doc.id),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      color: Colors.red,
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                  ),
-                ],
+                    confirmDismiss: (direction) async {
+                      return await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text(
+                              "Silmek istediğinize emin misiniz?",
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                child: const Text(
+                                  "Sil",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    onDismissed: (direction) {
+                      ref
+                          .read(apiDocumentRepositoryProvider)
+                          .deleteDocument(doc.id)
+                          .then((_) {
+                            ref.refresh(documentsProvider);
+                          });
+                    },
+                    child: _DocumentCard(document: doc),
+                  );
+                },
               ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-              itemCount: docs.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final doc = docs[index];
-                return _DocumentCard(document: doc);
-              },
-            ),
+      ),
     );
   }
 }
@@ -127,7 +189,7 @@ class _DocumentCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
             spreadRadius: -2,
@@ -148,8 +210,8 @@ class _DocumentCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        gradientStart.withOpacity(0.2),
-                        gradientEnd.withOpacity(0.2),
+                        gradientStart.withValues(alpha: 0.2),
+                        gradientEnd.withValues(alpha: 0.2),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -199,7 +261,7 @@ class _DocumentCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(statusIcon, color: statusColor, size: 24),
@@ -213,7 +275,7 @@ class _DocumentCard extends StatelessWidget {
   }
 }
 
-void _showUploadOptions(BuildContext context) {
+void _showUploadOptions(BuildContext context, WidgetRef ref) {
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
@@ -241,11 +303,30 @@ void _showUploadOptions(BuildContext context) {
               title: 'Dosya Yükle',
               subtitle: 'PDF, DOCX, TXT dosyalarını yükle',
               color: const Color(0xFF6366F1),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: Dosya seçiliyor...')),
-                );
+                try {
+                  FilePickerResult? result = await FilePicker.platform
+                      .pickFiles();
+                  if (result != null) {
+                    File file = File(result.files.single.path!);
+                    await ref
+                        .read(apiDocumentRepositoryProvider)
+                        .uploadDocument(file);
+                    ref.refresh(documentsProvider);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Dosya yüklendi!')),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+                  }
+                }
               },
             ),
             const SizedBox(height: 16),
@@ -254,11 +335,32 @@ void _showUploadOptions(BuildContext context) {
               title: 'Fotoğraf Çek',
               subtitle: 'Kamera ile doküman fotoğrafı çek',
               color: const Color(0xFFEC4899),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: Kamera açılıyor...')),
-                );
+                try {
+                  final picker = ImagePicker();
+                  final XFile? photo = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (photo != null) {
+                    File file = File(photo.path);
+                    await ref
+                        .read(apiDocumentRepositoryProvider)
+                        .uploadDocument(file, title: 'Kamera Görüntüsü');
+                    ref.refresh(documentsProvider);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Fotoğraf yüklendi!')),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+                  }
+                }
               },
             ),
             const SizedBox(height: 16),

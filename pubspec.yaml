@@ -45,6 +45,9 @@ dependencies:
   confetti: ^0.7.0
   dio: ^5.4.0
   shared_preferences: ^2.2.2
+  file_picker: ^10.3.10
+  image_picker: ^1.2.1
+  flutter_dotenv: ^5.1.0
 
 
 dev_dependencies:
@@ -79,6 +82,7 @@ flutter:
     - assets/images/tree_lvl3.png
     - assets/images/tree_lvl4.png
     - assets/images/tree_lvl5.png
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

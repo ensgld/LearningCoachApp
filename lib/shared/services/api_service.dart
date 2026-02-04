@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -6,9 +7,11 @@ class ApiService {
   // iOS Simulator: http://localhost:3000/api/v1
   // Android Emulator: http://10.0.2.2:3000/api/v1
   // Real device: http://YOUR_IP:3000/api/v1
-  static const String baseUrl = 'http://10.0.2.2:3000/api/v1';
+  static String baseUrl =
+      dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:3000/api/v1';
 
   final Dio _dio;
+  Dio get dio => _dio;
   String? _accessToken;
   String? _refreshToken;
 
@@ -16,8 +19,8 @@ class ApiService {
     : _dio = Dio(
         BaseOptions(
           baseUrl: baseUrl,
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 3),
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
         ),
       ) {
     _setupInterceptors();
