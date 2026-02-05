@@ -74,6 +74,8 @@ lib/generated_plugin_registrant.dart
 .env.local
 .env.*.local
 
+*.pyc
+
 # IDE - VS Code (keep settings and extensions for team)
 .vscode/*
 !.vscode/settings.json
