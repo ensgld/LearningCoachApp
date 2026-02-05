@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 
-class KaizenCheckinScreen extends StatefulWidget {
+class KaizenCheckinScreen extends ConsumerStatefulWidget {
   const KaizenCheckinScreen({super.key});
 
   @override
-  State<KaizenCheckinScreen> createState() => _KaizenCheckinScreenState();
+  ConsumerState<KaizenCheckinScreen> createState() => _KaizenCheckinScreenState();
 }
 
-class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
+class _KaizenCheckinScreenState extends ConsumerState<KaizenCheckinScreen> {
   final _didController = TextEditingController();
   final _blockedController = TextEditingController();
   final _todoController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -36,14 +39,14 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppStrings.quickKaizenTitle,
+              AppStrings.getQuickKaizenTitle(locale),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,
                   ),
             ),
             Text(
-              'Günlük gelişim takibi',
+              AppStrings.getDailyProgress(locale),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
@@ -60,7 +63,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
           children: [
             _buildSection(
               context,
-              'Dün ne yaptım?',
+              AppStrings.getWhatDidYesterday(locale),
               _didController,
               Icons.check_circle_rounded,
               const LinearGradient(
@@ -72,7 +75,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
             const SizedBox(height: 24),
             _buildSection(
               context,
-              'Beni ne engelledi?',
+              AppStrings.getWhatBlockedMe(locale),
               _blockedController,
               Icons.block_rounded,
               const LinearGradient(
@@ -84,7 +87,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
             const SizedBox(height: 24),
             _buildSection(
               context,
-              'Bugün neyi daha iyi yapacağım?',
+              AppStrings.getWhatWillDoBetter(locale),
               _todoController,
               Icons.lightbulb_rounded,
               const LinearGradient(
@@ -119,7 +122,7 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
                     context.pop();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text('Kaizen kaydedildi! Yarın için başarılar.'),
+                        content: Text(AppStrings.getKaizenSaved(locale)),
                         backgroundColor: const Color(0xFF10B981),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -131,14 +134,14 @@ class _KaizenCheckinScreenState extends State<KaizenCheckinScreen> {
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.save_rounded, color: Colors.white, size: 24),
-                        SizedBox(width: 12),
+                        const Icon(Icons.save_rounded, color: Colors.white, size: 24),
+                        const SizedBox(width: 12),
                         Text(
-                          'Kaydet ve Bitir',
-                          style: TextStyle(
+                          AppStrings.getSaveAndFinish(locale),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

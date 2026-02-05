@@ -1,0 +1,33 @@
+# Backend specific ignores
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Compiled output
+dist/
+build/
+
+# Test coverage
+coverage/
+*.lcov
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sql.bak
+*.dump
+db/schema.sql
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+

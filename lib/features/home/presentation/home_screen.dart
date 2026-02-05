@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/features/garden/presentation/garden_screen.dart';
 import 'package:learning_coach/features/home/presentation/widgets/home_widgets.dart';
 import 'package:learning_coach/features/shop/presentation/shop_screen.dart';
@@ -43,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     final userStats = ref.watch(userStatsProvider);
     final levelProgress = GamificationService.levelProgress(
       userStats.xp,
@@ -52,7 +55,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       userStats.xp,
       userStats.level,
     );
-    final stageName = GamificationService.getAvatarStageName(userStats.stage);
+    final stageName = GamificationService.getLocalizedStageName(userStats.stage, locale);
+    final powerName = GamificationService.getLocalizedPowerName(userStats.stage, locale);
     final stageFeatures = GamificationService.getStageFeatures(userStats.stage);
 
     return Scaffold(
@@ -223,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'Evrim Ağacını Görmek İçin Dokun',
+                            AppStrings.getTouchToSeeTree(locale),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -258,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '⚡ ${stageFeatures.powerName}',
+                        '⚡ $powerName',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -288,7 +292,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               ),
                             if (stageFeatures.goldBonus > 0)
                               _buildBonusBadge(
-                                '💰 +${stageFeatures.goldBonus}% Altın',
+                                '💰 +${stageFeatures.goldBonus}% ${AppStrings.getGoldBonus(locale)}',
                                 const Color(0xFFF59E0B),
                               ),
                           ],
@@ -308,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Sonraki seviyeye: $xpToNext XP',
+                        '${AppStrings.getNextLevel(locale)}: $xpToNext XP',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.primary,

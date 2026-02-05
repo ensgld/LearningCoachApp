@@ -26,6 +26,34 @@ class Goal extends Equatable {
     this.tasks = const [],
   }) : id = id ?? uuid.v4();
 
+  factory Goal.fromJson(Map<String, dynamic> json) {
+    return Goal(
+      id: json['id'] as String?,
+      title: json['title'] as String,
+      description: (json['description'] as String?) ?? '',
+      progress: double.tryParse(json['progress'].toString()) ?? 0.0,
+      status: json['status'] == 'completed'
+          ? GoalStatus.completed
+          : GoalStatus.active,
+      tasks:
+          (json['tasks'] as List<dynamic>?)
+              ?.map((t) => GoalTask.fromJson(t as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'progress': progress,
+      'status': status == GoalStatus.completed ? 'completed' : 'active',
+      'tasks': tasks.map((t) => t.toJson()).toList(),
+    };
+  }
+
   @override
   List<Object?> get props => [id, title, description, progress, status, tasks];
 }
@@ -35,18 +63,27 @@ class GoalTask extends Equatable {
   final String title;
   final bool isCompleted;
 
-  GoalTask({
-    String? id,
-    required this.title,
-    this.isCompleted = false,
-  }) : id = id ?? uuid.v4();
-  
-  GoalTask copyWith({bool? isCompleted}) {
+  GoalTask({String? id, required this.title, this.isCompleted = false})
+    : id = id ?? uuid.v4();
+
+  GoalTask copyWith({String? title, bool? isCompleted}) {
     return GoalTask(
       id: id,
-      title: title,
+      title: title ?? this.title,
       isCompleted: isCompleted ?? this.isCompleted,
     );
+  }
+
+  factory GoalTask.fromJson(Map<String, dynamic> json) {
+    return GoalTask(
+      id: json['id'] as String?,
+      title: json['title'] as String,
+      isCompleted: (json['is_completed'] as bool?) ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'title': title, 'is_completed': isCompleted};
   }
 
   @override
@@ -73,7 +110,14 @@ class StudySession extends Equatable {
   }) : id = id ?? uuid.v4();
 
   @override
-  List<Object?> get props => [id, goalId, durationMinutes, startTime, actualDurationSeconds, quizScore];
+  List<Object?> get props => [
+    id,
+    goalId,
+    durationMinutes,
+    startTime,
+    actualDurationSeconds,
+    quizScore,
+  ];
 }
 
 // --- Document & Chat ---
@@ -90,11 +134,25 @@ class Document extends Equatable {
   Document({
     String? id,
     required this.title,
-    required this.summary,
+    this.summary = '',
     this.status = DocStatus.processing,
     DateTime? uploadedAt,
   }) : id = id ?? uuid.v4(),
        uploadedAt = uploadedAt ?? DateTime.now();
+
+  factory Document.fromJson(Map<String, dynamic> json) {
+    DocStatus status = DocStatus.processing;
+    if (json['status'] == 'ready') status = DocStatus.ready;
+    if (json['status'] == 'failed') status = DocStatus.failed;
+
+    return Document(
+      id: json['id'] as String?,
+      title: json['title'] as String,
+      summary: '', // Backend doesn't support summary yet
+      status: status,
+      uploadedAt: DateTime.parse(json['uploaded_at'] as String),
+    );
+  }
 
   @override
   List<Object?> get props => [id, title, summary, status, uploadedAt];

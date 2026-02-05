@@ -1,17 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:learning_coach/core/constants/app_strings.dart';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/shared/data/providers.dart';
+
 // --- Today Plan Card ---
-class TodayPlanCard extends StatefulWidget {
+class TodayPlanCard extends ConsumerStatefulWidget {
   const TodayPlanCard({super.key});
 
   @override
-  State<TodayPlanCard> createState() => _TodayPlanCardState();
+  ConsumerState<TodayPlanCard> createState() => _TodayPlanCardState();
 }
 
-class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProviderStateMixin {
+class _TodayPlanCardState extends ConsumerState<TodayPlanCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   bool _isHovered = false;
 
@@ -32,6 +37,7 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     return AnimatedScale(
       scale: _isHovered ? 1.02 : 1.0,
       duration: const Duration(milliseconds: 200),
@@ -39,11 +45,7 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
       child: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [
-              Color(0xFF6366F1),
-              Color(0xFF8B5CF6),
-              Color(0xFF9333EA),
-            ],
+            colors: [Color(0xFF6366F1), Color(0xFF8B5CF6), Color(0xFF9333EA)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -100,33 +102,37 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
                         );
                       },
                     ),
-                  const SizedBox(width: 14),
-                  Text(
-                    '📜 Günlük Görev',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: -0.5,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Text(
-                '⚔️ Bugünün Macerasına Hazır Ol!',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.95),
-                      fontWeight: FontWeight.w500,
-                      height: 1.5,
+                    const SizedBox(width: 14),
+                    Text(
+                      AppStrings.getDailyQuest(locale),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
                     ),
-              ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  AppStrings.getTodayAdventure(locale),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withOpacity(0.95),
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 MouseRegion(
                   onEnter: (_) => setState(() => _isHovered = true),
                   onExit: (_) => setState(() => _isHovered = false),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    transform: Matrix4.translationValues(0, _isHovered ? -2 : 0, 0),
+                    transform: Matrix4.translationValues(
+                      0,
+                      _isHovered ? -2 : 0,
+                      0,
+                    ),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -142,9 +148,9 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
                           ),
                         ),
                         icon: const Icon(Icons.play_arrow_rounded, size: 28),
-                        label: const Text(
-                          '🎯 Göreve Başla',
-                          style: TextStyle(
+                        label: Text(
+                          AppStrings.getStartMission(locale),
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -164,14 +170,15 @@ class _TodayPlanCardState extends State<TodayPlanCard> with SingleTickerProvider
 }
 
 // --- Quick Kaizen Card ---
-class QuickKaizenCard extends StatefulWidget {
+class QuickKaizenCard extends ConsumerStatefulWidget {
   const QuickKaizenCard({super.key});
 
   @override
-  State<QuickKaizenCard> createState() => _QuickKaizenCardState();
+  ConsumerState<QuickKaizenCard> createState() => _QuickKaizenCardState();
 }
 
-class _QuickKaizenCardState extends State<QuickKaizenCard> with SingleTickerProviderStateMixin {
+class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   bool _isPressed = false;
 
@@ -192,6 +199,7 @@ class _QuickKaizenCardState extends State<QuickKaizenCard> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     return AnimatedScale(
       scale: _isPressed ? 0.97 : 1.0,
       duration: const Duration(milliseconds: 100),
@@ -202,9 +210,17 @@ class _QuickKaizenCardState extends State<QuickKaizenCard> with SingleTickerProv
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color.lerp(const Color(0xFFEC4899), const Color(0xFFF43F5E), _pulseController.value * 0.3)!,
+                  Color.lerp(
+                    const Color(0xFFEC4899),
+                    const Color(0xFFF43F5E),
+                    _pulseController.value * 0.3,
+                  )!,
                   const Color(0xFFF43F5E),
-                  Color.lerp(const Color(0xFFF43F5E), const Color(0xFFEC4899), _pulseController.value * 0.3)!,
+                  Color.lerp(
+                    const Color(0xFFF43F5E),
+                    const Color(0xFFEC4899),
+                    _pulseController.value * 0.3,
+                  )!,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -256,30 +272,32 @@ class _QuickKaizenCardState extends State<QuickKaizenCard> with SingleTickerProv
                           size: 32,
                         ),
                       ),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '⚡ Hızlı Görev',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: -0.3,
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              AppStrings.getQuickTask(locale),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    letterSpacing: -0.3,
+                                  ),
                             ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Günlük ilerleme kaydını tamamla!',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                              height: 1.4,
+                            const SizedBox(height: 6),
+                            Text(
+                              AppStrings.getDailyProgressHint(locale),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    height: 1.4,
+                                  ),
                             ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -305,12 +323,16 @@ class _QuickKaizenCardState extends State<QuickKaizenCard> with SingleTickerProv
 }
 
 // --- Progress Summary Card ---
-class ProgressSummaryCard extends StatelessWidget {
+// --- Progress Summary Card ---
+class ProgressSummaryCard extends ConsumerWidget {
   const ProgressSummaryCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
+
+    final progressAsync = ref.watch(userProgressProvider);
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -321,98 +343,108 @@ class ProgressSummaryCard extends StatelessWidget {
           offset: Offset(0, 20 * (1 - value)),
           child: Opacity(
             opacity: value,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 32,
-                    offset: const Offset(0, 12),
-                    spreadRadius: -8,
-                  ),
-                  BoxShadow(
-                    color: scheme.primary.withOpacity(0.05),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                    spreadRadius: -4,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.white.withOpacity(0.95),
-                          Colors.white.withOpacity(0.7),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+            child: GestureDetector(
+              onTap: () => context.push('/home/stats-detail'),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 32,
+                      offset: const Offset(0, 12),
+                      spreadRadius: -8,
                     ),
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: scheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.trending_up_rounded,
-                                color: scheme.primary,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Text(
-                              '📜 Macera Günlüğü',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                  ),
-                            ),
+                    BoxShadow(
+                      color: scheme.primary.withOpacity(0.05),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                      spreadRadius: -4,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withOpacity(0.95),
+                            Colors.white.withOpacity(0.7),
                           ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(height: 26),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(
-                              context,
-                              '120',
-                              'dk Toplam',
-                              Icons.timer_rounded,
-                              scheme,
+                      ),
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: scheme.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.trending_up_rounded,
+                                  color: scheme.primary,
+                                  size: 24,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Text(
+                                AppStrings.getAdventureLog(locale),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
+                                    ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 26),
+                          progressAsync.when(
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
                             ),
-                            _buildDivider(scheme),
-                            _buildStatItem(
-                              context,
-                              '4',
-                              'Seans',
-                              Icons.event_note_rounded,
-                              scheme,
+                            error: (err, _) => const Text('--'),
+                            data: (data) => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                _buildStatItem(
+                                  context,
+                                  '${data['totalStudyMinutes']}',
+                                  AppStrings.getTotalMinutes(locale),
+                                  Icons.timer_rounded,
+                                  scheme,
+                                ),
+                                _buildDivider(scheme),
+                                _buildStatItem(
+                                  context,
+                                  '${data['completedSessions']}',
+                                  AppStrings.getSessions(locale),
+                                  Icons.event_note_rounded,
+                                  scheme,
+                                ),
+                                _buildDivider(scheme),
+                                _buildStatItem(
+                                  context,
+                                  '${data['averageScore'] ?? 0}%',
+                                  AppStrings.getAvgScore(locale),
+                                  Icons.star_rounded,
+                                  scheme,
+                                ),
+                              ],
                             ),
-                            _buildDivider(scheme),
-                            _buildStatItem(
-                              context,
-                              '85%',
-                              'Ort. Skor',
-                              Icons.star_rounded,
-                              scheme,
-                            ),
-                          ],
-                        ),
-                      ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -425,20 +457,20 @@ class ProgressSummaryCard extends StatelessWidget {
   }
 
   Widget _buildDivider(ColorScheme scheme) => Container(
-        height: 50,
-        width: 1.5,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              scheme.outlineVariant.withOpacity(0.1),
-              scheme.outlineVariant.withOpacity(0.6),
-              scheme.outlineVariant.withOpacity(0.1),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-      );
+    height: 50,
+    width: 1.5,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          scheme.outlineVariant.withOpacity(0.1),
+          scheme.outlineVariant.withOpacity(0.6),
+          scheme.outlineVariant.withOpacity(0.1),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+    ),
+  );
 
   Widget _buildStatItem(
     BuildContext context,
@@ -480,18 +512,18 @@ class ProgressSummaryCard extends StatelessWidget {
               Text(
                 value,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: scheme.primary,
-                      letterSpacing: -1,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: scheme.primary,
+                  letterSpacing: -1,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -502,14 +534,15 @@ class ProgressSummaryCard extends StatelessWidget {
 }
 
 // --- Coach Tip Card ---
-class CoachTipCard extends StatefulWidget {
+class CoachTipCard extends ConsumerStatefulWidget {
   const CoachTipCard({super.key});
 
   @override
-  State<CoachTipCard> createState() => _CoachTipCardState();
+  ConsumerState<CoachTipCard> createState() => _CoachTipCardState();
 }
 
-class _CoachTipCardState extends State<CoachTipCard> with SingleTickerProviderStateMixin {
+class _CoachTipCardState extends ConsumerState<CoachTipCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
 
@@ -533,6 +566,7 @@ class _CoachTipCardState extends State<CoachTipCard> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final locale = ref.watch(localeProvider);
     return AnimatedBuilder(
       animation: _floatAnimation,
       builder: (context, child) {
@@ -610,8 +644,11 @@ class _CoachTipCardState extends State<CoachTipCard> with SingleTickerProviderSt
                               children: [
                                 Expanded(
                                   child: Text(
-                                    AppStrings.coachTipTitle,
-                                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    AppStrings.getCoachTipTitle(locale),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge
+                                        ?.copyWith(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                           letterSpacing: -0.5,
@@ -634,8 +671,9 @@ class _CoachTipCardState extends State<CoachTipCard> with SingleTickerProviderSt
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Pomodoro tekniği ile dikkatinizi canlı tutun.',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              AppStrings.getPomodoroTip(locale),
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
                                     color: Colors.white.withOpacity(0.95),
                                     height: 1.6,
                                     fontWeight: FontWeight.w500,

@@ -1,0 +1,56 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:learning_coach/shared/models/models.dart';
+import 'package:learning_coach/shared/services/api_service.dart';
+
+class ApiDocumentRepository {
+  final ApiService _apiService;
+
+  ApiDocumentRepository(this._apiService);
+
+  Dio get _dio => _apiService.dio;
+
+  Future<List<Document>> getDocuments() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>('/documents');
+      final data = response.data!['documents'] as List<dynamic>;
+      return data
+          .map((json) => Document.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      // Return empty list on error for now or rethrow
+      rethrow;
+    }
+  }
+
+  Future<Document> uploadDocument(File file, {String? title}) async {
+    try {
+      String fileName = file.path.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+        'title': title ?? fileName,
+      });
+
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/documents',
+        data: formData,
+      );
+
+      return Document.fromJson(
+        response.data!['document'] as Map<String, dynamic>,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteDocument(String id) async {
+    try {
+      await _dio.delete<void>('/documents/$id');
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

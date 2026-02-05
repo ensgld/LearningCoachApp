@@ -1,5 +1,7 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/shared/models/gamification_models.dart';
 
 /// Gamification Service - Evolution Story Game Mechanics
@@ -7,12 +9,12 @@ class GamificationService {
   // --- XP & Leveling Constants ---
   static const int baseXpPerLevel = 100;
   static const double xpMultiplier = 1.5;
-  
+
   // --- Base Reward Constants ---
   static const int baseXpPerMinute = 10;
   static const int baseGoldPerTask = 50;
   static const int baseGoldPerSession = 25;
-  
+
   // --- Evolution Milestones ---
   static const int seedMaxLevel = 8;
   static const int sproutMaxLevel = 16;
@@ -25,32 +27,32 @@ class GamificationService {
     final bonusXp = (baseXp * features.xpBonus / 100).round();
     return baseXp + bonusXp;
   }
-  
+
   /// Calculate Gold with stage bonus
   static int calculateGoldWithBonus(int baseGold, AvatarStage stage) {
     final features = getStageFeatures(stage);
     final bonusGold = (baseGold * features.goldBonus / 100).round();
     return baseGold + bonusGold;
   }
-  
+
   /// Calculate level from total XP
   /// Formula: Level = floor(sqrt(XP / baseXpPerLevel)) + 1
   static int calculateLevel(int totalXp) {
     if (totalXp <= 0) return 1;
     return (sqrt(totalXp / baseXpPerLevel)).floor() + 1;
   }
-  
+
   /// Get XP reward for study with stage bonus
   static int calculateXpReward(int studyMinutes, AvatarStage stage) {
     final baseXp = studyMinutes * baseXpPerMinute;
     return calculateXpWithBonus(baseXp, stage);
   }
-  
+
   /// Get Gold reward for task with stage bonus
   static int calculateTaskGoldReward(AvatarStage stage) {
     return calculateGoldWithBonus(baseGoldPerTask, stage);
   }
-  
+
   /// Get Gold reward for session with stage bonus
   static int calculateSessionGoldReward(AvatarStage stage) {
     return calculateGoldWithBonus(baseGoldPerSession, stage);
@@ -74,20 +76,20 @@ class GamificationService {
     final nextLevelXp = xpForLevel(currentLevel + 1);
     final levelRange = nextLevelXp - currentLevelXp;
     final xpInCurrentLevel = totalXp - currentLevelXp;
-    
+
     if (levelRange <= 0) return 1.0;
     return (xpInCurrentLevel / levelRange).clamp(0.0, 1.0);
   }
 
   /// Determine avatar stage based on level - Evolution Story
   static AvatarStage getAvatarStage(int level) {
-    if (level >= 36) return AvatarStage.forest;  // Level 36+ -> Orman (Ustalık)
-    if (level >= 26) return AvatarStage.tree;    // Level 26-35 -> Ağaç (Olgunluk)
-    if (level >= 17) return AvatarStage.bloom;   // Level 17-25 -> Çiçek (Gelişim)
-    if (level >= 9) return AvatarStage.sprout;   // Level 9-16 -> Filiz (Büyüme)
-    return AvatarStage.seed;                     // Level 1-8 -> Tohum (Başlangıç)
+    if (level >= 36) return AvatarStage.forest; // Level 36+ -> Orman (Ustalık)
+    if (level >= 26) return AvatarStage.tree; // Level 26-35 -> Ağaç (Olgunluk)
+    if (level >= 17) return AvatarStage.bloom; // Level 17-25 -> Çiçek (Gelişim)
+    if (level >= 9) return AvatarStage.sprout; // Level 9-16 -> Filiz (Büyüme)
+    return AvatarStage.seed; // Level 1-8 -> Tohum (Başlangıç)
   }
-  
+
   /// Get character asset path based on avatar stage
   static String getCharacterAssetPath(AvatarStage stage) {
     switch (stage) {
@@ -103,7 +105,7 @@ class GamificationService {
         return 'assets/images/char_lvl5.jpeg';
     }
   }
-  
+
   /// Get tree asset path based on level (for Garden Screen)
   static String getTreeAssetPath(int level) {
     if (level >= 40) return 'assets/images/tree_lvl5.png'; // Ancient Tree
@@ -112,7 +114,7 @@ class GamificationService {
     if (level >= 10) return 'assets/images/tree_lvl2.png'; // Sapling
     return 'assets/images/tree_lvl1.png'; // Seed/Sprout
   }
-  
+
   /// Get stage features - Each stage has unique bonuses
   static StageFeatures getStageFeatures(AvatarStage stage) {
     switch (stage) {
@@ -132,8 +134,8 @@ class GamificationService {
           title: '🌿 Filiz',
           description: 'Büyümeye başladın! Artık daha hızlı öğreniyorsun.',
           powerName: 'Hızlı Büyüme',
-          xpBonus: 10,  // +10% XP
-          goldBonus: 5,  // +5% Gold
+          xpBonus: 10, // +10% XP
+          goldBonus: 5, // +5% Gold
           emoji: '🌿',
           primaryColor: Color(0xFF10B981),
           secondaryColor: Color(0xFFD1FAE5),
@@ -143,7 +145,7 @@ class GamificationService {
           title: '🌸 Çiçek',
           description: 'Tüm potansiyelini açığa çıkarıyorsun!',
           powerName: 'Çiçek Açımı',
-          xpBonus: 25,  // +25% XP
+          xpBonus: 25, // +25% XP
           goldBonus: 15, // +15% Gold
           emoji: '🌸',
           primaryColor: Color(0xFFEC4899),
@@ -154,7 +156,7 @@ class GamificationService {
           title: '🌳 Ağaç',
           description: 'Güçlü ve köklü bir bilgesin artık.',
           powerName: 'Bilgelik Ağacı',
-          xpBonus: 40,  // +40% XP
+          xpBonus: 40, // +40% XP
           goldBonus: 30, // +30% Gold
           emoji: '🌳',
           primaryColor: Color(0xFF059669),
@@ -165,7 +167,7 @@ class GamificationService {
           title: '🌲 Orman',
           description: 'Efsanevi usta! Senin bilgin tüm ormanı besliyor.',
           powerName: 'Usta Ormanı',
-          xpBonus: 60,  // +60% XP
+          xpBonus: 60, // +60% XP
           goldBonus: 50, // +50% Gold
           emoji: '🌲',
           primaryColor: Color(0xFF0369A1),
@@ -173,11 +175,59 @@ class GamificationService {
         );
     }
   }
-  
+
   /// Get avatar display name with level range
   static String getAvatarStageName(AvatarStage stage) {
     final features = getStageFeatures(stage);
     return features.title;
+  }
+
+  /// Get localized stage name
+  static String getLocalizedStageName(AvatarStage stage, String locale) {
+    switch (stage) {
+      case AvatarStage.seed:
+        return AppStrings.getSeedStage(locale);
+      case AvatarStage.sprout:
+        return AppStrings.getSproutStage(locale);
+      case AvatarStage.bloom:
+        return AppStrings.getBloomStage(locale);
+      case AvatarStage.tree:
+        return AppStrings.getTreeStage(locale);
+      case AvatarStage.forest:
+        return AppStrings.getForestStage(locale);
+    }
+  }
+
+  /// Get localized power name
+  static String getLocalizedPowerName(AvatarStage stage, String locale) {
+    switch (stage) {
+      case AvatarStage.seed:
+        return AppStrings.getNewBeginningPower(locale);
+      case AvatarStage.sprout:
+        return AppStrings.getFastGrowthPower(locale);
+      case AvatarStage.bloom:
+        return AppStrings.getBloomingPower(locale);
+      case AvatarStage.tree:
+        return AppStrings.getWisdomTreePower(locale);
+      case AvatarStage.forest:
+        return AppStrings.getMasterForestPower(locale);
+    }
+  }
+
+  /// Get localized stage description
+  static String getLocalizedStageDescription(AvatarStage stage, String locale) {
+    switch (stage) {
+      case AvatarStage.seed:
+        return AppStrings.getSeedDescription(locale);
+      case AvatarStage.sprout:
+        return AppStrings.getSproutDescription(locale);
+      case AvatarStage.bloom:
+        return AppStrings.getBloomDescription(locale);
+      case AvatarStage.tree:
+        return AppStrings.getTreeDescription(locale);
+      case AvatarStage.forest:
+        return AppStrings.getForestDescription(locale);
+    }
   }
 
   /// Update user stats after study session
@@ -209,10 +259,10 @@ class GamificationService {
   static UserStats? purchaseItem(UserStats currentStats, InventoryItem item) {
     if (currentStats.purchasedItemIds.contains(item.id)) return null;
     if (currentStats.totalGold < item.goldCost) return null;
-    
+
     final newGold = currentStats.totalGold - item.goldCost;
     final updatedPurchased = [...currentStats.purchasedItemIds, item.id];
-    
+
     return currentStats.copyWith(
       totalGold: newGold,
       purchasedItemIds: updatedPurchased,
@@ -222,18 +272,22 @@ class GamificationService {
   /// Equip item
   static UserStats equipItem(UserStats currentStats, InventoryItem item) {
     if (!currentStats.purchasedItemIds.contains(item.id)) return currentStats;
-    
-    final updatedEquipped = Map<String, String>.from(currentStats.equippedItems);
+
+    final updatedEquipped = Map<String, String>.from(
+      currentStats.equippedItems,
+    );
     updatedEquipped[item.category.name] = item.id;
-    
+
     return currentStats.copyWith(equippedItems: updatedEquipped);
   }
 
   /// Unequip item by category
   static UserStats unequipItem(UserStats currentStats, ItemCategory category) {
-    final updatedEquipped = Map<String, String>.from(currentStats.equippedItems);
+    final updatedEquipped = Map<String, String>.from(
+      currentStats.equippedItems,
+    );
     updatedEquipped.remove(category.name);
-    
+
     return currentStats.copyWith(equippedItems: updatedEquipped);
   }
 }
