@@ -2,9 +2,10 @@ import { NextFunction, Response, Router } from 'express';
 import fs from 'fs';
 import multer from 'multer';
 import path from 'path';
-import { BadRequestError } from '../common/errors';
+import { BadRequestError, ConflictError } from '../common/errors';
 import { authMiddleware, AuthRequest } from '../middleware/auth.middleware';
 import * as documentService from '../services/document.service';
+import * as documentRagService from '../services/document_rag.service';
 
 const router = Router();
 const uploadDir = 'uploads';
@@ -30,6 +31,34 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// Development-only reindex (no auth)
+router.post('/:id/reindex-dev', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        if (process.env.NODE_ENV !== 'development') {
+            throw new BadRequestError('Sadece development ortamında kullanılabilir.');
+        }
+
+        const docId = req.params.id;
+        const resDoc = await documentService.getDocumentById(docId);
+
+        if (!resDoc.file_path || !fs.existsSync(resDoc.file_path)) {
+            throw new BadRequestError('Dosya bulunamadı. Lütfen dokümanı yeniden yükleyin.');
+        }
+
+        res.status(202).json({ status: 'queued' });
+
+        void documentRagService
+            .indexDocument({
+                documentId: resDoc.id,
+                filePath: path.resolve(resDoc.file_path),
+                mimeType: resDoc.mime_type || '',
+            })
+            .catch((err) => console.error('Document reindex failed:', err));
+    } catch (e) {
+        next(e);
+    }
+});
+
 // Middleware
 router.use(authMiddleware);
 
@@ -51,6 +80,14 @@ router.post('/', upload.single('file'), async (req: AuthRequest, res: Response, 
         });
 
         res.status(201).json({ document: doc });
+
+        void documentRagService
+            .indexDocument({
+                documentId: doc.id,
+                filePath: path.resolve(req.file.path),
+                mimeType: req.file.mimetype,
+            })
+            .catch((err) => console.error('Document indexing failed:', err));
     } catch (e) {
         // Cleanup file if DB insert fails?
         if (req.file && fs.existsSync(req.file.path)) {
@@ -66,6 +103,59 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
         const userId = req.user!.userId;
         const documents = await documentService.getDocuments(userId);
         res.json({ documents });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// POST /documents/:id/chat - Ask document
+router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const doc = await documentService.getDocument(userId, req.params.id);
+
+        if (doc.status !== 'ready') {
+            throw new ConflictError('Doküman işleniyor. Lütfen biraz bekleyin.');
+        }
+
+        if (!req.body?.message || typeof req.body.message !== 'string') {
+            throw new BadRequestError('message alanı zorunludur');
+        }
+
+        const result = await documentRagService.chatWithDocument({
+            documentId: doc.id,
+            question: req.body.message,
+            docTitle: doc.title,
+        });
+
+        res.json({
+            answer: result.answer,
+            sources: result.sources,
+        });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// POST /documents/:id/reindex - Reprocess document
+router.post('/:id/reindex', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const doc = await documentService.getDocument(userId, req.params.id);
+
+        if (!doc.file_path || !fs.existsSync(doc.file_path)) {
+            throw new BadRequestError('Dosya bulunamadı. Lütfen dokümanı yeniden yükleyin.');
+        }
+
+        res.status(202).json({ status: 'queued' });
+
+        void documentRagService
+            .indexDocument({
+                documentId: doc.id,
+                filePath: path.resolve(doc.file_path),
+                mimeType: doc.mime_type || '',
+            })
+            .catch((err) => console.error('Document reindex failed:', err));
     } catch (e) {
         next(e);
     }

@@ -5,11 +5,13 @@ import { closeDatabasePool } from './db/pool';
 
 const PORT = config.PORT;
 
-const server = app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+
+const server = app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
     console.log(`📊 Environment: ${config.NODE_ENV}`);
     console.log(`🗄️  Database: ${config.DATABASE_URL.replace(/:[^:]*@/, ':****@')}`); // Hide password
-    console.log(`✅ Health check: http://localhost:${PORT}/api/v1/health`);
+    console.log(`✅ Health check: http://${HOST}:${PORT}/api/v1/health`);
 });
 
 // Graceful shutdown

@@ -1,25 +1,57 @@
-import 'dart:io';
+import 'dart:async';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
-import 'package:learning_coach/shared/data/api_document_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
+import 'package:learning_coach/shared/widgets/document_upload_options.dart';
 
-class DocumentsScreen extends ConsumerWidget {
+class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final docsAsync = ref.watch(documentsProvider);
+  ConsumerState<DocumentsScreen> createState() => _DocumentsScreenState();
+}
+
+class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
+  Timer? _poller;
+
+  void _startPolling() {
+    if (_poller != null) return;
+    _poller = Timer.periodic(const Duration(seconds: 3), (_) {
+      ref.invalidate(documentsProvider);
+    });
+  }
+
+  void _stopPolling() {
+    _poller?.cancel();
+    _poller = null;
+  }
+
+  @override
+  void dispose() {
+    _stopPolling();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final locale = ref.watch(localeProvider);
+    final docsAsync = ref.watch(documentsProvider);
     final scheme = Theme.of(context).colorScheme;
+
+    final docs = docsAsync.asData?.value;
+    final hasProcessing =
+        docs?.any((doc) => doc.status == DocStatus.processing) ?? false;
+    if (hasProcessing) {
+      _startPolling();
+    } else {
+      _stopPolling();
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -44,14 +76,15 @@ class DocumentsScreen extends ConsumerWidget {
           ],
         ),
         toolbarHeight: 80,
-        actions: [
-          IconButton(
-            onPressed: () => _showUploadOptions(context, ref),
-            icon: const Icon(Icons.add_circle, size: 32),
-            color: scheme.primary,
-          ),
-          const SizedBox(width: 16),
-        ],
+        actions: const [SizedBox(width: 16)],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showDocumentUploadOptions(
+          context: context,
+          ref: ref,
+          locale: locale,
+        ),
+        child: const Icon(Icons.add),
       ),
       body: docsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -110,19 +143,19 @@ class DocumentsScreen extends ConsumerWidget {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text(
-                              "Silmek istediğinize emin misiniz?",
+                              'Silmek istediğinize emin misiniz?',
                             ),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(false),
-                                child: const Text("İptal"),
+                                child: const Text('İptal'),
                               ),
                               TextButton(
                                 onPressed: () =>
                                     Navigator.of(context).pop(true),
                                 child: const Text(
-                                  "Sil",
+                                  'Sil',
                                   style: TextStyle(color: Colors.red),
                                 ),
                               ),
@@ -136,10 +169,10 @@ class DocumentsScreen extends ConsumerWidget {
                           .read(apiDocumentRepositoryProvider)
                           .deleteDocument(doc.id)
                           .then((_) {
-                            ref.refresh(documentsProvider);
+                            ref.invalidate(documentsProvider);
                           });
                     },
-                    child: _DocumentCard(document: doc),
+                    child: _DocumentCard(document: doc, locale: locale),
                   );
                 },
               ),
@@ -150,8 +183,9 @@ class DocumentsScreen extends ConsumerWidget {
 
 class _DocumentCard extends StatelessWidget {
   final Document document;
+  final String locale;
 
-  const _DocumentCard({required this.document});
+  const _DocumentCard({required this.document, required this.locale});
 
   @override
   Widget build(BuildContext context) {
@@ -162,24 +196,31 @@ class _DocumentCard extends StatelessWidget {
     Color gradientStart;
     Color gradientEnd;
 
+    String statusLabel;
+    final progressPercent = (document.processingProgress * 100).round();
+
     switch (document.status) {
       case DocStatus.ready:
         statusColor = const Color(0xFF10B981);
         statusIcon = Icons.check_circle_rounded;
         gradientStart = const Color(0xFF10B981);
         gradientEnd = const Color(0xFF14B8A6);
+        statusLabel = AppStrings.getDocStatusReady(locale);
         break;
       case DocStatus.processing:
         statusColor = const Color(0xFFF59E0B);
         statusIcon = Icons.sync_rounded;
         gradientStart = const Color(0xFFF59E0B);
         gradientEnd = const Color(0xFFF97316);
+        statusLabel =
+            '${AppStrings.getDocStatusProcessing(locale)} %$progressPercent';
         break;
       case DocStatus.failed:
         statusColor = const Color(0xFFEF4444);
         statusIcon = Icons.error_rounded;
         gradientStart = const Color(0xFFEF4444);
         gradientEnd = const Color(0xFFF43F5E);
+        statusLabel = AppStrings.getDocStatusFailed(locale);
         break;
     }
 
@@ -235,6 +276,14 @@ class _DocumentCard extends StatelessWidget {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 6),
+                      Text(
+                        statusLabel,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           Icon(
@@ -268,170 +317,6 @@ class _DocumentCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-void _showUploadOptions(BuildContext context, WidgetRef ref) {
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _UploadOptionTile(
-              icon: Icons.upload_file_rounded,
-              title: 'Dosya Yükle',
-              subtitle: 'PDF, DOCX, TXT dosyalarını yükle',
-              color: const Color(0xFF6366F1),
-              onTap: () async {
-                Navigator.pop(context);
-                try {
-                  FilePickerResult? result = await FilePicker.platform
-                      .pickFiles();
-                  if (result != null) {
-                    File file = File(result.files.single.path!);
-                    await ref
-                        .read(apiDocumentRepositoryProvider)
-                        .uploadDocument(file);
-                    ref.refresh(documentsProvider);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Dosya yüklendi!')),
-                      );
-                    }
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Hata: $e')));
-                  }
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            _UploadOptionTile(
-              icon: Icons.camera_alt_rounded,
-              title: 'Fotoğraf Çek',
-              subtitle: 'Kamera ile doküman fotoğrafı çek',
-              color: const Color(0xFFEC4899),
-              onTap: () async {
-                Navigator.pop(context);
-                try {
-                  final picker = ImagePicker();
-                  final XFile? photo = await picker.pickImage(
-                    source: ImageSource.camera,
-                  );
-                  if (photo != null) {
-                    File file = File(photo.path);
-                    await ref
-                        .read(apiDocumentRepositoryProvider)
-                        .uploadDocument(file, title: 'Kamera Görüntüsü');
-                    ref.refresh(documentsProvider);
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Fotoğraf yüklendi!')),
-                      );
-                    }
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Hata: $e')));
-                  }
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-class _UploadOptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _UploadOptionTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: color.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios_rounded, color: color, size: 16),
-            ],
           ),
         ),
       ),

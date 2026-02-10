@@ -1,13 +1,14 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:learning_coach/shared/data/mock_data_repository.dart';
-import 'package:learning_coach/shared/models/models.dart';
-import 'package:learning_coach/shared/services/gamification_service.dart';
-import 'package:learning_coach/shared/services/api_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:learning_coach/shared/data/api_document_repository.dart';
 import 'package:learning_coach/shared/data/api_goal_repository.dart';
 import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/api_study_session_repository.dart';
+import 'package:learning_coach/shared/data/mock_data_repository.dart';
+import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/providers/auth_provider.dart';
+import 'package:learning_coach/shared/services/api_service.dart';
+import 'package:learning_coach/shared/services/gamification_service.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'providers.g.dart';
 
@@ -37,12 +38,22 @@ ApiStatsRepository apiStatsRepository(Ref ref) {
 
 @riverpod
 Future<List<Goal>> goals(Ref ref) async {
-  return ref.watch(apiGoalRepositoryProvider).getGoals();
+  try {
+    return await ref.watch(apiGoalRepositoryProvider).getGoals();
+  } catch (e) {
+    debugPrint('Goals API failed, falling back to mock data: $e');
+    return MockDataRepository.goals;
+  }
 }
 
 @riverpod
 Future<List<Document>> documents(Ref ref) async {
-  return ref.watch(apiDocumentRepositoryProvider).getDocuments();
+  try {
+    return await ref.watch(apiDocumentRepositoryProvider).getDocuments();
+  } catch (e) {
+    debugPrint('Documents API failed, falling back to mock data: $e');
+    return MockDataRepository.documents;
+  }
 }
 
 @riverpod
@@ -93,7 +104,7 @@ class ChatMessages extends _$ChatMessages {
     } catch (e) {
       // Hata durumunda kullanıcıya bilgi ver
       final errorMessage = CoachMessage(
-        text: "Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}",
+        text: 'Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}',
         isUser: false,
         timestamp: DateTime.now(),
       );

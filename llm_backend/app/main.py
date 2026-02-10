@@ -3,11 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.api.rag import router as rag_router
 
-app = FastAPI(
-    title="Learning Coach Backend",
-    version="1.0.0"
-)
+app = FastAPI(title="Learning Coach Backend", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,3 +17,4 @@ app.add_middleware(
 
 app.include_router(chat_router)
 app.include_router(health_router)
+app.include_router(rag_router)

@@ -1,6 +1,11 @@
 // Debug routes (development only)
 import { Request, Response, Router } from 'express';
+import fs from 'fs';
+import path from 'path';
+import { BadRequestError } from '../common/errors';
 import { pool } from '../db/pool';
+import * as documentService from '../services/document.service';
+import * as documentRagService from '../services/document_rag.service';
 
 const router = Router();
 
@@ -28,6 +33,34 @@ router.get('/debug/db-info', async (req: Request, res: Response) => {
         });
     } catch (error) {
         res.status(500).json({ error: 'Database query failed', message: (error as Error).message });
+    }
+});
+
+// POST /debug/documents/:id/reindex - Dev reindex without auth
+router.post('/debug/documents/:id/reindex', async (req: Request, res: Response, next: (err?: Error) => void) => {
+    try {
+        if (process.env.NODE_ENV !== 'development') {
+            return res.status(404).json({ error: 'Not found' });
+        }
+
+        const docId = req.params.id;
+        const doc = await documentService.getDocumentById(docId);
+
+        if (!doc.file_path || !fs.existsSync(doc.file_path)) {
+            throw new BadRequestError('Dosya bulunamadı. Lütfen dokümanı yeniden yükleyin.');
+        }
+
+        res.status(202).json({ status: 'queued' });
+
+        void documentRagService
+            .indexDocument({
+                documentId: doc.id,
+                filePath: path.resolve(doc.file_path),
+                mimeType: doc.mime_type || '',
+            })
+            .catch((err) => console.error('Document reindex failed:', err));
+    } catch (e) {
+        next(e as Error);
     }
 });
 

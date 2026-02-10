@@ -73,6 +73,12 @@ lib/generated_plugin_registrant.dart
 .env
 .env.local
 .env.*.local
+.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
 
 # IDE - VS Code (keep settings and extensions for team)
 .vscode/*
@@ -107,6 +113,8 @@ Desktop.ini
 
 # Log files
 *.log
+.dev_logs/
+.dev_pids/
 
 # Temporary files
 *.tmp
@@ -114,6 +122,13 @@ Desktop.ini
 *.swp
 *.swo
 *~
+
+# Node/TS build artifacts
+**/node_modules/
+backend/dist/
+
+# Uploads/runtime artifacts
+backend/uploads/
 
 # NOTE: We DO commit generated files (*.g.dart, *.freezed.dart)
 # This ensures everyone has the same generated code without running build_runner

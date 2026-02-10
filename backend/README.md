@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-# Learning Coach Backend
-
-## Run
-
-```bash
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-=======
 # Learning Coach - Backend
 
 Bu klasör Learning Coach uygulamasının backend altyapısını içerir: veritabanı migration'ları, seed data ve yardımcı scriptler.
@@ -61,6 +51,7 @@ backend/
 - **Node.js** 18+ (npm scriptleri için)
 - **PostgreSQL** 14+ (yerel kurulum veya Docker)
 - **pgvector extension** (RAG için gerekli)
+- **OCR için**: `graphicsmagick` (PDF sayfalarını görsele çevirmek için)
 
 ### 2. Kurulum
 
@@ -94,6 +85,51 @@ npm run db:migrate
 
 # Seed data ekle (opsiyonel - geliştirme için)
 npm run db:seed
+```
+
+## 📄 Doküman İşleme ve OCR
+
+Desteklenen formatlar:
+- PDF (metin PDF + tarama PDF için OCR fallback)
+- DOCX, DOC, TXT, MD, CSV, HTML, RTF
+- XLSX/XLS
+- PPTX/PPT
+- Görseller (PNG/JPG/WebP/TIFF/BMP → OCR)
+
+OCR için sistem bağımlılığı:
+
+```bash
+# macOS
+brew install graphicsmagick
+
+# Ubuntu/Debian
+sudo apt-get install graphicsmagick
+```
+
+OCR ayarları (opsiyonel):
+
+```bash
+export OCR_MAX_PAGES=5
+export OCR_LANG=eng
+```
+
+## 🔁 Manuel Reindex
+
+```bash
+curl -X POST http://localhost:3000/api/v1/documents/<DOC_ID>/reindex \
+    -H "Authorization: Bearer <TOKEN>"
+```
+
+### Development Reindex (Auth yok)
+
+```bash
+curl -X POST http://localhost:3000/api/v1/documents/<DOC_ID>/reindex-dev
+```
+
+### Debug Reindex (Auth yok, debug route)
+
+```bash
+curl -X POST http://localhost:3000/api/v1/debug/documents/<DOC_ID>/reindex
 ```
 
 #### Seçenek B: Yerel PostgreSQL
@@ -339,4 +375,3 @@ npm run docker:up
 ---
 
 **İyi Geliştirmeler! 🚀**
->>>>>>> e4c47be (Database & Backend Updates)

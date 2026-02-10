@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:learning_coach/shared/models/models.dart';
@@ -46,9 +47,66 @@ class ApiDocumentRepository {
     }
   }
 
+  Future<Document> uploadDocumentBytes(
+    Uint8List bytes,
+    String fileName, {
+    String? title,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(bytes, filename: fileName),
+        'title': title ?? fileName,
+      });
+
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/documents',
+        data: formData,
+      );
+
+      return Document.fromJson(
+        response.data!['document'] as Map<String, dynamic>,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> deleteDocument(String id) async {
     try {
       await _dio.delete<void>('/documents/$id');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<CoachMessage> chatWithDocument(
+    String documentId,
+    String message,
+  ) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/documents/$documentId/chat',
+        data: {'message': message},
+      );
+
+      final data = response.data!;
+      final sourcesData = data['sources'] as List<dynamic>?;
+
+      final sources = sourcesData
+          ?.map(
+            (s) => Source(
+              docTitle: s['docTitle'] as String? ?? '',
+              excerpt: s['excerpt'] as String? ?? '',
+              pageLabel: s['pageLabel'] as String? ?? '',
+            ),
+          )
+          .toList();
+
+      return CoachMessage(
+        text: data['answer'] as String? ?? '',
+        isUser: false,
+        sources: sources,
+      );
     } catch (e) {
       rethrow;
     }

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/features/coach/presentation/coach_chat_screen.dart';
+import 'package:learning_coach/shared/widgets/document_upload_options.dart';
 
 class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
@@ -69,7 +70,11 @@ class AppShell extends ConsumerWidget {
       floatingActionButton: navigationShell.currentIndex == 2
           ? FloatingActionButton(
               onPressed: () {
-                _showUploadOptions(context, ref.watch(localeProvider));
+                showDocumentUploadOptions(
+                  context: context,
+                  ref: ref,
+                  locale: ref.watch(localeProvider),
+                );
               },
               backgroundColor: const Color(0xFF6366F1),
               elevation: 8,
@@ -123,62 +128,6 @@ class AppShell extends ConsumerWidget {
             ),
     );
   }
-}
-
-void _showUploadOptions(BuildContext context, String locale) {
-  showModalBottomSheet<void>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (BuildContext context) {
-      return Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _UploadOptionTile(
-              icon: Icons.upload_file_rounded,
-              title: AppStrings.getUploadFile(locale),
-              subtitle: AppStrings.getUploadFileSubtitle(locale),
-              color: const Color(0xFF6366F1),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: Dosya seçiliyor...')),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            _UploadOptionTile(
-              icon: Icons.camera_alt_rounded,
-              title: AppStrings.getTakePhoto(locale),
-              subtitle: AppStrings.getTakePhotoSubtitle(locale),
-              color: const Color(0xFFEC4899),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: Kamera açılıyor...')),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      );
-    },
-  );
 }
 
 class _UploadOptionTile extends StatelessWidget {

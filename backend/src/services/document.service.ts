@@ -41,6 +41,15 @@ export async function getDocument(userId: string, docId: string) {
     return res.rows[0];
 }
 
+export async function getDocumentById(docId: string) {
+    const res = await pool.query(
+        `SELECT * FROM documents WHERE id = $1 AND deleted_at IS NULL`,
+        [docId]
+    );
+    if (res.rows.length === 0) throw new NotFoundError('Document not found');
+    return res.rows[0];
+}
+
 export async function deleteDocument(userId: string, docId: string) {
     const docRes = await pool.query(
         `SELECT * FROM documents WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`,
