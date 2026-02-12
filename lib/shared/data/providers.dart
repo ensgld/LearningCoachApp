@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:learning_coach/shared/data/api_chat_repository.dart';
 import 'package:learning_coach/shared/data/api_document_repository.dart';
 import 'package:learning_coach/shared/data/api_goal_repository.dart';
 import 'package:learning_coach/shared/data/api_stats_repository.dart';
@@ -27,6 +28,11 @@ ApiStudySessionRepository apiStudySessionRepository(Ref ref) {
 @riverpod
 ApiDocumentRepository apiDocumentRepository(Ref ref) {
   return ApiDocumentRepository(ref.watch(apiServiceProvider));
+}
+
+@riverpod
+ApiChatRepository apiChatRepository(Ref ref) {
+  return ApiChatRepository(ref.watch(apiServiceProvider));
 }
 
 @riverpod
@@ -70,8 +76,6 @@ Future<List<DailyStats>> dailyStats(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
-  final _apiService = ApiService();
-
   @override
   List<CoachMessage> build() {
     return List.from(MockDataRepository.initialChat);
@@ -91,7 +95,8 @@ class ChatMessages extends _$ChatMessages {
 
     try {
       // 2. API üzerinden cevabı al
-      final responseText = await _apiService.sendChatMessage(text);
+      final repository = ref.read(apiChatRepositoryProvider);
+      final responseText = await repository.sendMessage(text);
 
       // 3. AI Cevabını listeye ekle
       final aiMessage = CoachMessage(

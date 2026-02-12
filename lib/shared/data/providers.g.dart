@@ -152,6 +152,53 @@ final class ApiDocumentRepositoryProvider
 String _$apiDocumentRepositoryHash() =>
     r'e5f9e104539dc9063b251764d125b09d35177d30';
 
+@ProviderFor(apiChatRepository)
+const apiChatRepositoryProvider = ApiChatRepositoryProvider._();
+
+final class ApiChatRepositoryProvider
+    extends
+        $FunctionalProvider<
+          ApiChatRepository,
+          ApiChatRepository,
+          ApiChatRepository
+        >
+    with $Provider<ApiChatRepository> {
+  const ApiChatRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'apiChatRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$apiChatRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApiChatRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ApiChatRepository create(Ref ref) {
+    return apiChatRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApiChatRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApiChatRepository>(value),
+    );
+  }
+}
+
+String _$apiChatRepositoryHash() => r'fb762bd93eaaf4d819d0ba0b9ae238c183dc2685';
+
 @ProviderFor(apiStatsRepository)
 const apiStatsRepositoryProvider = ApiStatsRepositoryProvider._();
 
@@ -236,7 +283,7 @@ final class GoalsProvider
   }
 }
 
-String _$goalsHash() => r'a063380686ea3f31b9fecf6237cbe42951588e6a';
+String _$goalsHash() => r'f98eb78e69a482461b34f59f0da099f80dfcbb55';
 
 @ProviderFor(documents)
 const documentsProvider = DocumentsProvider._();
@@ -275,60 +322,7 @@ final class DocumentsProvider
   }
 }
 
-String _$documentsHash() => r'02768f4478c3990734ce0fd69c4967902d02d973';
-
-@ProviderFor(ChatMessages)
-const chatMessagesProvider = ChatMessagesProvider._();
-
-final class ChatMessagesProvider
-    extends $NotifierProvider<ChatMessages, List<CoachMessage>> {
-  const ChatMessagesProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'chatMessagesProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$chatMessagesHash();
-
-  @$internal
-  @override
-  ChatMessages create() => ChatMessages();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(List<CoachMessage> value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<List<CoachMessage>>(value),
-    );
-  }
-}
-
-String _$chatMessagesHash() => r'caddb75e427cd7a9ac6790126879081d69875a57';
-
-abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
-  List<CoachMessage> build();
-  @$mustCallSuper
-  @override
-  void runBuild() {
-    final created = build();
-    final ref = this.ref as $Ref<List<CoachMessage>, List<CoachMessage>>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<List<CoachMessage>, List<CoachMessage>>,
-              List<CoachMessage>,
-              Object?,
-              Object?
-            >;
-    element.handleValue(ref, created);
-  }
-}
+String _$documentsHash() => r'222eafa13c7aee18a28753a842c26e618e6d0d5b';
 
 @ProviderFor(userProgress)
 const userProgressProvider = UserProgressProvider._();
@@ -410,15 +404,64 @@ final class DailyStatsProvider
 
 String _$dailyStatsHash() => r'5ad40b64c301b07c3865e598998d84bbfb3cc50a';
 
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
+@ProviderFor(ChatMessages)
+const chatMessagesProvider = ChatMessagesProvider._();
+
+final class ChatMessagesProvider
+    extends $NotifierProvider<ChatMessages, List<CoachMessage>> {
+  const ChatMessagesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatMessagesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatMessagesHash();
+
+  @$internal
+  @override
+  ChatMessages create() => ChatMessages();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<CoachMessage> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<CoachMessage>>(value),
+    );
+  }
+}
+
+String _$chatMessagesHash() => r'7935a4f047ac22245dd86a4c1ede0e1c8f20f529';
+
+abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
+  List<CoachMessage> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<List<CoachMessage>, List<CoachMessage>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<CoachMessage>, List<CoachMessage>>,
+              List<CoachMessage>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
 
 @ProviderFor(UserStatsNotifier)
 const userStatsProvider = UserStatsNotifierProvider._();
 
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
 final class UserStatsNotifierProvider
     extends $NotifierProvider<UserStatsNotifier, UserStats> {
-  /// Main Gamification Notifier with complete XP, Leveling, and Gold logic
   const UserStatsNotifierProvider._()
     : super(
         from: null,
@@ -447,8 +490,6 @@ final class UserStatsNotifierProvider
 }
 
 String _$userStatsNotifierHash() => r'6f5c6f233b265297f116476efef9911da181d9f1';
-
-/// Main Gamification Notifier with complete XP, Leveling, and Gold logic
 
 abstract class _$UserStatsNotifier extends $Notifier<UserStats> {
   UserStats build();

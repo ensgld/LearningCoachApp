@@ -603,86 +603,93 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
               borderRadius: BorderRadius.circular(28),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Row(
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 1200),
-                        builder: (context, value, child) {
-                          return Transform.rotate(
-                            angle: value * 0.1,
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 6),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.lightbulb_rounded,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    AppStrings.getCoachTipTitle(locale),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          letterSpacing: -0.5,
-                                        ),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => context.push('/home/chat'),
+                    borderRadius: BorderRadius.circular(28),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Row(
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            duration: const Duration(milliseconds: 1200),
+                            builder: (context, value, child) {
+                              return Transform.rotate(
+                                angle: value * 0.1,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(18),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.15),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
                                   ),
                                   child: const Icon(
-                                    Icons.auto_awesome_rounded,
+                                    Icons.lightbulb_rounded,
                                     color: Colors.white,
-                                    size: 16,
+                                    size: 32,
                                   ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        AppStrings.getCoachTipTitle(locale),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: -0.5,
+                                            ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.auto_awesome_rounded,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  AppStrings.getPomodoroTip(locale),
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: Colors.white.withOpacity(0.95),
+                                        height: 1.6,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              AppStrings.getPomodoroTip(locale),
-                              style: Theme.of(context).textTheme.bodyLarge
-                                  ?.copyWith(
-                                    color: Colors.white.withOpacity(0.95),
-                                    height: 1.6,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
