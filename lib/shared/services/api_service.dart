@@ -214,24 +214,17 @@ class ApiService {
   //--------------  LLM BACKEND --------------//
 
   static String get baseUrlLLM {
+    // 1. Önce .env dosyasında tanımlı mı diye bakıyoruz
     final envUrl = dotenv.env['LLM_BASE_URL'];
+
     if (envUrl != null && envUrl.isNotEmpty) {
       return envUrl;
     }
 
-    if (kIsWeb) {
-      return 'http://localhost:8000';
-    }
-
-    if (Platform.isIOS) {
-      return 'http://localhost:8000';
-    }
-
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000';
-    }
-
-    return 'http://localhost:8000';
+    // 2. Eğer .env boşsa veya okunamazsa, senin sabit Windows sunucu IP'ni kullanıyoruz.
+    // Not: Sunucu farklı bilgisayarda olduğu için 'localhost' veya '10.0.2.2' işe yaramaz.
+    // Doğrudan o bilgisayarın ağ adresine gitmeliyiz.
+    return 'http://172.24.0.198:8000';
   }
 
   Future<String> sendChatMessage(String message) async {

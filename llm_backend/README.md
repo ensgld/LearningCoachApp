@@ -1,107 +1,71 @@
-# 🦙 Yerel LLM ve Ollama Kurulum Rehberi
+# 🚀 Learning Coach - LLM Backend Kurulum Rehberi (Windows)
 
-Bu proje, yapay zeka destekli özelliklerini çalıştırmak için **Ollama** altyapısını ve **Llama** modellerini kullanmaktadır. Bu doküman, geliştirme ortamının neden bu şekilde kurgulandığını ve hem Windows hem de macOS için kurulum adımlarını içermektedir.
+Bu rehber, yapay zeka servisinin Windows sunucunuzda (IP: `172.24.0.198`) doğru şekilde çalıştırılması için gerekli adımları içerir.
 
-## 🚀 Mimari Kararlar: Neden Llama 3.2 ve Yerel Çalışma?
+## 1. Ollama Yapılandırması (Kritik)
 
-Projemizde "Yerel Geliştirme" ve "Sunucu (Production)" olmak üzere iki farklı model stratejisi izlemekteyiz. Bunun temel sebepleri donanım gereksinimleri ve maliyet optimizasyonudur.
+Ollama bazen arayüz modunda (System Tray) çalışırken API isteklerini bekletebilir veya kısıtlayabilir. En sağlıklı yöntem **Server** modunda çalıştırmaktır.
 
-### 1. Yerel Ortam (Localhost) - Llama 3.2 (3B)
+- **Mevcut Ollama'yı Kapatın:**
+- Ekranın sağ altındaki (Sistem Tepsisi) Ollama ikonuna sağ tıklayıp **Quit Ollama** deyin.
+- Emin olmak için **Görev Yöneticisi**'ni açıp `ollama.exe` sürecinin çalışmadığından emin olun.
 
-Geliştirme aşamasında kendi bilgisayarlarımızda (Laptop/Desktop) **Llama 3.2 (3B)** modelini kullanıyoruz.
+- **Ollama'yı Sunucu Modunda Başlatın:**
+- Yeni bir Terminal (CMD veya PowerShell) açın ve şu komutu yazın:
 
-- **Boyut:** Yaklaşık **2.0 GB**.
-- **Neden:** Bu model, standart bir bilgisayarın RAM ve GPU'sunu yormadan çok hızlı çalışır. Anlık tepki verir ve kodlama/test aşamasında bizi bekletmez. MacBook (M Serisi) ve standart Windows bilgisayarlarda akıcı bir deneyim sunar.
-
-### 2. Sunucu Ortamı (Production) - Llama 4 Maverick (70B)
-
-Canlı sunucuda ise modelin **70B (70 Milyar parametre)** versiyonunu (veya GPT-4 seviyesindeki muadillerini) kullanacağız.
-
-- **Boyut:** Yaklaşık **40 GB - 70 GB** (VRAM gereksinimi).
-- **Neden:** Bu model çok daha zekidir, karmaşık mantık yürütme yeteneğine sahiptir ancak çalıştırılması için güçlü veri merkezi GPU'larına ihtiyaç duyar.
-
-**Özet:** Kendi bilgisayarımızda "hafif" modelle iskeleti kurup test ediyor, ağır yükü sunucudaki "dev" modele bırakıyoruz.
-
----
-
-## 🛠️ Kurulum Adımları
-
-Aşağıdaki adımları takiperek bilgisayarınızı yapay zeka geliştirme ortamına hazırlayabilirsiniz.
-
-### 1. Ollama'yı Yükleme
-
-Ollama, büyük dil modellerini (LLM) yerel bilgisayarınızda çalıştırmanızı sağlayan motorun adıdır.
-
-#### 🍎 macOS Kullanıcıları İçin
-
-1. [ollama.com/download](https://ollama.com/download) adresine gidin.
-2. **"Download for macOS"** butonuna tıklayın.
-3. İndirilen `.zip` dosyasını açın ve `Ollama` uygulamasını **Uygulamalar (Applications)** klasörüne sürükleyin.
-4. Uygulamayı çalıştırın ve kurulum sihirbazını tamamlayın.
-5. Terminali açın ve şu komutu yazarak kurulduğunu doğrulayın:
-
-```bash
-ollama --version
-
+```cmd
+ollama serve
 ```
 
-#### 🪟 Windows Kullanıcıları İçin
+- **Not:** Bu terminal penceresini kapatmayın. Ollama artık arka planda bir servis gibi çalışmaktadır.
 
-1. [ollama.com/download](https://ollama.com/download) adresine gidin.
-2. **"Download for Windows"** butonuna tıklayın.
-3. İndirilen `.exe` dosyasını çalıştırın ve kurulumu tamamlayın.
-4. Kurulum bittikten sonra **PowerShell** veya **Komut İstemi'ni (CMD)** açın.
-5. Şu komutu yazarak kurulduğunu doğrulayın:
+## 2. Ortam Değişkenleri (`.env`)
 
-```powershell
-ollama --version
+Sunucu üzerindeki `llm_backend` klasöründe bir `.env` dosyası oluşturun. Git bu dosyayı otomatik getirmez. Dosya içeriği tam olarak şu şekilde olmalıdır:
 
+```ini
+PORT=8000
+OLLAMA_URL=http://localhost:11434/api/chat
+MODEL_NAME=llama4:latest
+EMBEDDING_MODEL=nomic-embed-text
+OLLAMA_EMBEDDINGS_URL=http://localhost:11434/api/embeddings
 ```
 
----
+## 3. Python Sunucusunu Çalıştırma
 
-### 2. Llama 3.2 Modelini İndirme ve Çalıştırma
+Python backend'ini dış dünyaya (telefona) açmak için `--host 0.0.0.0` parametresi ile başlatmanız şarttır.
 
-Ollama kurulduktan sonra, projemiz için gerekli olan 2GB'lık hafif modeli indireceğiz. Bu işlem internet hızınıza bağlı olarak birkaç dakika sürebilir.
+1. Yeni bir terminal açın ve `llm_backend` dizinine gidin.
+2. Gerekli kütüphaneleri yükleyin:
 
-**Terminal (macOS) veya PowerShell (Windows) üzerinde şu komutu çalıştırın:**
-
-```bash
-ollama run llama3.2
-
+```cmd
+pip install -r requirements.txt
 ```
 
-**Bu komut şunları yapar:**
+3. Sunucuyu başlatın:
 
-1. Llama 3.2 modelinin "manifest" dosyasını çeker.
-2. Yaklaşık 2.0 GB boyutundaki model dosyalarını indirir.
-3. Modeli çalıştırır ve size sohbet edebileceğiniz bir alan açar.
+```cmd
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
-Eğer `>>> Send a message` satırını görüyorsanız kurulum başarıyla tamamlanmıştır! 🎉
-Çıkmak için `/bye` yazabilir veya `Ctrl + D` tuşlarına basabilirsiniz.
+## 4. Windows Güvenlik Duvarı (Firewall) İzni
 
----
+Dışarıdan (telefondan) gelen isteklerin 8000 portuna ulaşabilmesi için izin vermeniz gerekir:
 
-### 3. Arka Plan Testi (API Kontrolü)
+1. **Denetim Masası > Sistem ve Güvenlik > Windows Defender Güvenlik Duvarı** yolunu izleyin.
+2. **Gelişmiş Ayarlar**'a tıklayın.
+3. **Gelen Kuralları (Inbound Rules) > Yeni Kural (New Rule)** deyin.
+4. **Bağlantı Noktası (Port)** seçeneğini işaretleyip **8000** yazın.
+5. **Bağlantıya izin ver** diyerek kuralı kaydedin.
 
-Projemizdeki Python/Flutter uygulamaları Ollama ile **localhost** üzerinden haberleşecektir. Ollama çalıştığı sürece arka planda 11434 portunu dinler.
+## 5. Flutter Uygulama Ayarı
 
-Tarayıcınızdan şu adrese giderek servisin çalışıp çalışmadığını kontrol edebilirsiniz:
+Uygulamanızın sunucuya bağlanabilmesi için `api_service.dart` dosyasındaki adresin şu olduğundan emin olun:
 
-👉 [http://localhost:11434](https://www.google.com/search?q=http://localhost:11434)
-
-Ekranda sadece `Ollama is running` yazısını görüyorsanız her şey yolunda demektir.
-
----
-
-### ⚠️ Sık Karşılaşılan Sorunlar
-
-- **"Command not found" hatası:** Ollama'yı yükledikten sonra terminali kapatıp yeniden açmanız gerekebilir.
-- **Yavaşlama:** Eğer model çalışırken bilgisayarınız çok yavaşlarsa, arka plandaki diğer ağır uygulamaları (oyun, render programları vb.) kapatın.
-- **Port Hatası:** Eğer `11434` portu dolu hatası alırsanız, Ollama'nın zaten arka planda çalışıp çalışmadığını kontrol edin (Sağ alt/üst bardaki simgeye bakın).
+- **URL:** `http://172.24.0.198:8000/chat`
 
 ---
 
-### Sonraki Adım
+**Sunucu IP Adresiniz:** `172.24.0.198`
 
-Kurulum tamamlandıktan sonra projenin backend servisini (Python) başlatabilir ve Flutter arayüzünden modele bağlanabilirsiniz.
+**Backend Portu:** `8000`
