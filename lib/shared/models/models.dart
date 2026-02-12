@@ -130,6 +130,7 @@ class Document extends Equatable {
   final String summary;
   final DocStatus status;
   final DateTime uploadedAt;
+  final double processingProgress;
 
   Document({
     String? id,
@@ -137,6 +138,7 @@ class Document extends Equatable {
     this.summary = '',
     this.status = DocStatus.processing,
     DateTime? uploadedAt,
+    this.processingProgress = 0,
   }) : id = id ?? uuid.v4(),
        uploadedAt = uploadedAt ?? DateTime.now();
 
@@ -145,17 +147,28 @@ class Document extends Equatable {
     if (json['status'] == 'ready') status = DocStatus.ready;
     if (json['status'] == 'failed') status = DocStatus.failed;
 
+    final progressRaw = json['processing_progress'];
+    final progress = progressRaw is num ? progressRaw.toDouble() : 0.0;
+
     return Document(
       id: json['id'] as String?,
       title: json['title'] as String,
-      summary: '', // Backend doesn't support summary yet
+      summary: json['summary'] as String? ?? '',
       status: status,
       uploadedAt: DateTime.parse(json['uploaded_at'] as String),
+      processingProgress: progress,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, summary, status, uploadedAt];
+  List<Object?> get props => [
+    id,
+    title,
+    summary,
+    status,
+    uploadedAt,
+    processingProgress,
+  ];
 }
 
 class CoachMessage extends Equatable {

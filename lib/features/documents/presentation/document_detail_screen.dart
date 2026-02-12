@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
 class DocumentDetailScreen extends ConsumerWidget {
@@ -10,71 +11,32 @@ class DocumentDetailScreen extends ConsumerWidget {
 
   const DocumentDetailScreen({super.key, required this.document});
 
-  void _showAddDocumentDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Doküman Ekle'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.upload_file_rounded),
-              title: const Text('Dosya Yükle'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Mock: Dosya seçici açılacak...'),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt_rounded),
-              title: const Text('Fotoğraf Çek'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: Kamera açılacak...')),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.link_rounded),
-              title: const Text('URL Ekle'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mock: URL girişi açılacak...')),
-                );
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('İptal'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text(document.title)),
-      body: Padding(
+      appBar: AppBar(
+        title: Text(document.title),
+        actions: [
+          IconButton(
+            onPressed: () => _confirmDelete(context, ref),
+            icon: const Icon(Icons.delete_outline_rounded),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildStatusBadge(context, document.status, locale),
+            _buildStatusBadge(
+              context,
+              document.status,
+              locale,
+              document.processingProgress,
+            ),
             const SizedBox(height: 24),
             Text(
               AppStrings.getSummaryTitle(locale),
@@ -116,6 +78,7 @@ class DocumentDetailScreen extends ConsumerWidget {
     BuildContext context,
     DocStatus status,
     String locale,
+    double progress,
   ) {
     final scheme = Theme.of(context).colorScheme;
 
@@ -126,7 +89,8 @@ class DocumentDetailScreen extends ConsumerWidget {
     switch (status) {
       case DocStatus.processing:
         color = Colors.orange;
-        label = AppStrings.getDocStatusProcessing(locale);
+        label =
+            '${AppStrings.getDocStatusProcessing(locale)} %${(progress * 100).round()}';
         icon = Icons.sync;
         break;
       case DocStatus.ready:
@@ -160,5 +124,41 @@ class DocumentDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Doküman Silinsin mi?'),
+        content: const Text('Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    try {
+      await ref.read(apiDocumentRepositoryProvider).deleteDocument(document.id);
+      ref.invalidate(documentsProvider);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      }
+    }
   }
 }

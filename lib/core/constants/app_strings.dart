@@ -43,6 +43,9 @@ class AppStrings {
       locale == 'tr' ? 'Hazır' : 'Ready';
   static String getDocStatusFailed(String locale) =>
       locale == 'tr' ? 'Hata' : 'Failed';
+  static String getDocProcessingNotice(String locale) => locale == 'tr'
+      ? 'Doküman işleniyor, birazdan hazır.'
+      : 'Document is processing and will be ready soon.';
   static String getAskDocHint(String locale) =>
       locale == 'tr' ? 'Dokümana sor...' : 'Ask document...';
   static String getSourcesTitle(String locale) =>

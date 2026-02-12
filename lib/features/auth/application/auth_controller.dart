@@ -150,7 +150,9 @@ class AuthController extends _$AuthController {
   ///
   /// Clears authentication state.
   Future<void> logout() async {
-    await _repository.logout();
+    try {
+      await _repository.logout();
+    } catch (e) {}
 
     if (!ref.mounted) return;
 

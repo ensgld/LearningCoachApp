@@ -80,7 +80,15 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
         (_tasks.isEmpty ? 1 : _tasks.length);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.goal.title)),
+      appBar: AppBar(
+        title: Text(widget.goal.title),
+        actions: [
+          IconButton(
+            onPressed: _confirmDeleteGoal,
+            icon: const Icon(Icons.delete_outline_rounded),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -378,5 +386,41 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _confirmDeleteGoal() async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hedef Silinsin mi?'),
+        content: const Text('Bu işlem geri alınamaz.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('İptal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    try {
+      await ref.read(apiGoalRepositoryProvider).deleteGoal(widget.goal.id);
+      ref.invalidate(goalsProvider);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      }
+    }
   }
 }

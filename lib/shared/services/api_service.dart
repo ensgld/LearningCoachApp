@@ -1,19 +1,37 @@
-import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-
 import 'dart:io';
-import 'package:http/http.dart' as http;
+
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb için
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   // Change based on your setup:
   // iOS Simulator: http://localhost:3000/api/v1
   // Android Emulator: http://10.0.2.2:3000/api/v1
   // Real device: http://YOUR_IP:3000/api/v1
-  static String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:3000/api/v1';
+  static String get baseUrl {
+    final envUrl = dotenv.env['API_BASE_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      return envUrl;
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:3000/api/v1';
+    }
+
+    if (Platform.isIOS) {
+      return 'http://localhost:3000/api/v1';
+    }
+
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3000/api/v1';
+    }
+
+    return 'http://localhost:3000/api/v1';
+  }
 
   final Dio _dio;
   Dio get dio => _dio;
@@ -195,20 +213,32 @@ class ApiService {
 
   //--------------  LLM BACKEND --------------//
 
-  // Senin bilgisayarının sabit IP adresi
-  static const String _serverIp = '172.24.0.198';
-
   static String get baseUrlLLM {
-    // Mobil cihaz (fiziksel veya emülatör) ve web fark etmeksizin
-    // artık herkes bu ortak IP adresine gidecek.
-    return 'http://$_serverIp:8000';
+    final envUrl = dotenv.env['LLM_BASE_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      return envUrl;
+    }
+
+    if (kIsWeb) {
+      return 'http://localhost:8000';
+    }
+
+    if (Platform.isIOS) {
+      return 'http://localhost:8000';
+    }
+
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:8000';
+    }
+
+    return 'http://localhost:8000';
   }
 
   Future<String> sendChatMessage(String message) async {
     try {
       final url = Uri.parse('$baseUrlLLM/chat');
 
-      debugPrint("İstek gönderiliyor: $url"); // Log ekledik
+      debugPrint('İstek gönderiliyor: $url'); // Log ekledik
 
       final response = await http.post(
         url,
@@ -230,7 +260,7 @@ class ApiService {
         );
       }
     } catch (e) {
-      debugPrint("API Hatası: $e");
+      debugPrint('API Hatası: $e');
       throw Exception('Bağlantı hatası: $e');
     }
   }
