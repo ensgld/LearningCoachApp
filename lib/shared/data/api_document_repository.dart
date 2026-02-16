@@ -111,4 +111,44 @@ class ApiDocumentRepository {
       rethrow;
     }
   }
+
+  Future<List<CoachMessage>> getDocumentChatHistory(String documentId) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/documents/$documentId/chat/history',
+      );
+
+      final data = response.data!['messages'] as List<dynamic>? ?? [];
+
+      return data.map((item) {
+        final json = item as Map<String, dynamic>;
+        final timestampRaw = json['timestamp'];
+        DateTime? timestamp;
+        if (timestampRaw is String) {
+          timestamp = DateTime.tryParse(timestampRaw);
+        }
+
+        final sourcesRaw = json['sources'] as List<dynamic>?;
+        final sources = sourcesRaw
+            ?.map(
+              (s) => Source(
+                docTitle: s['docTitle'] as String? ?? '',
+                excerpt: s['excerpt'] as String? ?? '',
+                pageLabel: s['pageLabel'] as String? ?? '',
+              ),
+            )
+            .toList();
+
+        return CoachMessage(
+          id: json['id'] as String?,
+          text: json['text'] as String? ?? '',
+          isUser: json['isUser'] as bool? ?? false,
+          timestamp: timestamp,
+          sources: sources,
+        );
+      }).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

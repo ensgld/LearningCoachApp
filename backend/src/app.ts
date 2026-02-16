@@ -2,6 +2,7 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import { AppError } from './common/errors';
 import authRoutes from './routes/auth';
+import chatRoutes from './routes/chat';
 import debugRoutes from './routes/debug';
 import documentRoutes from './routes/documents';
 import goalRoutes from './routes/goals';
@@ -24,6 +25,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Routes
 app.use('/api/v1', healthRoutes);
 app.use('/api/v1', authRoutes);
+app.use('/api/v1', chatRoutes);
 app.use('/api/v1/goals', goalRoutes);
 app.use('/api/v1/study-sessions', studySessionRoutes);
 app.use('/api/v1/documents', documentRoutes);

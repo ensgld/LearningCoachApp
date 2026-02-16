@@ -7,7 +7,6 @@ import 'package:learning_coach/shared/data/api_study_session_repository.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
 import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/providers/auth_provider.dart';
-import 'package:learning_coach/shared/services/api_service.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -76,9 +75,33 @@ Future<List<DailyStats>> dailyStats(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
+  String? _threadId;
+  bool _loaded = false;
+
   @override
   List<CoachMessage> build() {
-    return List.from(MockDataRepository.initialChat);
+    if (!_loaded) {
+      _loaded = true;
+      _loadHistory();
+    }
+
+    return [];
+  }
+
+  Future<void> _loadHistory() async {
+    try {
+      final repository = ref.read(apiChatRepositoryProvider);
+      final result = await repository.getHistory();
+      _threadId = result.threadId;
+      if (result.messages.isNotEmpty) {
+        state = result.messages;
+        return;
+      }
+      state = List.from(MockDataRepository.initialChat);
+    } catch (e) {
+      debugPrint('Chat history load failed, using mock data: $e');
+      state = List.from(MockDataRepository.initialChat);
+    }
   }
 
   Future<void> sendMessage(String text) async {
@@ -96,11 +119,12 @@ class ChatMessages extends _$ChatMessages {
     try {
       // 2. API üzerinden cevabı al
       final repository = ref.read(apiChatRepositoryProvider);
-      final responseText = await repository.sendMessage(text);
+      final response = await repository.sendMessage(text, threadId: _threadId);
+      _threadId = response.threadId ?? _threadId;
 
       // 3. AI Cevabını listeye ekle
       final aiMessage = CoachMessage(
-        text: responseText,
+        text: response.answer,
         isUser: false,
         timestamp: DateTime.now(),
       );
