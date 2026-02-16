@@ -103,7 +103,9 @@ class ApiService {
     final data = response.data!;
 
     // Save token if present
-    if (data['access_token'] != null) {
+    if (data['accessToken'] != null) {
+      await _saveToken(data['accessToken'] as String);
+    } else if (data['access_token'] != null) {
       await _saveToken(data['access_token'] as String);
     } else if (data['token'] != null) {
       await _saveToken(data['token'] as String);
@@ -125,7 +127,9 @@ class ApiService {
     final data = response.data!;
 
     // Save token if present
-    if (data['access_token'] != null) {
+    if (data['accessToken'] != null) {
+      await _saveToken(data['accessToken'] as String);
+    } else if (data['access_token'] != null) {
       await _saveToken(data['access_token'] as String);
     } else if (data['token'] != null) {
       await _saveToken(data['token'] as String);
