@@ -153,16 +153,21 @@ class ApiService {
     String message, {
     String? threadId,
   }) async {
+    // LLM Backend'e tam URL ile istek atıyoruz (Port 8000)
+    final url = '$baseUrlLLM/chat';
+    print('🤖 Sending Chat Request to: $url');
+
     final response = await _dio.post<Map<String, dynamic>>(
-      '/chat',
+      url,
       data: {'message': message, if (threadId != null) 'threadId': threadId},
     );
     return response.data!;
   }
 
   Future<Map<String, dynamic>> getChatHistory({String? threadId}) async {
+    final url = '$baseUrlLLM/chat/history';
     final response = await _dio.get<Map<String, dynamic>>(
-      '/chat/history',
+      url,
       queryParameters: threadId != null ? {'threadId': threadId} : null,
     );
     return response.data!;
