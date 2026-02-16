@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
+import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
+import 'package:learning_coach/shared/models/models.dart';
 
 // --- Today Plan Card ---
 class TodayPlanCard extends ConsumerStatefulWidget {
@@ -545,6 +547,7 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -562,6 +565,110 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
   void dispose() {
     _floatController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleTap() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 1. Fetch Data
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      final dailyStatsList = await ref.read(dailyStatsProvider.future);
+      final sessions = await ref
+          .read(apiStudySessionRepositoryProvider)
+          .getSessions();
+      final goals = await ref.read(goalsProvider.future);
+      final userStats = ref.read(userStatsProvider);
+
+      // 2. Filter & Aggregate
+      final todayStats = dailyStatsList.firstWhere(
+        (s) => s.date == today.toIso8601String().split('T')[0],
+        orElse: () => DailyStats(date: '', minutes: 0, sessions: 0),
+      );
+
+      final todaySessions = sessions.where((s) {
+        final date = DateTime(
+          s.startTime.year,
+          s.startTime.month,
+          s.startTime.day,
+        );
+        return date.isAtSameMomentAs(today);
+      }).toList();
+
+      // 3. Construct Detailed Prompt
+      final buffer = StringBuffer();
+      buffer.writeln(
+        'Merhaba Koç, benim "Learning Coach" asistanımsın. İşte bugünkü durumum:',
+      );
+
+      buffer.writeln('\n👤 **Kullanıcı Profili:**');
+      buffer.writeln(
+        '- Seviye: ${userStats.level} (${userStats.stage.name.toUpperCase()})',
+      );
+      buffer.writeln(
+        '- XP: ${userStats.xp} / ${userStats.xpRequiredForNextLevel}',
+      );
+      buffer.writeln('- Toplam Altın: ${userStats.gold}');
+
+      buffer.writeln('\n📅 **Bugünkü Özet:**');
+      buffer.writeln('- Toplam Çalışma: ${todayStats.minutes} dakika');
+      buffer.writeln('- Oturum Sayısı: ${todayStats.sessions}');
+
+      if (todaySessions.isNotEmpty) {
+        buffer.writeln('\n📝 **Oturum Detayları:**');
+        for (final session in todaySessions) {
+          final goal = goals.firstWhere(
+            (g) => g.id == session.goalId,
+            orElse: () => Goal(title: 'Bilinmeyen Hedef', description: ''),
+          );
+
+          final timeStr =
+              "${session.startTime.hour.toString().padLeft(2, '0')}:${session.startTime.minute.toString().padLeft(2, '0')}";
+
+          buffer.write('- **$timeStr** | ${goal.title}');
+          buffer.write(' (${session.durationMinutes} dk)');
+
+          if (session.quizScore != null) {
+            buffer.write(' | Quiz Başarısı: %${session.quizScore}');
+          }
+
+          // Efficiency Check (if actual duration is tracked)
+          if (session.actualDurationSeconds != null) {
+            final actualMins = (session.actualDurationSeconds! / 60).round();
+            if (actualMins < session.durationMinutes) {
+              buffer.write(' | ⚡ Verimli (Erken bitti)');
+            } else if (actualMins > session.durationMinutes + 5) {
+              buffer.write(' | 🐢 Biraz uzadı');
+            }
+          }
+          buffer.writeln();
+        }
+      } else {
+        buffer.writeln('\nHenüz detaylı bir çalışma kaydım yok.');
+      }
+
+      buffer.writeln(
+        '\nLütfen bu verilere dayanarak bana özel, motive edici ve gelişim odaklı bir tavsiye ver. Eğer verimsiz geçtiyse nazikçe uyar, iyiyse kutla.',
+      );
+
+      if (!mounted) return;
+
+      // 4. Navigate
+      context.push('/home/chat', extra: buffer.toString());
+    } catch (e) {
+      debugPrint('Error preparing coach tip: $e');
+      if (mounted) {
+        context.push('/home/chat'); // Fallback to empty chat
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -606,7 +713,7 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => context.push('/home/chat'),
+                    onTap: _isLoading ? null : _handleTap,
                     borderRadius: BorderRadius.circular(28),
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
@@ -666,11 +773,20 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
                                         color: Colors.white.withOpacity(0.2),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(
-                                        Icons.auto_awesome_rounded,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
+                                      child: _isLoading
+                                          ? const SizedBox(
+                                              width: 16,
+                                              height: 16,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Icon(
+                                              Icons.auto_awesome_rounded,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
                                     ),
                                   ],
                                 ),
