@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,10 +25,20 @@ class ApiService {
     return 'http://172.24.0.198:8000';
   }
 
+  static String get baseUrl {
+    final envUrl = dotenv.env['API_BASE_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      return envUrl;
+    }
+    // Fallbacks
+    if (Platform.isAndroid) return 'http://10.0.2.2:3000/api/v1';
+    return 'http://localhost:3000/api/v1';
+  }
+
   ApiService() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: baseUrlLLM,
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
       ),
