@@ -85,13 +85,38 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final locale = ref.watch(localeProvider);
     final scheme = Theme.of(context).colorScheme;
 
+    final topPadding = MediaQuery.of(context).viewPadding.top;
+    final safeTop = topPadding > 0 ? topPadding : 44.0;
+
     // Auto-scroll on new messages
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Koç'), centerTitle: true),
       body: Column(
         children: [
+          SizedBox(height: safeTop),
+          // Custom Header
+          Container(
+            height: 56,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'AI Koç',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 48), // Balance for left icon
+              ],
+            ),
+          ),
           Expanded(
             child: messages.isEmpty
                 ? Center(
@@ -114,13 +139,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           Divider(height: 1, color: scheme.outlineVariant),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 if (messages.isEmpty)
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: Row(
                       children: [
                         _buildQuickPrompt(

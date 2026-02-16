@@ -436,9 +436,62 @@ final class ChatMessagesProvider
   }
 }
 
-String _$chatMessagesHash() => r'7935a4f047ac22245dd86a4c1ede0e1c8f20f529';
+String _$chatMessagesHash() => r'b89ccea6e1b989ec90d5100beebd06656fde9fd9';
 
 abstract class _$ChatMessages extends $Notifier<List<CoachMessage>> {
+  List<CoachMessage> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<List<CoachMessage>, List<CoachMessage>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<CoachMessage>, List<CoachMessage>>,
+              List<CoachMessage>,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
+@ProviderFor(CoachTipMessages)
+const coachTipMessagesProvider = CoachTipMessagesProvider._();
+
+final class CoachTipMessagesProvider
+    extends $NotifierProvider<CoachTipMessages, List<CoachMessage>> {
+  const CoachTipMessagesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'coachTipMessagesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$coachTipMessagesHash();
+
+  @$internal
+  @override
+  CoachTipMessages create() => CoachTipMessages();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<CoachMessage> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<CoachMessage>>(value),
+    );
+  }
+}
+
+String _$coachTipMessagesHash() => r'ec55018ca2ff534979927773bac1e3f633160a22';
+
+abstract class _$CoachTipMessages extends $Notifier<List<CoachMessage>> {
   List<CoachMessage> build();
   @$mustCallSuper
   @override
@@ -489,7 +542,7 @@ final class UserStatsNotifierProvider
   }
 }
 
-String _$userStatsNotifierHash() => r'6f5c6f233b265297f116476efef9911da181d9f1';
+String _$userStatsNotifierHash() => r'3c654f1827cb5bd9748609c88dd3d6db9ca94822';
 
 abstract class _$UserStatsNotifier extends $Notifier<UserStats> {
   UserStats build();

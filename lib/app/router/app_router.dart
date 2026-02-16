@@ -8,6 +8,7 @@ import 'package:learning_coach/features/auth/presentation/screens/forgot_passwor
 import 'package:learning_coach/features/auth/presentation/screens/login_screen.dart';
 import 'package:learning_coach/features/auth/presentation/screens/signup_screen.dart';
 import 'package:learning_coach/features/chat/presentation/chat_screen.dart';
+import 'package:learning_coach/features/coach/presentation/coach_chat_screen.dart';
 import 'package:learning_coach/features/documents/presentation/document_chat_screen.dart';
 import 'package:learning_coach/features/documents/presentation/document_detail_screen.dart';
 import 'package:learning_coach/features/documents/presentation/documents_screen.dart';
@@ -148,6 +149,14 @@ GoRouter goRouter(Ref ref) {
                     builder: (context, state) {
                       final initialPrompt = state.extra as String?;
                       return ChatScreen(initialPrompt: initialPrompt);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'coach-chat',
+                    parentNavigatorKey: _rootNavigatorKey,
+                    builder: (context, state) {
+                      final initialPrompt = state.extra as String?;
+                      return CoachChatScreen(initialPrompt: initialPrompt);
                     },
                   ),
                 ],

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
-import 'package:learning_coach/features/coach/presentation/coach_chat_screen.dart';
+import 'package:learning_coach/features/chat/presentation/chat_screen.dart';
 import 'package:learning_coach/shared/widgets/document_upload_options.dart';
 
 class AppShell extends ConsumerWidget {
@@ -109,7 +109,7 @@ class AppShell extends ConsumerWidget {
                       context: context,
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
-                      builder: (context) => const CoachChatScreen(),
+                      builder: (context) => const ChatScreen(),
                     );
                   },
                   borderRadius: BorderRadius.circular(20),

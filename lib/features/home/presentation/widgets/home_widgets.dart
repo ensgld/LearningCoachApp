@@ -8,6 +8,7 @@ import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // --- Today Plan Card ---
 class TodayPlanCard extends ConsumerStatefulWidget {
@@ -565,9 +566,23 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
     setState(() => _isLoading = true);
 
     try {
-      // 1. Fetch Data
+      // 0. Check "Once per day" rule
+      final prefs = await SharedPreferences.getInstance();
+      const lastTipDateKey = 'last_coach_tip_date';
+      final lastDate = prefs.getString(lastTipDateKey);
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+      final todayStr = '${now.year}-${now.month}-${now.day}'; // YYYY-M-D format
+
+      // If already sent today, just open chat without prompt
+      if (lastDate == todayStr) {
+        if (!mounted) return;
+        context.push('/home/coach-chat'); // No extra prompt
+        return;
+      }
+
+      // 1. Fetch Data for YESTERDAY
+      final yesterday = now.subtract(const Duration(days: 1));
+      final yesterdayStr = yesterday.toIso8601String().split('T')[0];
 
       final dailyStatsList = await ref.read(dailyStatsProvider.future);
       final sessions = await ref
@@ -576,25 +591,27 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
       final goals = await ref.read(goalsProvider.future);
       final userStats = ref.read(userStatsProvider);
 
-      // 2. Filter & Aggregate
-      final todayStats = dailyStatsList.firstWhere(
-        (s) => s.date == today.toIso8601String().split('T')[0],
-        orElse: () => DailyStats(date: '', minutes: 0, sessions: 0),
+      // 2. Filter & Aggregate (Yesterday's data)
+      final yesterdayStats = dailyStatsList.firstWhere(
+        (s) => s.date == yesterdayStr,
+        orElse: () => DailyStats(date: yesterdayStr, minutes: 0, sessions: 0),
       );
 
-      final todaySessions = sessions.where((s) {
+      final yesterdaySessions = sessions.where((s) {
         final date = DateTime(
           s.startTime.year,
           s.startTime.month,
           s.startTime.day,
         );
-        return date.isAtSameMomentAs(today);
+        return date.year == yesterday.year &&
+            date.month == yesterday.month &&
+            date.day == yesterday.day;
       }).toList();
 
       // 3. Construct Detailed Prompt
       final buffer = StringBuffer();
       buffer.writeln(
-        'Merhaba Koç, benim "Learning Coach" asistanımsın. İşte bugünkü durumum:',
+        'Merhaba Koç, benim "Learning Coach" asistanımsın. İşte dünkü ($yesterdayStr) durumum:',
       );
 
       buffer.writeln('\n👤 **Kullanıcı Profili:**');
@@ -606,13 +623,13 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
       );
       buffer.writeln('- Toplam Altın: ${userStats.gold}');
 
-      buffer.writeln('\n📅 **Bugünkü Özet:**');
-      buffer.writeln('- Toplam Çalışma: ${todayStats.minutes} dakika');
-      buffer.writeln('- Oturum Sayısı: ${todayStats.sessions}');
+      buffer.writeln('\n📅 **Dünkü Özet:**');
+      buffer.writeln('- Toplam Çalışma: ${yesterdayStats.minutes} dakika');
+      buffer.writeln('- Oturum Sayısı: ${yesterdayStats.sessions}');
 
-      if (todaySessions.isNotEmpty) {
+      if (yesterdaySessions.isNotEmpty) {
         buffer.writeln('\n📝 **Oturum Detayları:**');
-        for (final session in todaySessions) {
+        for (final session in yesterdaySessions) {
           final goal = goals.firstWhere(
             (g) => g.id == session.goalId,
             orElse: () => Goal(title: 'Bilinmeyen Hedef', description: ''),
@@ -631,26 +648,33 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
           // Efficiency Check (if actual duration is tracked)
           if (session.actualDurationSeconds != null) {
             final actualMins = (session.actualDurationSeconds! / 60).round();
-            if (actualMins < session.durationMinutes) {
-              buffer.write(' | ⚡ Verimli (Erken bitti)');
-            } else if (actualMins > session.durationMinutes + 5) {
-              buffer.write(' | 🐢 Biraz uzadı');
+            if (actualMins >= session.durationMinutes) {
+              buffer.write(
+                ' | ⚡ Verimli (Hedef: ${session.durationMinutes}dk, Gerçekleşen: ${actualMins}dk)',
+              );
+            } else {
+              buffer.write(
+                ' | 🐢 Hedefin altında (Hedef: ${session.durationMinutes}dk, Gerçekleşen: ${actualMins}dk)',
+              );
             }
           }
           buffer.writeln();
         }
       } else {
-        buffer.writeln('\nHenüz detaylı bir çalışma kaydım yok.');
+        buffer.writeln('\nDün detaylı bir çalışma kaydım yoktu.');
       }
 
       buffer.writeln(
-        '\nLütfen bu verilere dayanarak bana özel, motive edici ve gelişim odaklı bir tavsiye ver. Eğer verimsiz geçtiyse nazikçe uyar, iyiyse kutla.',
+        '\nLütfen bu verilere dayanarak bana özel, motive edici ve gelişim odaklı bir tavsiye ver. Eğer dün verimsiz geçtiyse nazikçe uyar, boşa geçtiyse teşvik et, iyiyse kutla. Tavsiyeler ver.',
       );
+
+      // Save "Today" as the last sent date (so we don't send again today)
+      await prefs.setString(lastTipDateKey, todayStr);
 
       if (!mounted) return;
 
-      // 4. Navigate
-      context.push('/home/chat', extra: buffer.toString());
+      // 4. Navigate to new specific route for Coach Tip
+      context.push('/home/coach-chat', extra: buffer.toString());
     } catch (e) {
       debugPrint('Error preparing coach tip: $e');
       if (mounted) {

@@ -75,7 +75,7 @@ Future<List<DailyStats>> dailyStats(Ref ref) async {
 
 @Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
-  String? _threadId;
+  final String _threadId = 'general_chat'; // Explicit thread ID
   bool _loaded = false;
 
   @override
@@ -91,10 +91,13 @@ class ChatMessages extends _$ChatMessages {
   Future<void> _loadHistory() async {
     try {
       final repository = ref.read(apiChatRepositoryProvider);
-      final result = await repository.getHistory();
-      _threadId = result.threadId;
+      final result = await repository.getHistory(
+        threadId: _threadId,
+      ); // Pass threadId
       if (result.messages.isNotEmpty) {
         state = result.messages;
+        // Optionally update threadId if backend returns a new one, but we prefer keeping ours if possible
+        // _threadId = result.threadId ?? _threadId;
         return;
       }
       state = List.from(MockDataRepository.initialChat);
@@ -120,7 +123,7 @@ class ChatMessages extends _$ChatMessages {
       // 2. API üzerinden cevabı al
       final repository = ref.read(apiChatRepositoryProvider);
       final response = await repository.sendMessage(text, threadId: _threadId);
-      _threadId = response.threadId ?? _threadId;
+      // _threadId = response.threadId ?? _threadId; // Remove override to keep distinct threadId
 
       // 3. AI Cevabını listeye ekle
       final aiMessage = CoachMessage(
@@ -134,6 +137,56 @@ class ChatMessages extends _$ChatMessages {
       // Hata durumunda kullanıcıya bilgi ver
       final errorMessage = CoachMessage(
         text: 'Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}',
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+      state = [...state, errorMessage];
+    }
+  }
+}
+
+@Riverpod(keepAlive: true)
+class CoachTipMessages extends _$CoachTipMessages {
+  final String _threadId = 'coach_tip_daily'; // Explicit thread ID
+  // Coach Tip için history yüklemeye gerek var mı?
+  // "Sadece 1 defa o gün neler yaptığını göndersin" denildiğine göre
+  // belki de her gün sıfırlanmalı veya sadece o session için tutulmalı.
+  // Kullanıcı "her şeyi konuşabilir" dediği için history tutmak mantıklı olabilir
+  // ama "koçtan ipucu" kısmında user 1 kere basıp sonucu görüyor.
+  // Biz yine de standart chat yapısını koruyalım, ayrı bir state olsun.
+
+  @override
+  List<CoachMessage> build() {
+    return [];
+  }
+
+  Future<void> sendMessage(String text) async {
+    if (text.trim().isEmpty) return;
+
+    final userMessage = CoachMessage(
+      text: text,
+      isUser: true,
+      timestamp: DateTime.now(),
+    );
+
+    state = [...state, userMessage];
+
+    try {
+      final repository = ref.read(apiChatRepositoryProvider);
+      // Farklı bir thread veya context gerekebilir ama şimdilik aynı endpoint
+      final response = await repository.sendMessage(text, threadId: _threadId);
+      // _threadId = response.threadId ?? _threadId; // Remove override
+
+      final aiMessage = CoachMessage(
+        text: response.answer,
+        isUser: false,
+        timestamp: DateTime.now(),
+      );
+
+      state = [...state, aiMessage];
+    } catch (e) {
+      final errorMessage = CoachMessage(
+        text: 'Bağlantı hatası: ${e.toString()}',
         isUser: false,
         timestamp: DateTime.now(),
       );

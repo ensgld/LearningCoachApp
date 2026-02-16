@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
 class CoachChatScreen extends ConsumerStatefulWidget {
-  const CoachChatScreen({super.key});
+  final String? initialPrompt;
+
+  const CoachChatScreen({super.key, this.initialPrompt});
 
   @override
   ConsumerState<CoachChatScreen> createState() => _CoachChatScreenState();
@@ -17,6 +20,58 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
 
   // 1. Loading durumunu tutan değişken
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPrompt != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _sendInitialMessage(widget.initialPrompt!);
+      });
+    }
+  }
+
+  Future<void> _sendInitialMessage(String text) async {
+    // Check if the last message is already this prompt (deduplication)
+    final messages = ref.read(coachTipMessagesProvider);
+    if (messages.isNotEmpty) {
+      final lastUserMessage = messages.lastWhere(
+        (m) => m.isUser,
+        orElse: () =>
+            CoachMessage(text: '', isUser: true, timestamp: DateTime(0)),
+      );
+      if (lastUserMessage.text == text) {
+        // Already sent, just scroll to bottom
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(
+              _scrollController.position.maxScrollExtent,
+            );
+          }
+        });
+        return;
+      }
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(coachTipMessagesProvider.notifier).sendMessage(text);
+      // Scroll to bottom after delay
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -40,7 +95,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
     try {
       // Mesajı gönder ve cevabı bekle
       // (Provider'daki sendMessage fonksiyonunun Future<void> döndürdüğünden emin ol)
-      await ref.read(chatMessagesProvider.notifier).sendMessage(text);
+      await ref.read(coachTipMessagesProvider.notifier).sendMessage(text);
 
       // Mesaj gittikten sonra text alanını temizle
       if (mounted) {
@@ -59,7 +114,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
       });
     } catch (e) {
       // Hata olursa kullanıcıya snackbar ile gösterilebilir
-      debugPrint("Hata: $e");
+      debugPrint('Hata: $e');
     } finally {
       // İşlem bitince (başarılı veya hatalı) loading'i kapat
       if (mounted) {
@@ -72,226 +127,236 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final messages = ref.watch(chatMessagesProvider);
+    final messages = ref.watch(coachTipMessagesProvider);
     final scheme = Theme.of(context).colorScheme;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark, // iOS
+        systemNavigationBarColor: scheme.surface,
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
-      child: Column(
-        children: [
-          // --- HEADER KISMI AYNI ---
-          Container(
-            padding: const EdgeInsets.fromLTRB(24, 16, 16, 16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      child: Scaffold(
+        backgroundColor: scheme.surface,
+        body: Column(
+          children: [
+            // --- HEADER KISMI ---
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(
+                24,
+                MediaQuery.of(context).padding.top + 16,
+                16,
+                16,
               ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                    spreadRadius: -4,
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF6366F1).withOpacity(0.3),
-                  blurRadius: 16,
-                  offset: const Offset(0, 8),
-                  spreadRadius: -4,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.psychology_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        AppStrings.coachChatTitle,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      Text(
-                        'AI öğrenme asistanı',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
-                      Icons.close_rounded,
+                      Icons.psychology_rounded,
                       color: Colors.white,
-                      size: 20,
+                      size: 28,
                     ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-
-          // --- CHAT LISTESI ---
-          Expanded(
-            child: messages.isEmpty
-                ? Center(
+                  const SizedBox(width: 14),
+                  Expanded(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                scheme.primaryContainer.withOpacity(0.3),
-                                scheme.secondaryContainer.withOpacity(0.3),
-                              ],
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.chat_bubble_outline_rounded,
-                            size: 48,
-                            color: scheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
                         Text(
-                          'Merhaba! Size nasıl yardımcı olabilirim?',
-                          style: Theme.of(context).textTheme.titleMedium
+                          AppStrings.coachChatTitle,
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                              ),
+                        ),
+                        Text(
+                          'AI öğrenme asistanı',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
                               ),
                         ),
                       ],
                     ),
-                  )
-                : ListView.separated(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(20),
-                    itemCount: messages.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final msg = messages[index];
-                      return _ChatBubble(message: msg);
-                    },
                   ),
-          ),
-
-          // --- INPUT ALANI ---
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: scheme.surface,
-              border: Border(
-                top: BorderSide(color: scheme.outlineVariant.withOpacity(0.3)),
+                  IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(24),
+
+            // --- CHAT LISTESI ---
+            Expanded(
+              child: messages.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  scheme.primaryContainer.withOpacity(0.3),
+                                  scheme.secondaryContainer.withOpacity(0.3),
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 48,
+                              color: scheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Merhaba! Size nasıl yardımcı olabilirim?',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(20),
+                      itemCount: messages.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final msg = messages[index];
+                        return _ChatBubble(message: msg);
+                      },
                     ),
-                    child: TextField(
-                      controller: _textController,
-                      // Yüklenirken enter tuşunu devre dışı bırakmak istersen burayı kontrol edebilirsin
-                      onSubmitted: _isLoading ? null : (_) => _handleSend(),
-                      enabled:
-                          !_isLoading, // Yüklenirken yazı yazılamasın (Opsiyonel)
-                      decoration: const InputDecoration(
-                        hintText: AppStrings.askCoachHint,
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 14,
+            ),
+
+            // --- INPUT ALANI ---
+            Container(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                MediaQuery.of(context).padding.bottom + 16,
+              ),
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                border: Border(
+                  top: BorderSide(
+                    color: scheme.outlineVariant.withOpacity(0.3),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: TextField(
+                        controller: _textController,
+                        onSubmitted: _isLoading ? null : (_) => _handleSend(),
+                        enabled: !_isLoading,
+                        decoration: const InputDecoration(
+                          hintText: AppStrings.askCoachHint,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 14,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-
-                // 3. Buton Kısmı: Loading ise Spinner, değilse İkon
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: _isLoading
-                          ? [
-                              Colors.grey.shade400,
-                              Colors.grey.shade500,
-                            ] // Pasif renk
-                          : [
-                              const Color(0xFF6366F1),
-                              const Color(0xFF8B5CF6),
-                            ], // Aktif renk
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                            (_isLoading ? Colors.grey : const Color(0xFF6366F1))
-                                .withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                  const SizedBox(width: 12),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _isLoading
+                            ? [Colors.grey.shade400, Colors.grey.shade500]
+                            : [
+                                const Color(0xFF6366F1),
+                                const Color(0xFF8B5CF6),
+                              ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    ],
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              (_isLoading
+                                      ? Colors.grey
+                                      : const Color(0xFF6366F1))
+                                  .withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: _isLoading ? null : _handleSend,
+                      icon: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.send_rounded, color: Colors.white),
+                    ),
                   ),
-                  child: IconButton(
-                    onPressed: _isLoading
-                        ? null
-                        : _handleSend, // Yüklenirken tıklanmasın
-                    icon: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.send_rounded, color: Colors.white),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
