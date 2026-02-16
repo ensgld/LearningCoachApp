@@ -7,7 +7,8 @@ import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
 
 void main() async {
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: '.env');
+  debugPrint("DotEnv loaded. API_BASE_URL: ${dotenv.env['API_BASE_URL']}");
   runApp(const ProviderScope(child: LearningCoachApp()));
 }
 

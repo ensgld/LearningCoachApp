@@ -6,7 +6,9 @@ import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+  final String? initialPrompt;
+
+  const ChatScreen({super.key, this.initialPrompt});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -16,6 +18,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isSending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPrompt != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _sendInitialMessage(widget.initialPrompt!);
+      });
+    }
+  }
+
+  Future<void> _sendInitialMessage(String text) async {
+    setState(() => _isSending = true);
+    try {
+      // Add user message first (optional, maybe we don't want to show the long prompt?)
+      // For now let's show it so user knows context is sent.
+      // Alternatively, we could send it as a "system" message or just directly call provider.
+      await ref.read(chatMessagesProvider.notifier).sendMessage(text);
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    } finally {
+      if (mounted) {
+        setState(() => _isSending = false);
+      }
+    }
+  }
 
   @override
   void dispose() {

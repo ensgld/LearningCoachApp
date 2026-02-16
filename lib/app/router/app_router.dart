@@ -145,7 +145,10 @@ GoRouter goRouter(Ref ref) {
                   GoRoute(
                     path: 'chat',
                     parentNavigatorKey: _rootNavigatorKey,
-                    builder: (context, state) => const ChatScreen(),
+                    builder: (context, state) {
+                      final initialPrompt = state.extra as String?;
+                      return ChatScreen(initialPrompt: initialPrompt);
+                    },
                   ),
                 ],
               ),

@@ -37,6 +37,12 @@ export async function indexDocument(params: {
     mimeType: string;
 }): Promise<void> {
     try {
+        const existingDoc = await pool.query(
+            'SELECT summary FROM documents WHERE id = $1',
+            [params.documentId]
+        );
+        const existingSummary = existingDoc.rows[0]?.summary as string | null | undefined;
+
         const text = await extractText(params.filePath, params.mimeType);
         if (!text || text.trim().length === 0) {
             await markDocumentFailed(params.documentId, 'Doküman metni çıkarılamadı.');
@@ -51,14 +57,16 @@ export async function indexDocument(params: {
 
         const totalChunks = chunks.length;
 
-        const summary = await generateSummary(chunks);
+        const summary = existingSummary && existingSummary.trim().length > 0
+            ? existingSummary
+            : await generateSummary(chunks);
 
         await pool.query('DELETE FROM document_chunks WHERE document_id = $1', [params.documentId]);
         await pool.query(
             `UPDATE documents
-             SET status = 'processing', total_chunks = $2, processing_progress = 0.00, error_message = NULL, summary = $3
+             SET status = 'processing', total_chunks = $2, processing_progress = 0.00, error_message = NULL, summary = $3, content_text = $4
              WHERE id = $1`,
-            [params.documentId, totalChunks, summary]
+            [params.documentId, totalChunks, summary, text]
         );
 
         let processed = 0;
@@ -128,9 +136,9 @@ export async function indexDocument(params: {
 
         await pool.query(
             `UPDATE documents
-             SET status = 'ready', total_chunks = $2, indexed_at = NOW(), error_message = NULL, processing_progress = 1.00, summary = $3
+             SET status = 'ready', total_chunks = $2, indexed_at = NOW(), error_message = NULL, processing_progress = 1.00, summary = $3, content_text = $4
              WHERE id = $1`,
-            [params.documentId, totalChunks, summary]
+            [params.documentId, totalChunks, summary, text]
         );
     } catch (e) {
         await markDocumentFailed(params.documentId, 'Doküman işlenirken hata oluştu.');

@@ -13,6 +13,10 @@ interface RagAnswerResponse {
     answer: string;
 }
 
+interface ChatResponse {
+    answer: string;
+}
+
 export async function embedTexts(texts: string[]): Promise<number[][]> {
     if (!config.OLLAMA_EMBEDDINGS_URL) {
         throw new Error('Ollama embeddings endpoint is not configured');
@@ -64,5 +68,21 @@ export async function answerWithContext(question: string, context: string): Prom
     }
 
     const data = (await response.json()) as RagAnswerResponse;
+    return data.answer;
+}
+
+export async function askCoach(message: string): Promise<string> {
+    const response = await fetch(`${config.LLM_BACKEND_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`LLM chat error: ${response.status} ${body}`);
+    }
+
+    const data = (await response.json()) as ChatResponse;
     return data.answer;
 }

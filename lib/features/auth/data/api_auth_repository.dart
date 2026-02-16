@@ -87,8 +87,8 @@ class ApiAuthRepository implements AuthRepository {
   Future<AuthUser?> getCurrentUser() async {
     print('🔑 ApiAuthRepository.getCurrentUser');
 
-    // Wait for tokens to be loaded from storage
-    await _apiService.ensureInitialized();
+    // Ensure token is loaded from storage
+    await _apiService.loadToken();
 
     if (!_apiService.isLoggedIn) {
       print('📭 No active session');

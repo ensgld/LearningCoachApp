@@ -4,6 +4,7 @@ import multer from 'multer';
 import path from 'path';
 import { BadRequestError, ConflictError } from '../common/errors';
 import { authMiddleware, AuthRequest } from '../middleware/auth.middleware';
+import * as chatService from '../services/chat.service';
 import * as documentService from '../services/document.service';
 import * as documentRagService from '../services/document_rag.service';
 
@@ -108,6 +109,17 @@ router.get('/', async (req: AuthRequest, res: Response, next: NextFunction) => {
     }
 });
 
+// GET /documents/:id - Document detail
+router.get('/:id', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const document = await documentService.getDocument(userId, req.params.id);
+        res.json({ document });
+    } catch (e) {
+        next(e);
+    }
+});
+
 // POST /documents/:id/chat - Ask document
 router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -122,16 +134,58 @@ router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunct
             throw new BadRequestError('message alanı zorunludur');
         }
 
+        const thread = await chatService.getOrCreateThread(userId, doc.id);
+
+        await chatService.addMessage({
+            threadId: thread.id,
+            text: req.body.message,
+            isUser: true,
+        });
+
         const result = await documentRagService.chatWithDocument({
             documentId: doc.id,
             question: req.body.message,
             docTitle: doc.title,
         });
 
+        const aiMessage = await chatService.addMessage({
+            threadId: thread.id,
+            text: result.answer,
+            isUser: false,
+        });
+
+        if (result.sources && result.sources.length > 0) {
+            await chatService.addMessageSources({
+                messageId: aiMessage.id,
+                documentId: doc.id,
+                sources: result.sources.map((source) => ({
+                    chunkId: source.chunkId,
+                    excerpt: source.excerpt,
+                    pageLabel: source.pageLabel,
+                })),
+            });
+        }
+
         res.json({
             answer: result.answer,
             sources: result.sources,
+            threadId: thread.id,
         });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// GET /documents/:id/chat/history - Document chat history
+router.get('/:id/chat/history', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const doc = await documentService.getDocument(userId, req.params.id);
+
+        const thread = await chatService.getOrCreateThread(userId, doc.id);
+        const messages = await chatService.getThreadMessages(thread.id);
+
+        res.json({ threadId: thread.id, messages });
     } catch (e) {
         next(e);
     }
