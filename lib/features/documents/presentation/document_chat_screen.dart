@@ -18,18 +18,46 @@ class _DocumentChatScreenState extends ConsumerState<DocumentChatScreen> {
   final List<CoachMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
   bool _isSending = false;
+  bool _historyLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    // Initial greeting
-    _messages.add(
-      CoachMessage(
-        text:
-            "Merhaba! '${widget.document.title}' hakkında ne bilmek istersiniz?",
-        isUser: false,
-      ),
-    );
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    if (_historyLoaded) return;
+    _historyLoaded = true;
+
+    try {
+      final history = await ref
+          .read(apiDocumentRepositoryProvider)
+          .getDocumentChatHistory(widget.document.id);
+
+      if (!mounted) return;
+
+      if (history.isNotEmpty) {
+        setState(() {
+          _messages.addAll(history);
+        });
+        return;
+      }
+    } catch (_) {
+      if (!mounted) return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _messages.add(
+          CoachMessage(
+            text:
+                "Merhaba! '${widget.document.title}' hakkında ne bilmek istersiniz?",
+            isUser: false,
+          ),
+        );
+      });
+    }
   }
 
   Future<void> _sendMessage() async {

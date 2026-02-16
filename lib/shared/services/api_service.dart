@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'; // kIsWeb için
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
@@ -211,52 +209,22 @@ class ApiService {
 
   bool get isLoggedIn => _accessToken != null;
 
-  //--------------  LLM BACKEND --------------//
-
-  static String get baseUrlLLM {
-    // 1. Önce .env dosyasında tanımlı mı diye bakıyoruz
-    final envUrl = dotenv.env['LLM_BASE_URL'];
-
-    if (envUrl != null && envUrl.isNotEmpty) {
-      return envUrl;
-    }
-
-    // 2. Eğer .env boşsa veya okunamazsa, senin sabit Windows sunucu IP'ni kullanıyoruz.
-    // Not: Sunucu farklı bilgisayarda olduğu için 'localhost' veya '10.0.2.2' işe yaramaz.
-    // Doğrudan o bilgisayarın ağ adresine gitmeliyiz.
-    return 'http://172.24.0.198:8000';
+  Future<Map<String, dynamic>> sendChatMessage(
+    String message, {
+    String? threadId,
+  }) async {
+    final response = await _dio.post(
+      '/chat',
+      data: {'message': message, if (threadId != null) 'threadId': threadId},
+    );
+    return response.data as Map<String, dynamic>;
   }
 
-  Future<String> sendChatMessage(String message) async {
-    try {
-      final url = Uri.parse('$baseUrlLLM/chat');
-
-      debugPrint('İstek gönderiliyor: $url'); // Log ekledik
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8', // UTF-8 önemli
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'message': message}),
-      );
-
-      if (response.statusCode == 200) {
-        // UTF-8 decode yaparak Türkçe karakter sorununu da çözüyoruz
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-
-        return data['answer'] as String;
-      } else {
-        throw Exception(
-          'Server hatası: ${response.statusCode} - ${response.body}',
-        );
-      }
-    } catch (e) {
-      debugPrint('API Hatası: $e');
-      throw Exception('Bağlantı hatası: $e');
-    }
+  Future<Map<String, dynamic>> getChatHistory({String? threadId}) async {
+    final response = await _dio.get(
+      '/chat/history',
+      queryParameters: threadId != null ? {'threadId': threadId} : null,
+    );
+    return response.data as Map<String, dynamic>;
   }
-
-  //--------------  LLM BACKEND --------------//
 }
