@@ -216,6 +216,11 @@ class ApiService {
   static String get baseUrlLLM {
     // 1. Önce .env dosyasında tanımlı mı diye bakıyoruz
     final envUrl = dotenv.env['LLM_BASE_URL'];
+    final debugModeLLM = dotenv.env['DEBUG_MODE_LLM'];
+
+    if (debugModeLLM == 'true') {
+      return 'http://127.0.0.1:8000';
+    }
 
     if (envUrl != null && envUrl.isNotEmpty) {
       return envUrl;
