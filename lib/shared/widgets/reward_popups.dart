@@ -1,22 +1,24 @@
-import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
 import 'dart:math' as math;
+
+import 'package:confetti/confetti.dart';
+import 'package:flutter/material.dart';
 
 /// Victory Popup - Shows XP and Gold rewards after study session
 class VictoryPopup extends StatefulWidget {
   final int xpEarned;
-  final int goldEarned;
+  // Gold removed
   final int newLevel;
   final bool leveledUp;
   final VoidCallback onContinue;
+  final VoidCallback? onResume;
 
   const VictoryPopup({
     super.key,
     required this.xpEarned,
-    required this.goldEarned,
     required this.newLevel,
     this.leveledUp = false,
     required this.onContinue,
+    this.onResume,
   });
 
   @override
@@ -43,17 +45,18 @@ class _VictoryPopupState extends State<VictoryPopup>
       curve: Curves.elasticOut,
     );
 
-    _fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
 
     _controller.forward();
-    _confettiController.play();
+
+    // Only play confetti if XP was earned
+    if (widget.xpEarned > 0) {
+      _confettiController.play();
+    }
   }
 
   @override
@@ -65,26 +68,29 @@ class _VictoryPopupState extends State<VictoryPopup>
 
   @override
   Widget build(BuildContext context) {
+    final hasEarnedRewards = widget.xpEarned > 0;
+
     return Stack(
       children: [
-        // Confetti
-        Align(
-          alignment: Alignment.topCenter,
-          child: ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            colors: const [
-              Color(0xFF6366F1),
-              Color(0xFFEC4899),
-              Color(0xFF10B981),
-              Color(0xFFF59E0B),
-              Color(0xFF8B5CF6),
-            ],
-            numberOfParticles: 30,
-            gravity: 0.3,
+        // Confetti (Only if rewards earned)
+        if (hasEarnedRewards)
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              colors: const [
+                Color(0xFF6366F1),
+                Color(0xFFEC4899),
+                Color(0xFF10B981),
+                Color(0xFFF59E0B),
+                Color(0xFF8B5CF6),
+              ],
+              numberOfParticles: 30,
+              gravity: 0.3,
+            ),
           ),
-        ),
         // Dialog
         Center(
           child: ScaleTransition(
@@ -96,19 +102,25 @@ class _VictoryPopupState extends State<VictoryPopup>
                 child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF6366F1),
-                        Color(0xFF8B5CF6),
-                        Color(0xFF9333EA),
-                      ],
+                    gradient: LinearGradient(
+                      colors: hasEarnedRewards
+                          ? [
+                              const Color(0xFF6366F1),
+                              const Color(0xFF8B5CF6),
+                              const Color(0xFF9333EA),
+                            ]
+                          : [const Color(0xFF64748B), const Color(0xFF94A3B8)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6366F1).withOpacity(0.5),
+                        color:
+                            (hasEarnedRewards
+                                    ? const Color(0xFF6366F1)
+                                    : Colors.black)
+                                .withOpacity(0.5),
                         blurRadius: 40,
                         offset: const Offset(0, 20),
                       ),
@@ -117,7 +129,7 @@ class _VictoryPopupState extends State<VictoryPopup>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Trophy Icon
+                      // Icon
                       TweenAnimationBuilder<double>(
                         tween: Tween(begin: 0.0, end: 1.0),
                         duration: const Duration(milliseconds: 800),
@@ -130,8 +142,10 @@ class _VictoryPopupState extends State<VictoryPopup>
                                 color: Colors.white.withOpacity(0.2),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
-                                Icons.emoji_events_rounded,
+                              child: Icon(
+                                hasEarnedRewards
+                                    ? Icons.emoji_events_rounded
+                                    : Icons.access_time_filled_rounded,
                                 size: 64,
                                 color: Colors.white,
                               ),
@@ -142,7 +156,12 @@ class _VictoryPopupState extends State<VictoryPopup>
                       const SizedBox(height: 24),
                       // Title
                       Text(
-                        widget.leveledUp ? '🎉 Seviye Atladın!' : '⚔️ Zafer!',
+                        // If 0 XP (duration < 10 mins), show specific message
+                        !hasEarnedRewards
+                            ? 'Henüz Erken!'
+                            : widget.leveledUp
+                            ? '🎉 Seviye Atladın!'
+                            : '⚔️ Zafer!',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -152,55 +171,103 @@ class _VictoryPopupState extends State<VictoryPopup>
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      if (widget.leveledUp)
-                        Text(
-                          'Seviye ${widget.newLevel}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
+                      // Subtitle / Description
+                      Text(
+                        !hasEarnedRewards
+                            ? 'XP kazanmak için minimum 10 dakika çalışmalısın.'
+                            : widget.leveledUp
+                            ? 'Seviye ${widget.newLevel}'
+                            : 'Harika bir çalışma seansıydı!',
+                        style: TextStyle(
+                          fontSize: !hasEarnedRewards ? 16 : 20,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withOpacity(0.9),
+                          height: 1.5,
                         ),
-                      const SizedBox(height: 32),
-                      // Rewards
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildRewardItem(
-                            '⭐',
-                            '${widget.xpEarned} XP',
-                          ),
-                          _buildRewardItem(
-                            '💰',
-                            '${widget.goldEarned} Altın',
-                          ),
-                        ],
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      // Continue Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: widget.onContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF6366F1),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      // Rewards (Only if earned)
+                      if (hasEarnedRewards)
+                        Center(
+                          child: _buildRewardItem('⭐', '${widget.xpEarned} XP'),
+                        ),
+                      if (hasEarnedRewards) const SizedBox(height: 32),
+
+                      // Actions
+                      if (!hasEarnedRewards) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed:
+                                    widget.onContinue, // Actually "Finish" here
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white70,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Bitir',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Devam Et',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: widget.onResume,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: const Color(0xFF64748B),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  'Devam Et',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: widget.onContinue,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF6366F1),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Devam Et',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
@@ -229,10 +296,7 @@ class _VictoryPopupState extends State<VictoryPopup>
               ),
               child: Column(
                 children: [
-                  Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 32),
-                  ),
+                  Text(emoji, style: const TextStyle(fontSize: 32)),
                   const SizedBox(height: 8),
                   Text(
                     text,
@@ -254,14 +318,14 @@ class _VictoryPopupState extends State<VictoryPopup>
 
 /// Task Completion Popup - Shows gold reward
 class TaskCompletionPopup extends StatelessWidget {
-  final int goldEarned;
   final String taskName;
+  final int xpEarned;
   final VoidCallback onClose;
 
   const TaskCompletionPopup({
     super.key,
-    required this.goldEarned,
     required this.taskName,
+    this.xpEarned = 0,
     required this.onClose,
   });
 
@@ -317,29 +381,34 @@ class TaskCompletionPopup extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('💰', style: TextStyle(fontSize: 28)),
-                        const SizedBox(width: 12),
-                        Text(
-                          '+$goldEarned Altın',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  if (xpEarned > 0) ...[
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('⭐', style: TextStyle(fontSize: 20)),
+                          const SizedBox(width: 8),
+                          Text(
+                            '+$xpEarned XP',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 24),
                   SizedBox(
                     width: double.infinity,

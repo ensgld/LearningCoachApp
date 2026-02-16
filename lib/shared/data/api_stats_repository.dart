@@ -40,6 +40,22 @@ class ApiStatsRepository {
     }
   }
 
+  Future<void> updateUserStats(UserStats stats) async {
+    try {
+      await _dio.post(
+        '/user/stats',
+        data: {
+          'current_level': stats.currentLevel,
+          'current_xp': stats.currentXP,
+          'total_gold': stats.totalGold,
+          'avatar_stage': stats.stage.name, // Enum to string
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<DailyStats>> getDailyStats() async {
     try {
       final response = await _dio.get<Map<String, dynamic>>('/user/daily');

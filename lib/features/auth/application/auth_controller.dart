@@ -34,16 +34,26 @@ class AuthController extends _$AuthController {
     // Check for existing session on app init
     _checkSession();
 
-    // Initially show unauthenticated state
-    // Will update if session exists
-    return const AuthStateUnauthenticated();
+    // Initially show loading state to prevent flash of login screen
+    return const AuthStateLoading();
   }
 
   /// Check if user session exists (called on app init)
   Future<void> _checkSession() async {
-    final user = await _repository.getCurrentUser();
-    if (user != null && ref.mounted) {
-      state = AuthStateAuthenticated(user);
+    try {
+      final user = await _repository.getCurrentUser();
+
+      if (!ref.mounted) return;
+
+      if (user != null) {
+        state = AuthStateAuthenticated(user);
+      } else {
+        state = const AuthStateUnauthenticated();
+      }
+    } catch (e) {
+      if (ref.mounted) {
+        state = const AuthStateUnauthenticated();
+      }
     }
   }
 

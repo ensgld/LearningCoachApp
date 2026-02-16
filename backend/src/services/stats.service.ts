@@ -44,6 +44,27 @@ export async function getUserStats(userId: string): Promise<UserStatsResult> {
     };
 }
 
+export async function updateUserStats(userId: string, stats: UserStatsResult): Promise<UserStatsResult> {
+    const res = await pool.query(
+        `INSERT INTO user_stats (user_id, current_level, current_xp, total_gold, avatar_stage)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (user_id) DO UPDATE SET
+            current_level = EXCLUDED.current_level,
+            current_xp = EXCLUDED.current_xp,
+            total_gold = EXCLUDED.total_gold,
+            avatar_stage = EXCLUDED.avatar_stage
+         RETURNING current_level, current_xp, total_gold, avatar_stage`,
+        [userId, stats.currentLevel, stats.currentXP, stats.totalGold, stats.avatarStage]
+    );
+
+    return {
+        currentLevel: res.rows[0].current_level,
+        currentXP: res.rows[0].current_xp,
+        totalGold: res.rows[0].total_gold,
+        avatarStage: res.rows[0].avatar_stage
+    };
+}
+
 export async function getUserProgress(userId: string): Promise<UserProgressResult> {
     // Calculate aggregate study stats
     // We sum duration_seconds / 60 for minutes
