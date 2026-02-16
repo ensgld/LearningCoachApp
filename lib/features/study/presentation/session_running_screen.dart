@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
+import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
-import 'package:learning_coach/shared/widgets/avatar_character.dart';
 import 'package:learning_coach/shared/widgets/reward_popups.dart';
 
 class SessionRunningScreen extends ConsumerStatefulWidget {
@@ -25,17 +25,31 @@ class SessionRunningScreen extends ConsumerStatefulWidget {
       _SessionRunningScreenState();
 }
 
-class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
+class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen>
+    with SingleTickerProviderStateMixin {
   // Timer
   late int _secondsRemaining;
   Timer? _timer;
   bool _isPaused = false;
+
+  // Animation
+  late AnimationController _swayController;
+  late Animation<double> _swayAnimation;
 
   @override
   void initState() {
     super.initState();
     _secondsRemaining = widget.durationMinutes * 60;
     _startTimer();
+
+    _swayController = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _swayAnimation = Tween<double>(begin: -0.05, end: 0.05).animate(
+      CurvedAnimation(parent: _swayController, curve: Curves.easeInOut),
+    );
   }
 
   void _startTimer() {
@@ -58,6 +72,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _swayController.dispose();
     super.dispose();
   }
 
@@ -127,12 +142,8 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
                         color: scheme.primary,
                       ),
                     ),
-                    // Animated Avatar in Training Pose
-                    AvatarCharacter(
-                      stage: userStats.stage.name,
-                      size: 180,
-                      isAnimating: !_isPaused,
-                    ),
+                    // Plant with Swaying Animation
+                    _buildSwayingPlant(userStats, scheme),
                   ],
                 ),
                 const SizedBox(height: 32),
@@ -209,20 +220,57 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
     );
   }
 
-  void _finishSession() async {
+  void _finishSession() {
     _timer?.cancel();
-
-    // Calculate study time based on elapsed time (not just full duration if finished early)
-    // Assuming button press finishes session with current elapsed time?
-    // User requested: "bu hedefin ilerlemesini ne kadar süre çalıştığını db'ye kaydedilsin"
-    // Usually "finish" means "done for now".
 
     final elapsedSeconds = (widget.durationMinutes * 60) - _secondsRemaining;
     final elapsedMinutes = elapsedSeconds ~/ 60;
+    final currentStats = ref.read(userStatsProvider);
 
-    // Minimum 1 minutes to record? or just record whatever.
-    // Let's record.
+    // Minimum 10 minutes required for rewards
+    if (elapsedMinutes < 10) {
+      // Show VictoryPopup in "Early Exit" mode (0 XP)
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => VictoryPopup(
+          xpEarned: 0,
+          newLevel: currentStats.level,
+          leveledUp: false,
+          onContinue: () {
+            // "Bitir" pressed
+            Navigator.of(context).pop(); // Close dialog
+            _completeSession(
+              elapsedSeconds,
+              elapsedMinutes,
+              showSuccessDialog: false,
+            );
+            if (mounted && context.canPop()) {
+              context.pop(); // Close screen
+            }
+          },
+          onResume: () {
+            // "Devam Et" pressed
+            Navigator.of(context).pop(); // Close dialog
+            // Timer is already paused by logic flow? No, _finishSession cancels it.
+            // We need to decide if we restart it or if we just let it be.
+            // _finishSession cancelled it. We should probably restart it or not cancel it until confirmed.
+            // Wait, the previous logic cancelled timer at start of _finishSession.
+            // If we resume, we need to restart timer.
+            _startTimer();
+          },
+        ),
+      );
+    } else {
+      _completeSession(elapsedSeconds, elapsedMinutes);
+    }
+  }
 
+  Future<void> _completeSession(
+    int elapsedSeconds,
+    int elapsedMinutes, {
+    bool showSuccessDialog = true,
+  }) async {
     try {
       await ref
           .read(apiStudySessionRepositoryProvider)
@@ -236,34 +284,31 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
       final currentStats = ref.read(userStatsProvider);
       final newStats = GamificationService.awardStudyRewards(
         currentStats,
-        elapsedMinutes > 0
-            ? elapsedMinutes
-            : 1, // Minimum 1 minute for reward calc
+        elapsedMinutes, // Corrected to use minutes
       );
       final leveledUp = newStats.level > currentStats.level;
 
       // Update stats
       ref.read(userStatsProvider.notifier).updateStats(newStats);
 
-      // Show victory popup
-      if (mounted) {
+      // Show victory popup if requested (and if we have rewards or it's a normal finish)
+      // Actually strictly respecting the flag is safer for the double-dialog issue.
+      if (showSuccessDialog && mounted) {
         await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => VictoryPopup(
             xpEarned: GamificationService.calculateXpReward(
-              elapsedMinutes > 0 ? elapsedMinutes : 1,
-              currentStats.stage,
-            ),
-            goldEarned: GamificationService.calculateSessionGoldReward(
+              elapsedMinutes,
               currentStats.stage,
             ),
             newLevel: newStats.level,
             leveledUp: leveledUp,
             onContinue: () {
               Navigator.of(context).pop(); // Close dialog
-              context.pop(); // Close running screen, return to study menu
+              context.pop(); // Close running screen
             },
+            // onResume not needed here
           ),
         );
       }
@@ -274,5 +319,126 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen> {
         ).showSnackBar(SnackBar(content: Text('Kayıt hatası: $e')));
       }
     }
+  }
+
+  Widget _buildSwayingPlant(UserStats userStats, ColorScheme scheme) {
+    final treeAsset = GamificationService.getTreeAssetPath(userStats.level);
+    const double containerSize = 220.0;
+
+    // Pot logic (Static base)
+    const double potHeight = containerSize * 0.35;
+    const double potWidth = containerSize * 0.55;
+
+    // Tree dimensions
+    const double treeHeight = containerSize * 0.8;
+    const double treeWidth = treeHeight * 0.85;
+
+    return SizedBox(
+      width: containerSize,
+      height: containerSize,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Tree Layer (Animated)
+          Positioned(
+            bottom: containerSize * 0.28,
+            child: AnimatedBuilder(
+              animation: _swayAnimation,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _isPaused ? 0 : _swayAnimation.value,
+                  alignment: Alignment.bottomCenter,
+                  child: SizedBox(
+                    width: treeWidth,
+                    height: treeHeight,
+                    child: Image.asset(
+                      treeAsset,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.park,
+                          size: 80,
+                          color: Colors.green,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Pot Layer (Static Front)
+          Positioned(
+            bottom: containerSize * 0.25,
+            child: Container(
+              width: potWidth,
+              height: potHeight,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.brown[400]!, Colors.brown[700]!],
+                ),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  // Pot rim
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: potHeight * 0.2,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.brown[300]!, Colors.brown[500]!],
+                        ),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Soil or Label area
+                  Positioned(
+                    top: potHeight * 0.3,
+                    left: potWidth * 0.2,
+                    right: potWidth * 0.2,
+                    child: Container(
+                      height: potHeight * 0.4,
+                      decoration: BoxDecoration(
+                        color: Colors.brown[900]?.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.eco,
+                          color: Colors.green[200]!.withOpacity(0.5),
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

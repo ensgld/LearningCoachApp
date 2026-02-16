@@ -26,35 +26,35 @@ class _ShopScreenState extends ConsumerState<ShopScreen>
       id: 'pot_terracotta',
       name: '🪴 Terracotta Saksı',
       category: ItemCategory.pot,
-      goldCost: 150,
+      goldCost: 0,
       assetPath: 'pot_terracotta',
     ),
     const InventoryItem(
       id: 'pot_ceramic',
       name: '🏺 Seramik Saksı',
       category: ItemCategory.pot,
-      goldCost: 250,
+      goldCost: 0,
       assetPath: 'pot_ceramic',
     ),
     const InventoryItem(
       id: 'pot_wooden',
       name: '🪵 Ahşap Saksı',
       category: ItemCategory.pot,
-      goldCost: 200,
+      goldCost: 0,
       assetPath: 'pot_wooden',
     ),
     const InventoryItem(
       id: 'pot_gold',
       name: '✨ Altın Saksı',
       category: ItemCategory.pot,
-      goldCost: 500,
+      goldCost: 0,
       assetPath: 'pot_gold',
     ),
     const InventoryItem(
       id: 'pot_crystal',
       name: '💎 Kristal Saksı',
       category: ItemCategory.pot,
-      goldCost: 600,
+      goldCost: 0,
       assetPath: 'pot_crystal',
     ),
 
@@ -63,35 +63,35 @@ class _ShopScreenState extends ConsumerState<ShopScreen>
       id: 'bg_night',
       name: '🌙 Gece Gökyüzü',
       category: ItemCategory.background,
-      goldCost: 600,
+      goldCost: 0,
       assetPath: 'space_bg',
     ),
     const InventoryItem(
       id: 'bg_forest',
       name: '🌲 Orman Arka Planı',
       category: ItemCategory.background,
-      goldCost: 500,
+      goldCost: 0,
       assetPath: 'forest_bg',
     ),
     const InventoryItem(
       id: 'bg_ocean',
       name: '🌊 Okyanus Arka Planı',
       category: ItemCategory.background,
-      goldCost: 550,
+      goldCost: 0,
       assetPath: 'ocean_bg',
     ),
     const InventoryItem(
       id: 'bg_sunny',
       name: '☀️ Güneşli Park',
       category: ItemCategory.background,
-      goldCost: 400,
+      goldCost: 0,
       assetPath: 'sunny_bg',
     ),
     const InventoryItem(
       id: 'bg_rainbow',
       name: '🌈 Gökkuşağı',
       category: ItemCategory.background,
-      goldCost: 700,
+      goldCost: 0,
       assetPath: 'rainbow_bg',
     ),
 
@@ -100,35 +100,35 @@ class _ShopScreenState extends ConsumerState<ShopScreen>
       id: 'comp_cat',
       name: '🐱 Uyuyan Kedi',
       category: ItemCategory.companion,
-      goldCost: 300,
+      goldCost: 0,
       assetPath: 'cat_companion',
     ),
     const InventoryItem(
       id: 'comp_bird',
       name: '🐦 Cıvıldayan Kuş',
       category: ItemCategory.companion,
-      goldCost: 250,
+      goldCost: 0,
       assetPath: 'bird_companion',
     ),
     const InventoryItem(
       id: 'comp_butterfly',
       name: '🦋 Kelebek',
       category: ItemCategory.companion,
-      goldCost: 200,
+      goldCost: 0,
       assetPath: 'butterfly_companion',
     ),
     const InventoryItem(
       id: 'comp_owl',
       name: '🦉 Bilge Baykuş',
       category: ItemCategory.companion,
-      goldCost: 400,
+      goldCost: 0,
       assetPath: 'owl_companion',
     ),
     const InventoryItem(
       id: 'comp_dragon',
       name: '🐉 Mini Ejderha',
       category: ItemCategory.companion,
-      goldCost: 800,
+      goldCost: 0,
       assetPath: 'dragon_companion',
     ),
   ];
@@ -192,41 +192,8 @@ class _ShopScreenState extends ConsumerState<ShopScreen>
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                     const Spacer(),
-                    // Gold Balance
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFF59E0B).withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('💰', style: TextStyle(fontSize: 20)),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${userStats.gold}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Gold removed
+                    const SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -572,27 +539,16 @@ class _ShopItemCard extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: canAfford
-                            ? const Color(0xFFFBBF24).withOpacity(0.2)
-                            : Colors.grey.withOpacity(0.2),
+                        color: const Color(0xFF10B981).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('💰', style: TextStyle(fontSize: 14)),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${item.goldCost}',
-                            style: TextStyle(
-                              color: canAfford
-                                  ? const Color(0xFFF59E0B)
-                                  : Colors.grey,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      child: const Text(
+                        'Ücretsiz', // Free
+                        style: TextStyle(
+                          color: Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                 ],
@@ -627,19 +583,13 @@ class _PurchaseConfirmDialog extends ConsumerWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Fiyat: 💰 ', style: TextStyle(fontSize: 18)),
-              Text(
-                '${item.goldCost}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFF59E0B),
-                ),
-              ),
-            ],
+          const Text(
+            'Ücretsiz',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF10B981),
+            ),
           ),
         ],
       ),

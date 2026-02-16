@@ -37,11 +37,16 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
           .read(apiGoalRepositoryProvider)
           .updateTask(widget.goal.id, updatedTask);
 
-      // Award gold for newly completed tasks
+      // Award XP for newly completed tasks
       if (!wasCompleted && updatedTask.isCompleted) {
-        final currentStats = ref.read(userStatsProvider);
-        final newStats = GamificationService.awardTaskRewards(currentStats);
-        ref.read(userStatsProvider.notifier).updateStats(newStats);
+        // Award rewards logic
+        ref.read(userStatsProvider.notifier).awardTaskRewards();
+
+        // Get XP amount for popup display
+        final currentStage = ref.read(userStatsProvider).stage;
+        final xpEarned = GamificationService.calculateTaskXpReward(
+          currentStage,
+        );
 
         // Show reward popup
         if (mounted) {
@@ -49,10 +54,8 @@ class _GoalDetailScreenState extends ConsumerState<GoalDetailScreen> {
             showDialog<void>(
               context: context,
               builder: (context) => TaskCompletionPopup(
-                goldEarned: GamificationService.calculateTaskGoldReward(
-                  currentStats.stage,
-                ),
                 taskName: task.title,
+                xpEarned: xpEarned,
                 onClose: () => Navigator.of(context).pop(),
               ),
             );

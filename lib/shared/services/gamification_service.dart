@@ -11,7 +11,7 @@ class GamificationService {
   static const double xpMultiplier = 1.5;
 
   // --- Base Reward Constants ---
-  static const int baseXpPerMinute = 10;
+  static const int baseXpPerTask = 5;
   static const int baseGoldPerTask = 50;
   static const int baseGoldPerSession = 25;
 
@@ -21,18 +21,15 @@ class GamificationService {
   static const int bloomMaxLevel = 25;
   static const int treeMaxLevel = 35;
 
-  /// Calculate XP with stage bonus
+  /// Calculate XP with stage bonus - DEPRECATED BONUS
   static int calculateXpWithBonus(int baseXp, AvatarStage stage) {
-    final features = getStageFeatures(stage);
-    final bonusXp = (baseXp * features.xpBonus / 100).round();
-    return baseXp + bonusXp;
+    // Bonuses removed for linear progression
+    return baseXp;
   }
 
-  /// Calculate Gold with stage bonus
+  /// Calculate Gold with stage bonus - DEPRECATED
   static int calculateGoldWithBonus(int baseGold, AvatarStage stage) {
-    final features = getStageFeatures(stage);
-    final bonusGold = (baseGold * features.goldBonus / 100).round();
-    return baseGold + bonusGold;
+    return 0; // Gold removed
   }
 
   /// Calculate level from total XP
@@ -42,20 +39,28 @@ class GamificationService {
     return (sqrt(totalXp / baseXpPerLevel)).floor() + 1;
   }
 
-  /// Get XP reward for study with stage bonus
+  /// Get XP reward for study
+  /// Rules:
+  /// - 1 min = 1 XP
+  /// - Minimum 10 minutes required
   static int calculateXpReward(int studyMinutes, AvatarStage stage) {
-    final baseXp = studyMinutes * baseXpPerMinute;
-    return calculateXpWithBonus(baseXp, stage);
+    if (studyMinutes < 10) return 0;
+    return studyMinutes;
   }
 
-  /// Get Gold reward for task with stage bonus
+  /// Get XP reward for task
+  static int calculateTaskXpReward(AvatarStage stage) {
+    return baseXpPerTask;
+  }
+
+  /// Get Gold reward for task - DEPRECATED
   static int calculateTaskGoldReward(AvatarStage stage) {
-    return calculateGoldWithBonus(baseGoldPerTask, stage);
+    return 0;
   }
 
-  /// Get Gold reward for session with stage bonus
+  /// Get Gold reward for session - DEPRECATED
   static int calculateSessionGoldReward(AvatarStage stage) {
-    return calculateGoldWithBonus(baseGoldPerSession, stage);
+    return 0;
   }
 
   /// Calculate XP required for next level
@@ -107,16 +112,18 @@ class GamificationService {
   }
 
   /// Get tree asset path based on level (for Garden Screen)
+  /// Get tree asset path based on level (for Garden Screen)
   static String getTreeAssetPath(int level) {
-    if (level >= 40) return 'assets/images/tree_lvl5.png'; // Ancient Tree
-    if (level >= 30) return 'assets/images/tree_lvl4.png'; // Mature Tree
-    if (level >= 20) return 'assets/images/tree_lvl3.png'; // Young Tree
-    if (level >= 10) return 'assets/images/tree_lvl2.png'; // Sapling
+    if (level >= 20) return 'assets/images/tree_lvl5.png'; // Ancient Tree
+    if (level >= 15) return 'assets/images/tree_lvl4.png'; // Mature Tree
+    if (level >= 10) return 'assets/images/tree_lvl3.png'; // Young Tree
+    if (level >= 5) return 'assets/images/tree_lvl2.png'; // Sapling
     return 'assets/images/tree_lvl1.png'; // Seed/Sprout
   }
 
   /// Get stage features - Each stage has unique bonuses
   static StageFeatures getStageFeatures(AvatarStage stage) {
+    // Bonuses are set to 0 to support consistent 1 XP/min logic
     switch (stage) {
       case AvatarStage.seed:
         return const StageFeatures(
@@ -134,8 +141,8 @@ class GamificationService {
           title: '🌿 Filiz',
           description: 'Büyümeye başladın! Artık daha hızlı öğreniyorsun.',
           powerName: 'Hızlı Büyüme',
-          xpBonus: 10, // +10% XP
-          goldBonus: 5, // +5% Gold
+          xpBonus: 0, // Previously 10
+          goldBonus: 0, // Previously 5
           emoji: '🌿',
           primaryColor: Color(0xFF10B981),
           secondaryColor: Color(0xFFD1FAE5),
@@ -145,8 +152,8 @@ class GamificationService {
           title: '🌸 Çiçek',
           description: 'Tüm potansiyelini açığa çıkarıyorsun!',
           powerName: 'Çiçek Açımı',
-          xpBonus: 25, // +25% XP
-          goldBonus: 15, // +15% Gold
+          xpBonus: 0, // Previously 25
+          goldBonus: 0, // Previously 15
           emoji: '🌸',
           primaryColor: Color(0xFFEC4899),
           secondaryColor: Color(0xFFFCE7F3),
@@ -156,8 +163,8 @@ class GamificationService {
           title: '🌳 Ağaç',
           description: 'Güçlü ve köklü bir bilgesin artık.',
           powerName: 'Bilgelik Ağacı',
-          xpBonus: 40, // +40% XP
-          goldBonus: 30, // +30% Gold
+          xpBonus: 0, // Previously 40
+          goldBonus: 0, // Previously 30
           emoji: '🌳',
           primaryColor: Color(0xFF059669),
           secondaryColor: Color(0xFFA7F3D0),
@@ -167,8 +174,8 @@ class GamificationService {
           title: '🌲 Orman',
           description: 'Efsanevi usta! Senin bilgin tüm ormanı besliyor.',
           powerName: 'Usta Ormanı',
-          xpBonus: 60, // +60% XP
-          goldBonus: 50, // +50% Gold
+          xpBonus: 0, // Previously 60
+          goldBonus: 0, // Previously 50
           emoji: '🌲',
           primaryColor: Color(0xFF0369A1),
           secondaryColor: Color(0xFFBAE6FD),
@@ -249,10 +256,20 @@ class GamificationService {
 
   /// Update user stats after task completion
   static UserStats awardTaskRewards(UserStats currentStats) {
+    final xpGained = calculateTaskXpReward(currentStats.stage);
     final goldGained = calculateTaskGoldReward(currentStats.stage);
-    final newGold = currentStats.totalGold + goldGained;
 
-    return currentStats.copyWith(totalGold: newGold);
+    final newXp = currentStats.currentXP + xpGained;
+    final newGold = currentStats.totalGold + goldGained;
+    final newLevel = calculateLevel(newXp);
+    final newStage = getAvatarStage(newLevel);
+
+    return currentStats.copyWith(
+      currentXP: newXp,
+      totalGold: newGold,
+      currentLevel: newLevel,
+      stage: newStage,
+    );
   }
 
   /// Purchase item with gold

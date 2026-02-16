@@ -4,7 +4,6 @@ import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/features/garden/presentation/garden_screen.dart';
 import 'package:learning_coach/features/home/presentation/widgets/home_widgets.dart';
-import 'package:learning_coach/features/shop/presentation/shop_screen.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/gamification_models.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
@@ -55,8 +54,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       userStats.xp,
       userStats.level,
     );
-    final stageName = GamificationService.getLocalizedStageName(userStats.stage, locale);
-    final powerName = GamificationService.getLocalizedPowerName(userStats.stage, locale);
+    final stageName = GamificationService.getLocalizedStageName(
+      userStats.stage,
+      locale,
+    );
+    final powerName = GamificationService.getLocalizedPowerName(
+      userStats.stage,
+      locale,
+    );
     final stageFeatures = GamificationService.getStageFeatures(userStats.stage);
 
     return Scaffold(
@@ -81,99 +86,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
                 child: Column(
                   children: [
-                    // Gold & Level Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Gold Display (Tappable to open shop)
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const ShopScreen(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.95),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFFFBBF24,
-                                  ).withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const Text(
-                                  '💰',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${userStats.gold}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFF59E0B),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    // Level Badge Centered or Leading?
+                    // Let's keep it clean. Just show Level Badge.
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
                         ),
-                        // Level Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                stageFeatures.primaryColor,
-                                stageFeatures.primaryColor.withOpacity(0.7),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: stageFeatures.primaryColor.withOpacity(
-                                  0.3,
-                                ),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              stageFeatures.primaryColor,
+                              stageFeatures.primaryColor.withOpacity(0.8),
                             ],
                           ),
-                          child: Row(
-                            children: [
-                              Text(
-                                stageFeatures.emoji,
-                                style: const TextStyle(fontSize: 20),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: stageFeatures.primaryColor.withOpacity(
+                                0.3,
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Lv ${userStats.level}',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              stageFeatures.emoji,
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Lv ${userStats.level}',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 30),
 
@@ -274,28 +231,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     const SizedBox(height: 16),
 
                     // Bonus Indicators
-                    if (stageFeatures.xpBonus > 0 ||
-                        stageFeatures.goldBonus > 0)
+                    if (stageFeatures.xpBonus > 0)
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.9),
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            if (stageFeatures.xpBonus > 0)
-                              _buildBonusBadge(
-                                '⚡ +${stageFeatures.xpBonus}% XP',
-                                stageFeatures.primaryColor,
-                              ),
-                            if (stageFeatures.goldBonus > 0)
-                              _buildBonusBadge(
-                                '💰 +${stageFeatures.goldBonus}% ${AppStrings.getGoldBonus(locale)}',
-                                const Color(0xFFF59E0B),
-                              ),
-                          ],
+                        child: _buildBonusBadge(
+                          '⚡ +${stageFeatures.xpBonus}% XP',
+                          stageFeatures.primaryColor,
                         ),
                       ),
 
@@ -349,10 +294,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     // Compact size for home screen preview
     const double containerSize = 150.0;
-    const double treeHeight = containerSize * 0.75;
+
+    // Pot logic (Static base)
     const double potHeight = containerSize * 0.35;
+    const double potWidth = containerSize * 0.55;
+
+    // Tree dimensions relative to asset aspect ratio (approx)
+    const double treeHeight = containerSize * 0.8;
     const double treeWidth = treeHeight * 0.85;
-    const double potWidth = treeWidth * 0.65;
 
     return SizedBox(
       width: containerSize,
@@ -361,9 +310,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Tree Layer (Behind)
+          // Tree Layer (Image Asset)
           Positioned(
-            bottom: containerSize * 0.32, // Tree base enters pot
+            bottom: containerSize * 0.28, // Just above pot bottom
             child: SizedBox(
               width: treeWidth,
               height: treeHeight,

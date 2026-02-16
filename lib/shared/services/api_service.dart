@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -38,6 +39,9 @@ class ApiService {
   String? _accessToken;
   String? _refreshToken;
 
+  final Completer<void> _initCompleter = Completer<void>();
+  Future<void> get initializationDone => _initCompleter.future;
+
   ApiService()
     : _dio = Dio(
         BaseOptions(
@@ -54,8 +58,15 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Wait for initialization before attaching token
+          if (!_initCompleter.isCompleted) {
+            await _initCompleter.future;
+          }
+
           print('🌐 API REQUEST: ${options.method} ${options.uri}');
-          print('📦 Data: ${options.data}');
+          if (options.data != null) {
+            print('📦 Data: ${options.data}');
+          }
           if (_accessToken != null) {
             options.headers['Authorization'] = 'Bearer $_accessToken';
           }
@@ -92,17 +103,27 @@ class ApiService {
     );
   }
 
+  Future<void> ensureInitialized() => _initCompleter.future;
+
   Future<void> _loadTokens() async {
     print('🔄 ApiService._loadTokens started');
-    final prefs = await SharedPreferences.getInstance();
-    if (_accessToken == null) {
-      _accessToken = prefs.getString('access_token');
-      _refreshToken = prefs.getString('refresh_token');
-      print('✅ ApiService._loadTokens loaded: $_accessToken');
-    } else {
-      print(
-        '⚠️ ApiService._loadTokens: Token already set, skipping load (race condition avoided)',
-      );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (_accessToken == null) {
+        _accessToken = prefs.getString('access_token');
+        _refreshToken = prefs.getString('refresh_token');
+        print('✅ ApiService._loadTokens loaded: $_accessToken');
+      } else {
+        print(
+          '⚠️ ApiService._loadTokens: Token already set, skipping load (race condition avoided)',
+        );
+      }
+    } catch (e) {
+      print('❌ ApiService._loadTokens error: $e');
+    } finally {
+      if (!_initCompleter.isCompleted) {
+        _initCompleter.complete();
+      }
     }
   }
 

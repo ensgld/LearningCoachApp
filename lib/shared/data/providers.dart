@@ -7,7 +7,6 @@ import 'package:learning_coach/shared/data/api_study_session_repository.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
 import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/providers/auth_provider.dart';
-import 'package:learning_coach/shared/services/api_service.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -147,6 +146,16 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     }
   }
 
+  Future<void> _persistStats(UserStats newStats) async {
+    state = newStats;
+    try {
+      await ref.read(apiStatsRepositoryProvider).updateUserStats(newStats);
+    } catch (e) {
+      print('Error persisting stats: $e');
+      // Optionally revert state or show error
+    }
+  }
+
   void addXP(int amount) {
     if (amount <= 0) return;
 
@@ -154,16 +163,18 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     int newLevel = GamificationService.calculateLevel(newXP);
     final newStage = GamificationService.getAvatarStage(newLevel);
 
-    state = state.copyWith(
+    final newStats = state.copyWith(
       currentXP: newXP,
       currentLevel: newLevel,
       stage: newStage,
     );
+    _persistStats(newStats);
   }
 
   void addGold(int amount) {
     if (amount <= 0) return;
-    state = state.copyWith(totalGold: state.totalGold + amount);
+    final newStats = state.copyWith(totalGold: state.totalGold + amount);
+    _persistStats(newStats);
   }
 
   String getCharacterAssetPath() {
@@ -171,6 +182,8 @@ class UserStatsNotifier extends _$UserStatsNotifier {
   }
 
   void awardStudyRewards(int studyMinutes) {
+    // This is likely not used if we use updateStats directly from screen
+    // But keeping it consistent
     final xpGained = GamificationService.calculateXpReward(
       studyMinutes,
       state.stage,
@@ -178,21 +191,48 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     final goldGained = GamificationService.calculateSessionGoldReward(
       state.stage,
     );
-    addXP(xpGained);
-    addGold(goldGained);
+
+    // Calculate new state logic duplicated from addXP/addGold but combined
+    int newXP = state.currentXP + xpGained;
+    int newLevel = GamificationService.calculateLevel(newXP);
+    final newStage = GamificationService.getAvatarStage(newLevel);
+    int newGold = state.totalGold + goldGained;
+
+    final newStats = state.copyWith(
+      currentXP: newXP,
+      currentLevel: newLevel,
+      stage: newStage,
+      totalGold: newGold,
+    );
+    _persistStats(newStats);
   }
 
   void awardTaskRewards() {
+    final xpGained = GamificationService.calculateTaskXpReward(state.stage);
     final goldGained = GamificationService.calculateTaskGoldReward(state.stage);
-    addGold(goldGained);
+
+    // Calculate new state logic
+    int newXP = state.currentXP + xpGained;
+    int newLevel = GamificationService.calculateLevel(newXP);
+    final newStage = GamificationService.getAvatarStage(newLevel);
+    int newGold = state.totalGold + goldGained;
+
+    final newStats = state.copyWith(
+      currentXP: newXP,
+      currentLevel: newLevel,
+      stage: newStage,
+      totalGold: newGold,
+    );
+    _persistStats(newStats);
   }
 
   void purchaseItem(String itemId, int cost) {
     if (state.totalGold >= cost && !state.purchasedItemIds.contains(itemId)) {
-      state = state.copyWith(
+      final newStats = state.copyWith(
         totalGold: state.totalGold - cost,
         purchasedItemIds: [...state.purchasedItemIds, itemId],
       );
+      _persistStats(newStats);
     }
   }
 
@@ -200,17 +240,19 @@ class UserStatsNotifier extends _$UserStatsNotifier {
     if (state.purchasedItemIds.contains(itemId)) {
       final updated = Map<String, String>.from(state.equippedItems);
       updated[category] = itemId;
-      state = state.copyWith(equippedItems: updated);
+      final newStats = state.copyWith(equippedItems: updated);
+      _persistStats(newStats);
     }
   }
 
   void unequipItem(String category) {
     final updated = Map<String, String>.from(state.equippedItems);
     updated.remove(category);
-    state = state.copyWith(equippedItems: updated);
+    final newStats = state.copyWith(equippedItems: updated);
+    _persistStats(newStats);
   }
 
   void updateStats(UserStats newStats) {
-    state = newStats;
+    _persistStats(newStats);
   }
 }
