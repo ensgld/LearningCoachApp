@@ -31,7 +31,13 @@ class ApiService {
         receiveTimeout: const Duration(seconds: 15),
       ),
     );
+    print('🔌 ApiService Initialized');
+    print('🔗 Resolved API_BASE_URL: ${_dio.options.baseUrl}');
+    _setupInterceptors();
+    loadToken();
+  }
 
+  void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
