@@ -32,13 +32,15 @@ class _AvatarCharacterState extends State<AvatarCharacter>
       vsync: this,
     )..repeat(reverse: true);
 
-    _breathingAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _breathingAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _floatingAnimation = Tween<double>(begin: -8, end: 8).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _floatingAnimation = Tween<double>(
+      begin: -8,
+      end: 8,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -104,10 +106,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         ],
       ),
       child: Center(
-        child: Text(
-          '🥚',
-          style: TextStyle(fontSize: widget.size * 0.5),
-        ),
+        child: Text('🥚', style: TextStyle(fontSize: widget.size * 0.5)),
       ),
     );
   }
@@ -132,10 +131,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         ],
       ),
       child: Center(
-        child: Text(
-          '👶',
-          style: TextStyle(fontSize: widget.size * 0.5),
-        ),
+        child: Text('👶', style: TextStyle(fontSize: widget.size * 0.5)),
       ),
     );
   }
@@ -160,10 +156,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         ],
       ),
       child: Center(
-        child: Text(
-          '🧒',
-          style: TextStyle(fontSize: widget.size * 0.5),
-        ),
+        child: Text('🧒', style: TextStyle(fontSize: widget.size * 0.5)),
       ),
     );
   }
@@ -188,10 +181,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         ],
       ),
       child: Center(
-        child: Text(
-          '🧑',
-          style: TextStyle(fontSize: widget.size * 0.5),
-        ),
+        child: Text('🧑', style: TextStyle(fontSize: widget.size * 0.5)),
       ),
     );
   }
@@ -202,11 +192,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
       height: widget.size,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFFFAF5FF),
-            Color(0xFFE9D5FF),
-            Color(0xFFD8B4FE),
-          ],
+          colors: [Color(0xFFFAF5FF), Color(0xFFE9D5FF), Color(0xFFD8B4FE)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -242,10 +228,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
               ),
             );
           }),
-          Text(
-            '🧙',
-            style: TextStyle(fontSize: widget.size * 0.5),
-          ),
+          Text('🧙', style: TextStyle(fontSize: widget.size * 0.5)),
         ],
       ),
     );

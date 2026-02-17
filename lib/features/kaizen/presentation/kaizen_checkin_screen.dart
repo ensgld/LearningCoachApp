@@ -8,7 +8,8 @@ class KaizenCheckinScreen extends ConsumerStatefulWidget {
   const KaizenCheckinScreen({super.key});
 
   @override
-  ConsumerState<KaizenCheckinScreen> createState() => _KaizenCheckinScreenState();
+  ConsumerState<KaizenCheckinScreen> createState() =>
+      _KaizenCheckinScreenState();
 }
 
 class _KaizenCheckinScreenState extends ConsumerState<KaizenCheckinScreen> {
@@ -41,16 +42,16 @@ class _KaizenCheckinScreenState extends ConsumerState<KaizenCheckinScreen> {
             Text(
               AppStrings.getQuickKaizenTitle(locale),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
             ),
             Text(
               AppStrings.getDailyProgress(locale),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -137,7 +138,11 @@ class _KaizenCheckinScreenState extends ConsumerState<KaizenCheckinScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.save_rounded, color: Colors.white, size: 24),
+                        const Icon(
+                          Icons.save_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                         const SizedBox(width: 12),
                         Text(
                           AppStrings.getSaveAndFinish(locale),
@@ -192,19 +197,15 @@ class _KaizenCheckinScreenState extends ConsumerState<KaizenCheckinScreen> {
                   gradient: gradient,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: Icon(icon, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

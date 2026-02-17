@@ -32,10 +32,11 @@ class AppTheme {
       surfaceContainerHighest: const Color(0xFFF8FAFC),
     );
 
-    final textTheme = GoogleFonts.plusJakartaSansTextTheme(ThemeData.light().textTheme).apply(
-      bodyColor: colorScheme.onSurface,
-      displayColor: colorScheme.onSurface,
-    );
+    final textTheme =
+        GoogleFonts.plusJakartaSansTextTheme(ThemeData.light().textTheme).apply(
+          bodyColor: colorScheme.onSurface,
+          displayColor: colorScheme.onSurface,
+        );
 
     const fieldRadius = 16.0;
     const cardRadius = 24.0;
@@ -108,7 +109,10 @@ class AppTheme {
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        extendedPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        extendedPadding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -117,7 +121,9 @@ class AppTheme {
           backgroundColor: colorScheme.primary,
           foregroundColor: Colors.white,
           shadowColor: colorScheme.primary.withOpacity(0.3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(fieldRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(fieldRadius),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
           textStyle: textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w700,
@@ -130,16 +136,22 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.primary,
           side: BorderSide(color: colorScheme.outlineVariant),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(fieldRadius)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(fieldRadius),
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+          textStyle: textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
 
@@ -154,7 +166,9 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: colorScheme.surface,
-        hintStyle: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+        hintStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(fieldRadius),
           borderSide: BorderSide(color: colorScheme.outlineVariant),
@@ -175,7 +189,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(fieldRadius),
           borderSide: BorderSide(color: colorScheme.error, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }

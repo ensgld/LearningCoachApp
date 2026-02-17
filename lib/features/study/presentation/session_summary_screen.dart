@@ -32,8 +32,8 @@ class SessionSummaryScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                   onPressed: () => context.go('/home'),
-                   child: const Text('Ana Sayfaya Dön'),
+                  onPressed: () => context.go('/home'),
+                  child: const Text('Ana Sayfaya Dön'),
                 ),
               ),
             ],

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 
 // --- Avatar Evolution Stages - 5 Stages Evolution Story ---
 enum AvatarStage {
-  seed,      // Level 1-8   -> char_lvl1.jpeg (Tohum - Başlangıç)
-  sprout,    // Level 9-16  -> char_lvl2.jpeg (Filiz - Büyüme)
-  bloom,     // Level 17-25 -> char_lvl3.jpeg (Çiçek - Gelişim)
-  tree,      // Level 26-35 -> char_lvl4.jpeg (Ağaç - Olgunluk)
-  forest,    // Level 36+   -> char_lvl5.jpeg (Orman - Ustalık)
+  seed, // Level 1-8   -> char_lvl1.jpeg (Tohum - Başlangıç)
+  sprout, // Level 9-16  -> char_lvl2.jpeg (Filiz - Büyüme)
+  bloom, // Level 17-25 -> char_lvl3.jpeg (Çiçek - Gelişim)
+  tree, // Level 26-35 -> char_lvl4.jpeg (Ağaç - Olgunluk)
+  forest, // Level 36+   -> char_lvl5.jpeg (Orman - Ustalık)
 }
 
 // --- Evolution Stage Features ---
@@ -15,8 +15,8 @@ class StageFeatures {
   final String title;
   final String description;
   final String powerName;
-  final int xpBonus;      // Extra XP percentage
-  final int goldBonus;    // Extra Gold percentage
+  final int xpBonus; // Extra XP percentage
+  final int goldBonus; // Extra Gold percentage
   final String emoji;
   final Color primaryColor;
   final Color secondaryColor;
@@ -63,14 +63,17 @@ class InventoryItem extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, category, goldCost, assetPath, isPurchased];
+  List<Object?> get props => [
+    id,
+    name,
+    category,
+    goldCost,
+    assetPath,
+    isPurchased,
+  ];
 }
 
-enum ItemCategory {
-  pot,
-  background,
-  companion,
-}
+enum ItemCategory { pot, background, companion }
 
 // --- User Stats (Gamification State) ---
 class UserStats extends Equatable {
@@ -85,11 +88,11 @@ class UserStats extends Equatable {
     this.currentLevel = 1,
     this.currentXP = 0,
     this.totalGold = 100,
-    this.stage = AvatarStage.seed,  // Başlangıç evresi: Tohum
+    this.stage = AvatarStage.seed, // Başlangıç evresi: Tohum
     this.equippedItems = const {},
     this.purchasedItemIds = const [],
   });
-  
+
   // Convenience getters for easier access
   int get level => currentLevel;
   int get xp => currentXP;
@@ -105,7 +108,8 @@ class UserStats extends Equatable {
   }
 
   /// Get remaining XP to next level
-  int get xpToNextLevel => (xpRequiredForNextLevel - currentXP).clamp(0, xpRequiredForNextLevel);
+  int get xpToNextLevel =>
+      (xpRequiredForNextLevel - currentXP).clamp(0, xpRequiredForNextLevel);
 
   UserStats copyWith({
     int? currentLevel,
@@ -127,11 +131,11 @@ class UserStats extends Equatable {
 
   @override
   List<Object?> get props => [
-        currentLevel,
-        currentXP,
-        totalGold,
-        stage,
-        equippedItems,
-        purchasedItemIds,
-      ];
+    currentLevel,
+    currentXP,
+    totalGold,
+    stage,
+    equippedItems,
+    purchasedItemIds,
+  ];
 }
