@@ -202,7 +202,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen>
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: ClipRRect(
@@ -421,8 +421,8 @@ class _ShopItemCard extends ConsumerWidget {
           boxShadow: [
             BoxShadow(
               color: isEquipped
-                  ? const Color(0xFF6366F1).withOpacity(0.3)
-                  : Colors.black.withOpacity(0.1),
+                  ? const Color(0xFF6366F1).withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.1),
               blurRadius: isEquipped ? 16 : 12,
               offset: const Offset(0, 4),
             ),
@@ -520,7 +520,7 @@ class _ShopItemCard extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.2),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -539,7 +539,7 @@ class _ShopItemCard extends ConsumerWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(

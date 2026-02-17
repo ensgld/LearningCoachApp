@@ -59,8 +59,10 @@ class SessionFinishScreen extends StatelessWidget {
             ...options.map(
               (opt) => RadioListTile(
                 value: opt,
+                // ignore: deprecated_member_use
                 groupValue: null,
-                onChanged: (val) {},
+                // ignore: deprecated_member_use
+                onChanged: (value) {},
                 title: Text(opt),
                 contentPadding: EdgeInsets.zero,
               ),

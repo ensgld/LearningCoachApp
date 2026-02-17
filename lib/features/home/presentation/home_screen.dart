@@ -71,9 +71,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              stageFeatures.secondaryColor.withOpacity(0.3),
-              stageFeatures.primaryColor.withOpacity(0.1),
-              Theme.of(context).colorScheme.surface.withOpacity(0.95),
+              stageFeatures.secondaryColor.withValues(alpha: 0.3),
+              stageFeatures.primaryColor.withValues(alpha: 0.1),
+              Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
             ],
             stops: const [0.0, 0.4, 1.0],
           ),
@@ -98,13 +98,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           gradient: LinearGradient(
                             colors: [
                               stageFeatures.primaryColor,
-                              stageFeatures.primaryColor.withOpacity(0.8),
+                              stageFeatures.primaryColor.withValues(alpha: 0.8),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: stageFeatures.primaryColor.withOpacity(
+                              color: stageFeatures.primaryColor.withValues(alpha: 
                                 0.3,
                               ),
                               blurRadius: 12,
@@ -168,10 +168,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: stageFeatures.primaryColor.withOpacity(0.1),
+                        color: stageFeatures.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
-                          color: stageFeatures.primaryColor.withOpacity(0.2),
+                          color: stageFeatures.primaryColor.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Row(
@@ -215,7 +215,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: stageFeatures.primaryColor.withOpacity(0.15),
+                        color: stageFeatures.primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -235,7 +235,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: _buildBonusBadge(
@@ -253,7 +253,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.primaryContainer.withOpacity(0.5),
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -356,7 +356,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -408,9 +408,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         text,

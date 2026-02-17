@@ -162,7 +162,9 @@ class AuthController extends _$AuthController {
   Future<void> logout() async {
     try {
       await _repository.logout();
-    } catch (e) {}
+    } catch (e) {
+      // Ignore logout errors
+    }
 
     if (!ref.mounted) return;
 

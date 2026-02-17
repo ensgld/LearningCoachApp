@@ -120,7 +120,7 @@ class _VictoryPopupState extends State<VictoryPopup>
                             (hasEarnedRewards
                                     ? const Color(0xFF6366F1)
                                     : Colors.black)
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                         blurRadius: 40,
                         offset: const Offset(0, 20),
                       ),
@@ -139,7 +139,7 @@ class _VictoryPopupState extends State<VictoryPopup>
                             child: Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -181,7 +181,7 @@ class _VictoryPopupState extends State<VictoryPopup>
                         style: TextStyle(
                           fontSize: !hasEarnedRewards ? 16 : 20,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           height: 1.5,
                         ),
                         textAlign: TextAlign.center,
@@ -291,7 +291,7 @@ class _VictoryPopupState extends State<VictoryPopup>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -348,7 +348,7 @@ class TaskCompletionPopup extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF10B981).withOpacity(0.4),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.4),
                     blurRadius: 24,
                     offset: const Offset(0, 12),
                   ),
@@ -377,7 +377,7 @@ class TaskCompletionPopup extends StatelessWidget {
                     taskName,
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -389,7 +389,7 @@ class TaskCompletionPopup extends StatelessWidget {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(

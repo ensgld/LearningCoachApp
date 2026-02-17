@@ -159,7 +159,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.3),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.3),
                     blurRadius: 16,
                     offset: const Offset(0, 8),
                     spreadRadius: -4,
@@ -171,7 +171,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(
@@ -198,7 +198,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                           'AI öğrenme asistanı',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                                 fontWeight: FontWeight.w500,
                               ),
                         ),
@@ -209,7 +209,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -236,8 +236,12 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  scheme.primaryContainer.withOpacity(0.3),
-                                  scheme.secondaryContainer.withOpacity(0.3),
+                                  scheme.primaryContainer.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  scheme.secondaryContainer.withValues(
+                                    alpha: 0.3,
+                                  ),
                                 ],
                               ),
                               shape: BoxShape.circle,
@@ -284,7 +288,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                 color: scheme.surface,
                 border: Border(
                   top: BorderSide(
-                    color: scheme.outlineVariant.withOpacity(0.3),
+                    color: scheme.outlineVariant.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -332,7 +336,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                               (_isLoading
                                       ? Colors.grey
                                       : const Color(0xFF6366F1))
-                                  .withOpacity(0.3),
+                                  .withValues(alpha: 0.3),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -356,63 +360,6 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// QuickChip widget'ına onTap özelliği ekledik
-class _QuickChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Gradient gradient;
-  final VoidCallback? onTap; // Yeni parametre
-
-  const _QuickChip({
-    required this.label,
-    required this.icon,
-    required this.gradient,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap ?? () {}, // Callback kullanımı
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
@@ -451,8 +398,8 @@ class _ChatBubble extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: isUser
-                    ? const Color(0xFF6366F1).withOpacity(0.2)
-                    : Colors.black.withOpacity(0.05),
+                    ? const Color(0xFF6366F1).withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),

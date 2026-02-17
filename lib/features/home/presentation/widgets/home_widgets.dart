@@ -55,13 +55,13 @@ class _TodayPlanCardState extends ConsumerState<TodayPlanCard>
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withOpacity(0.4),
+              color: const Color(0xFF6366F1).withValues(alpha: 0.4),
               blurRadius: 32,
               offset: const Offset(0, 16),
               spreadRadius: -8,
             ),
             BoxShadow(
-              color: const Color(0xFF8B5CF6).withOpacity(0.3),
+              color: const Color(0xFF8B5CF6).withValues(alpha: 0.3),
               blurRadius: 16,
               offset: const Offset(0, 8),
               spreadRadius: -4,
@@ -86,11 +86,11 @@ class _TodayPlanCardState extends ConsumerState<TodayPlanCard>
                           child: Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.25),
+                              color: Colors.white.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -120,7 +120,7 @@ class _TodayPlanCardState extends ConsumerState<TodayPlanCard>
                 Text(
                   AppStrings.getTodayAdventure(locale),
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                     fontWeight: FontWeight.w500,
                     height: 1.5,
                   ),
@@ -144,7 +144,7 @@ class _TodayPlanCardState extends ConsumerState<TodayPlanCard>
                           backgroundColor: Colors.white,
                           foregroundColor: const Color(0xFF6366F1),
                           elevation: _isHovered ? 8 : 0,
-                          shadowColor: Colors.black.withOpacity(0.2),
+                          shadowColor: Colors.black.withValues(alpha: 0.2),
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(18),
@@ -231,13 +231,13 @@ class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFEC4899).withOpacity(0.4),
+                  color: const Color(0xFFEC4899).withValues(alpha: 0.4),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                   spreadRadius: -4,
                 ),
                 BoxShadow(
-                  color: const Color(0xFFF43F5E).withOpacity(0.2),
+                  color: const Color(0xFFF43F5E).withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                   spreadRadius: -2,
@@ -259,11 +259,11 @@ class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
+                              color: Colors.black.withValues(alpha: 0.15),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -294,7 +294,7 @@ class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
                               AppStrings.getDailyProgressHint(locale),
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                     height: 1.4,
                                   ),
                             ),
@@ -304,7 +304,7 @@ class _QuickKaizenCardState extends ConsumerState<QuickKaizenCard>
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -354,13 +354,13 @@ class ProgressSummaryCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 32,
                       offset: const Offset(0, 12),
                       spreadRadius: -8,
                     ),
                     BoxShadow(
-                      color: scheme.primary.withOpacity(0.05),
+                      color: scheme.primary.withValues(alpha: 0.05),
                       blurRadius: 16,
                       offset: const Offset(0, 6),
                       spreadRadius: -4,
@@ -375,8 +375,8 @@ class ProgressSummaryCard extends ConsumerWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withOpacity(0.95),
-                            Colors.white.withOpacity(0.7),
+                            Colors.white.withValues(alpha: 0.95),
+                            Colors.white.withValues(alpha: 0.7),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -391,7 +391,7 @@ class ProgressSummaryCard extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: scheme.primary.withOpacity(0.1),
+                                  color: scheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -457,9 +457,9 @@ class ProgressSummaryCard extends ConsumerWidget {
     decoration: BoxDecoration(
       gradient: LinearGradient(
         colors: [
-          scheme.outlineVariant.withOpacity(0.1),
-          scheme.outlineVariant.withOpacity(0.6),
-          scheme.outlineVariant.withOpacity(0.1),
+          scheme.outlineVariant.withValues(alpha: 0.1),
+          scheme.outlineVariant.withValues(alpha: 0.6),
+          scheme.outlineVariant.withValues(alpha: 0.1),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -488,14 +488,14 @@ class ProgressSummaryCard extends ConsumerWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      scheme.primary.withOpacity(0.2),
-                      scheme.secondary.withOpacity(0.2),
+                      scheme.primary.withValues(alpha: 0.2),
+                      scheme.secondary.withValues(alpha: 0.2),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: scheme.primary.withOpacity(0.2),
+                      color: scheme.primary.withValues(alpha: 0.2),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -576,7 +576,7 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
       // If already sent today, just open chat without prompt
       if (lastDate == todayStr) {
         if (!mounted) return;
-        context.push('/home/coach-chat'); // No extra prompt
+        await context.push('/home/coach-chat'); // No extra prompt
         return;
       }
 
@@ -674,11 +674,11 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
       if (!mounted) return;
 
       // 4. Navigate to new specific route for Coach Tip
-      context.push('/home/coach-chat', extra: buffer.toString());
+      await context.push('/home/coach-chat', extra: buffer.toString());
     } catch (e) {
       debugPrint('Error preparing coach tip: $e');
       if (mounted) {
-        context.push('/home/chat'); // Fallback to empty chat
+        await context.push('/home/chat'); // Fallback to empty chat
       }
     } finally {
       if (mounted) {
@@ -709,13 +709,13 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF10B981).withOpacity(0.4),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.4),
                   blurRadius: 24,
                   offset: Offset(0, 12 + _floatAnimation.value),
                   spreadRadius: -4,
                 ),
                 BoxShadow(
-                  color: const Color(0xFF14B8A6).withOpacity(0.2),
+                  color: const Color(0xFF14B8A6).withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                   spreadRadius: -2,
@@ -744,11 +744,13 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
                                 child: Container(
                                   padding: const EdgeInsets.all(16),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.3),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     borderRadius: BorderRadius.circular(18),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.15),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.15,
+                                        ),
                                         blurRadius: 12,
                                         offset: const Offset(0, 6),
                                       ),
@@ -786,7 +788,9 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
                                     Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: _isLoading
@@ -811,7 +815,9 @@ class _CoachTipCardState extends ConsumerState<CoachTipCard>
                                   AppStrings.getPomodoroTip(locale),
                                   style: Theme.of(context).textTheme.bodyLarge
                                       ?.copyWith(
-                                        color: Colors.white.withOpacity(0.95),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.95,
+                                        ),
                                         height: 1.6,
                                         fontWeight: FontWeight.w500,
                                       ),

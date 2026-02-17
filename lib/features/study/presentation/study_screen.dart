@@ -124,8 +124,8 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                             boxShadow: [
                               BoxShadow(
                                 color: _selectedGoalId == goal.id
-                                    ? const Color(0xFF6366F1).withOpacity(0.3)
-                                    : Colors.black.withOpacity(0.05),
+                                    ? const Color(0xFF6366F1).withValues(alpha: 0.3)
+                                    : Colors.black.withValues(alpha: 0.05),
                                 blurRadius: _selectedGoalId == goal.id ? 16 : 8,
                                 offset: Offset(
                                   0,
@@ -152,9 +152,9 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
                                         color: _selectedGoalId == goal.id
-                                            ? Colors.white.withOpacity(0.2)
+                                            ? Colors.white.withValues(alpha: 0.2)
                                             : scheme.primaryContainer
-                                                  .withOpacity(0.5),
+                                                  .withValues(alpha: 0.5),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Icon(
@@ -198,7 +198,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                                                         _selectedGoalId ==
                                                             goal.id
                                                         ? Colors.white
-                                                              .withOpacity(0.9)
+                                                              .withValues(alpha: 0.9)
                                                         : scheme
                                                               .onSurfaceVariant,
                                                   ),
@@ -241,7 +241,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                   spreadRadius: -4,
@@ -256,7 +256,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: scheme.secondary.withOpacity(0.1),
+                        color: scheme.secondary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -285,8 +285,8 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          scheme.secondary.withOpacity(0.15),
-                          scheme.tertiary.withOpacity(0.15),
+                          scheme.secondary.withValues(alpha: 0.15),
+                          scheme.tertiary.withValues(alpha: 0.15),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(20),
@@ -312,9 +312,9 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                       overlayRadius: 28,
                     ),
                     activeTrackColor: scheme.primary,
-                    inactiveTrackColor: scheme.primary.withOpacity(0.2),
+                    inactiveTrackColor: scheme.primary.withValues(alpha: 0.2),
                     thumbColor: scheme.primary,
-                    overlayColor: scheme.primary.withOpacity(0.2),
+                    overlayColor: scheme.primary.withValues(alpha: 0.2),
                   ),
                   child: Slider(
                     value: _duration,
@@ -341,7 +341,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6366F1).withOpacity(0.4),
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.4),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                   spreadRadius: -2,
@@ -371,7 +371,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                       Icon(
                         Icons.play_circle_outline_rounded,
                         color: _selectedGoalId == null
-                            ? Colors.white.withOpacity(0.5)
+                            ? Colors.white.withValues(alpha: 0.5)
                             : Colors.white,
                         size: 28,
                       ),
@@ -382,7 +382,7 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: _selectedGoalId == null
-                              ? Colors.white.withOpacity(0.5)
+                              ? Colors.white.withValues(alpha: 0.5)
                               : Colors.white,
                           letterSpacing: 0.5,
                         ),

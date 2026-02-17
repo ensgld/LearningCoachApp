@@ -99,7 +99,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withOpacity(0.3),
+            color: const Color(0xFF6366F1).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -124,7 +124,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF59E0B).withOpacity(0.3),
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -149,7 +149,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF10B981).withOpacity(0.3),
+            color: const Color(0xFF10B981).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -174,7 +174,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFEC4899).withOpacity(0.3),
+            color: const Color(0xFFEC4899).withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -199,12 +199,12 @@ class _AvatarCharacterState extends State<AvatarCharacter>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF9333EA).withOpacity(0.4),
+            color: const Color(0xFF9333EA).withValues(alpha: 0.4),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: const Color(0xFFA855F7).withOpacity(0.3),
+            color: const Color(0xFFA855F7).withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -223,7 +223,7 @@ class _AvatarCharacterState extends State<AvatarCharacter>
               ),
               child: Icon(
                 Icons.auto_awesome,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.6),
                 size: 16,
               ),
             );
@@ -263,7 +263,7 @@ class CircularLevelProgress extends StatelessWidget {
             size: Size(size, size),
             painter: _ProgressRingPainter(
               progress: progress,
-              backgroundColor: Colors.grey.withOpacity(0.2),
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
               progressColor: const Color(0xFF6366F1),
               strokeWidth: 8,
             ),
@@ -282,7 +282,7 @@ class CircularLevelProgress extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.4),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.4),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -340,7 +340,7 @@ class _ProgressRingPainter extends CustomPainter {
     // Progress arc
     final progressPaint = Paint()
       ..shader = LinearGradient(
-        colors: [progressColor, progressColor.withOpacity(0.6)],
+        colors: [progressColor, progressColor.withValues(alpha: 0.6)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
 import 'package:learning_coach/core/providers/locale_provider.dart';
-import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 
 class StatsDetailScreen extends ConsumerWidget {
@@ -40,7 +39,7 @@ class StatsDetailScreen extends ConsumerWidget {
                   leading: CircleAvatar(
                     backgroundColor: Theme.of(
                       context,
-                    ).primaryColor.withOpacity(0.1),
+                    ).primaryColor.withValues(alpha: 0.1),
                     child: Text('${item.sessions}x'),
                   ),
                   title: Text(

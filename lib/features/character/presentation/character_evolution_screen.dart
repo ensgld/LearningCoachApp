@@ -73,7 +73,7 @@ class _CharacterEvolutionScreenState
               color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
               ],
             ),
             child: const Icon(
@@ -90,7 +90,7 @@ class _CharacterEvolutionScreenState
             color: Colors.white,
             fontWeight: FontWeight.bold,
             shadows: [
-              Shadow(color: Colors.black.withOpacity(0.3), blurRadius: 8),
+              Shadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 8),
             ],
           ),
         ),
@@ -103,7 +103,7 @@ class _CharacterEvolutionScreenState
             end: Alignment.bottomCenter,
             colors: [
               currentFeatures.primaryColor,
-              currentFeatures.primaryColor.withOpacity(0.6),
+              currentFeatures.primaryColor.withValues(alpha: 0.6),
               currentFeatures.secondaryColor,
             ],
           ),
@@ -160,7 +160,7 @@ class _CharacterEvolutionScreenState
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: features.primaryColor.withOpacity(0.3),
+                  color: features.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -176,7 +176,7 @@ class _CharacterEvolutionScreenState
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: features.primaryColor.withOpacity(0.4),
+                        color: features.primaryColor.withValues(alpha: 0.4),
                         blurRadius: 30,
                         spreadRadius: 10,
                       ),
@@ -230,7 +230,7 @@ class _CharacterEvolutionScreenState
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: features.primaryColor.withOpacity(0.1),
+                    color: features.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -343,7 +343,7 @@ class _CharacterEvolutionScreenState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -391,14 +391,14 @@ class _CharacterEvolutionScreenState
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isCurrent
-                  ? features.primaryColor.withOpacity(
+                  ? features.primaryColor.withValues(alpha: 
                       0.1 + (_glowAnimation.value * 0.1),
                     )
                   : Colors.grey[50],
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isCurrent
-                    ? features.primaryColor.withOpacity(
+                    ? features.primaryColor.withValues(alpha: 
                         0.3 + (_glowAnimation.value * 0.3),
                       )
                     : Colors.grey[300]!,
@@ -515,7 +515,7 @@ class _CharacterEvolutionScreenState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -587,7 +587,7 @@ class _CharacterEvolutionScreenState
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(

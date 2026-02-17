@@ -99,8 +99,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            scheme.primaryContainer.withOpacity(0.3),
-                            scheme.secondaryContainer.withOpacity(0.3),
+                            scheme.primaryContainer.withValues(alpha: 0.3),
+                            scheme.secondaryContainer.withValues(alpha: 0.3),
                           ],
                         ),
                         shape: BoxShape.circle,

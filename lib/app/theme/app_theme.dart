@@ -65,7 +65,7 @@ class AppTheme {
         color: colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         clipBehavior: Clip.antiAlias,
-        shadowColor: Colors.black.withOpacity(0.08),
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
@@ -86,9 +86,9 @@ class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         elevation: 8,
         height: 72,
-        backgroundColor: colorScheme.surface.withOpacity(0.95),
+        backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
         surfaceTintColor: Colors.transparent,
-        shadowColor: colorScheme.primary.withOpacity(0.08),
+        shadowColor: colorScheme.primary.withValues(alpha: 0.08),
         indicatorColor: colorScheme.primaryContainer,
         indicatorShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -120,7 +120,7 @@ class AppTheme {
           elevation: 2,
           backgroundColor: colorScheme.primary,
           foregroundColor: Colors.white,
-          shadowColor: colorScheme.primary.withOpacity(0.3),
+          shadowColor: colorScheme.primary.withValues(alpha: 0.3),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(fieldRadius),
           ),

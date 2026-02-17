@@ -184,7 +184,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             borderSide: BorderSide.none,
                           ),
                           filled: true,
-                          fillColor: scheme.surfaceContainerHighest.withOpacity(
+                          fillColor: scheme.surfaceContainerHighest.withValues(alpha: 
                             0.5,
                           ),
                           contentPadding: const EdgeInsets.symmetric(

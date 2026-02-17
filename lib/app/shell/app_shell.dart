@@ -24,7 +24,7 @@ class AppShell extends ConsumerWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: scheme.primary.withOpacity(0.08),
+              color: scheme.primary.withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, -8),
               spreadRadius: 0,
@@ -40,7 +40,7 @@ class AppShell extends ConsumerWidget {
                 index,
                 initialLocation: index == navigationShell.currentIndex,
               ),
-              backgroundColor: scheme.surface.withOpacity(0.85),
+              backgroundColor: scheme.surface.withValues(alpha: 0.85),
               destinations: [
                 NavigationDestination(
                   icon: const Icon(Icons.home_outlined),
@@ -94,7 +94,7 @@ class AppShell extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6366F1).withOpacity(0.45),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.45),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                     spreadRadius: -2,
@@ -126,74 +126,6 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
             ),
-    );
-  }
-}
-
-class _UploadOptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _UploadOptionTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: color.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios_rounded, color: color, size: 16),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

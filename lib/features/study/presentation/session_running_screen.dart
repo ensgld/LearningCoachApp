@@ -387,7 +387,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen>
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -421,13 +421,13 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen>
                     child: Container(
                       height: potHeight * 0.4,
                       decoration: BoxDecoration(
-                        color: Colors.brown[900]?.withOpacity(0.3),
+                        color: Colors.brown[900]?.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Center(
                         child: Icon(
                           Icons.eco,
-                          color: Colors.green[200]!.withOpacity(0.5),
+                          color: Colors.green[200]!.withValues(alpha: 0.5),
                           size: 16,
                         ),
                       ),
