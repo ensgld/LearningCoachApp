@@ -8,7 +8,6 @@ interface EnvConfig {
     PORT: number;
     DATABASE_URL: string;
     LLM_BACKEND_URL: string;
-    OLLAMA_EMBEDDINGS_URL: string | null;
     EMBEDDING_MODEL: string;
 }
 
@@ -34,7 +33,6 @@ function validateEnv(): EnvConfig {
         PORT: port,
         DATABASE_URL: databaseUrl,
         LLM_BACKEND_URL: process.env.LLM_BACKEND_URL || 'http://localhost:8000',
-        OLLAMA_EMBEDDINGS_URL: process.env.OLLAMA_EMBEDDINGS_URL || null,
         EMBEDDING_MODEL: process.env.EMBEDDING_MODEL || 'nomic-embed-text',
     };
 }

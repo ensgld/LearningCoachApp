@@ -100,10 +100,10 @@ class ApiAuthRepository implements AuthRepository {
       print('✅ Current user: ${user['email']}');
 
       return AuthUser(
-        id: user['id'] as String,
-        email: user['email'] as String,
-        displayName: user['displayName'] as String? ?? 'User',
-        isGuest: user['isGuest'] as bool? ?? false,
+        id: (user['id'] as String?) ?? '',
+        email: (user['email'] as String?) ?? '',
+        displayName: (user['displayName'] as String?) ?? 'User',
+        isGuest: (user['isGuest'] as bool?) ?? false,
       );
     } catch (e) {
       print('❌ Get current user failed: $e');

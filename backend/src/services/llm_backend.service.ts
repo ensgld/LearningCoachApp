@@ -5,10 +5,6 @@ interface EmbeddingResponse {
     embeddings: number[][];
 }
 
-interface OllamaEmbeddingResponse {
-    embedding: number[];
-}
-
 interface RagAnswerResponse {
     answer: string;
 }
@@ -18,41 +14,28 @@ interface ChatResponse {
 }
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
-    if (!config.OLLAMA_EMBEDDINGS_URL) {
-        throw new Error('Ollama embeddings endpoint is not configured');
-    }
-
-    const embeddings: number[][] = [];
-    for (const text of texts) {
-        let lastError: Error | null = null;
-        for (let attempt = 1; attempt <= 3; attempt += 1) {
-            try {
-                const response = await fetch(config.OLLAMA_EMBEDDINGS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: config.EMBEDDING_MODEL, prompt: text }),
-                });
-                if (!response.ok) {
-                    const body = await response.text();
-                    throw new Error(`Ollama embedding error: ${response.status} ${body}`);
-                }
-                const data = (await response.json()) as OllamaEmbeddingResponse;
-                embeddings.push(data.embedding);
-                lastError = null;
-                break;
-            } catch (error) {
-                lastError = error instanceof Error ? error : new Error('Ollama embedding failed');
-                if (attempt < 3) {
-                    await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
-                }
+    let lastError: Error | null = null;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+            const response = await fetch(`${config.LLM_BACKEND_URL}/rag/embeddings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts }),
+            });
+            if (!response.ok) {
+                const body = await response.text();
+                throw new Error(`Embedding error: ${response.status} ${body}`);
+            }
+            const data = (await response.json()) as EmbeddingResponse;
+            return data.embeddings;
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error('Embedding request failed');
+            if (attempt < 3) {
+                await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
             }
         }
-        if (lastError) {
-            throw lastError;
-        }
     }
-
-    return embeddings;
+    throw lastError!;
 }
 
 export async function answerWithContext(question: string, context: string): Promise<string> {

@@ -150,12 +150,18 @@ class Document extends Equatable {
     final progressRaw = json['processing_progress'];
     final progress = progressRaw is num ? progressRaw.toDouble() : 0.0;
 
+    DateTime? uploadedAt;
+    final uploadedAtRaw = json['uploaded_at'];
+    if (uploadedAtRaw is String) {
+      uploadedAt = DateTime.tryParse(uploadedAtRaw);
+    }
+
     return Document(
       id: json['id'] as String?,
-      title: json['title'] as String,
-      summary: json['summary'] as String? ?? '',
+      title: (json['title'] as String?) ?? 'Untitled',
+      summary: (json['summary'] as String?) ?? '',
       status: status,
-      uploadedAt: DateTime.parse(json['uploaded_at'] as String),
+      uploadedAt: uploadedAt,
       processingProgress: progress,
     );
   }
