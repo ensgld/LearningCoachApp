@@ -64,9 +64,9 @@ export async function indexDocument(params: {
         await pool.query('DELETE FROM document_chunks WHERE document_id = $1', [params.documentId]);
         await pool.query(
             `UPDATE documents
-             SET status = 'processing', total_chunks = $2, processing_progress = 0.00, error_message = NULL, summary = $3, content_text = $4
+             SET status = 'processing', total_chunks = $2, processing_progress = 0.00, error_message = NULL, summary = $3
              WHERE id = $1`,
-            [params.documentId, totalChunks, summary, text]
+            [params.documentId, totalChunks, summary]
         );
 
         let processed = 0;
@@ -136,9 +136,9 @@ export async function indexDocument(params: {
 
         await pool.query(
             `UPDATE documents
-             SET status = 'ready', total_chunks = $2, indexed_at = NOW(), error_message = NULL, processing_progress = 1.00, summary = $3, content_text = $4
+             SET status = 'ready', total_chunks = $2, indexed_at = NOW(), error_message = NULL, processing_progress = 1.00, summary = $3
              WHERE id = $1`,
-            [params.documentId, totalChunks, summary, text]
+            [params.documentId, totalChunks, summary]
         );
     } catch (e) {
         await markDocumentFailed(params.documentId, 'Doküman işlenirken hata oluştu.');

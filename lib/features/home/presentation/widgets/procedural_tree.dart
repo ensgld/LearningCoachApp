@@ -140,7 +140,6 @@ class _TreePainter extends CustomPainter {
 
     // Recursive branches
     if (currentDepth > 0) {
-      const int branches = 2; // Split into 2
       final double spreadAngle =
           0.6 + (currentLevel * 0.04).clamp(0.0, 0.4); // Wider spread
 

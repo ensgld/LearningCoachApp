@@ -57,8 +57,6 @@ start_process "llm_backend" "cd '$ROOT/llm_backend' && \
   uvicorn app.main:app --host 0.0.0.0 --port 8000"
 start_process "backend" "cd '$ROOT/backend' && \
   export NODE_ENV='development' && \
-  export OLLAMA_EMBEDDINGS_URL='http://127.0.0.1:11434/api/embeddings' && \
-  export EMBEDDING_MODEL='nomic-embed-text' && \
   npm run start"
 
 echo "All services started. Logs: $LOG_DIR"

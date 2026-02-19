@@ -15,12 +15,13 @@ class ApiDocumentRepository {
   Future<List<Document>> getDocuments() async {
     try {
       final response = await _dio.get<Map<String, dynamic>>('/documents');
+      print('📄 getDocuments response: ${response.data}');
       final data = response.data!['documents'] as List<dynamic>;
       return data
           .map((json) => Document.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      // Return empty list on error for now or rethrow
+      print('❌ getDocuments error: $e');
       rethrow;
     }
   }
@@ -39,10 +40,13 @@ class ApiDocumentRepository {
         data: formData,
       );
 
+      print('📄 Upload response: ${response.data}');
+
       return Document.fromJson(
         response.data!['document'] as Map<String, dynamic>,
       );
     } catch (e) {
+      print('❌ Upload error: $e');
       rethrow;
     }
   }
@@ -63,10 +67,13 @@ class ApiDocumentRepository {
         data: formData,
       );
 
+      print('📄 Upload bytes response: ${response.data}');
+
       return Document.fromJson(
         response.data!['document'] as Map<String, dynamic>,
       );
     } catch (e) {
+      print('❌ Upload bytes error: $e');
       rethrow;
     }
   }

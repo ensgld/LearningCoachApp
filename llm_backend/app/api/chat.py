@@ -27,7 +27,3 @@ def chat(req: ChatRequest):
     except Exception as e:
         logger.error(f"Chat error: {str(e)}")
         raise HTTPException(status_code=500, detail="LLM error")
-
-    except Exception as e:
-        logger.error(str(e))
-        raise HTTPException(status_code=500, detail="LLM error")
