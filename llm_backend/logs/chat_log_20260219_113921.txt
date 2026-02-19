@@ -1,0 +1,4 @@
+2026-02-19 11:39:21,564 | INFO | Logging started. Log file: /Users/utar/Documents/GitHub/LearningCoachApp/llm_backend/logs/chat_log_20260219_113921.txt
+2026-02-19 11:39:35,816 | INFO | [GENERAL_CHAT] REQUEST: Merhaba, benim adım Antigravity....
+2026-02-19 11:39:35,816 | INFO | LLAMA isteği gönderildi
+2026-02-19 11:39:35,816 | ERROR | Chat error: Invalid URL 'None': No scheme supplied. Perhaps you meant https://None?

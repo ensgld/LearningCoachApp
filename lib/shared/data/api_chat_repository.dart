@@ -20,8 +20,16 @@ class ApiChatRepository {
 
   ApiChatRepository(this._apiService);
 
-  Future<ChatSendResult> sendMessage(String message, {String? threadId}) async {
-    final data = await _apiService.sendChatMessage(message, threadId: threadId);
+  Future<ChatSendResult> sendMessage(
+    String message, {
+    String? threadId,
+    List<Map<String, dynamic>>? history,
+  }) async {
+    final data = await _apiService.sendChatMessage(
+      message,
+      threadId: threadId,
+      history: history,
+    );
 
     return ChatSendResult(
       answer: data['answer'] as String? ?? '',

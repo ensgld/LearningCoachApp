@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1)
+    history: list[dict] = Field(default_factory=list)
 
 
 class ChatResponse(BaseModel):
@@ -20,6 +21,7 @@ class EmbeddingResponse(BaseModel):
 class RagAnswerRequest(BaseModel):
     question: str = Field(..., min_length=1)
     context: str = Field(..., min_length=1)
+    history: list[dict] = Field(default_factory=list)
 
 
 class RagAnswerResponse(BaseModel):

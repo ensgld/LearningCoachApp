@@ -70,10 +70,15 @@ class _DocumentChatScreenState extends ConsumerState<DocumentChatScreen> {
     });
     _controller.clear();
 
+    // Prepare history from existing messages
+    final history = _messages.map((msg) {
+      return {'role': msg.isUser ? 'user' : 'assistant', 'content': msg.text};
+    }).toList();
+
     try {
       final response = await ref
           .read(apiDocumentRepositoryProvider)
-          .chatWithDocument(widget.document.id, text);
+          .chatWithDocument(widget.document.id, text, history: history);
 
       if (!mounted) return;
       setState(() {

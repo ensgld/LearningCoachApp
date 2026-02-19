@@ -11,13 +11,20 @@ from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
 from app.core.logger import logger
 
 
-def ask_llama(user_message: str) -> str:
+def ask_llama(user_message: str, history: list[dict] = []) -> str:
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    # Add history messages if any
+    for msg in history:
+        # Validate role (ollama expects 'user', 'assistant', 'system')
+        if msg.get("role") in ["user", "assistant", "system"]:
+            messages.append(msg)
+            
+    messages.append({"role": "user", "content": user_message})
+
     payload = {
         "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_message},
-        ],
+        "messages": messages,
         "stream": False,
     }
 
@@ -75,16 +82,22 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
     return embeddings
 
 
-def ask_document(question: str, context: str) -> str:
+def ask_document(question: str, context: str, history: list[dict] = []) -> str:
+    messages = [{"role": "system", "content": RAG_SYSTEM_PROMPT}]
+    
+    # Add history messages if any
+    for msg in history:
+        if msg.get("role") in ["user", "assistant", "system"]:
+            messages.append(msg)
+    
+    messages.append({
+        "role": "user",
+        "content": f"Bağlam:\n{context}\n\nSoru: {question}",
+    })
+
     payload = {
         "model": MODEL_NAME,
-        "messages": [
-            {"role": "system", "content": RAG_SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": f"Bağlam:\n{context}\n\nSoru: {question}",
-            },
-        ],
+        "messages": messages,
         "stream": False,
     }
 

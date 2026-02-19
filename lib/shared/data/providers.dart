@@ -117,12 +117,21 @@ class ChatMessages extends _$ChatMessages {
       timestamp: DateTime.now(),
     );
 
+    // Mevcut mesajları history olarak hazırla (son mesaj eklenmeden önce)
+    final history = state.map((msg) {
+      return {'role': msg.isUser ? 'user' : 'assistant', 'content': msg.text};
+    }).toList();
+
     state = [...state, userMessage];
 
     try {
       // 2. API üzerinden cevabı al
       final repository = ref.read(apiChatRepositoryProvider);
-      final response = await repository.sendMessage(text, threadId: _threadId);
+      final response = await repository.sendMessage(
+        text,
+        threadId: _threadId,
+        history: history,
+      );
       // _threadId = response.threadId ?? _threadId; // Remove override to keep distinct threadId
 
       // 3. AI Cevabını listeye ekle
@@ -169,12 +178,21 @@ class CoachTipMessages extends _$CoachTipMessages {
       timestamp: DateTime.now(),
     );
 
+    // Mevcut mesajları history olarak hazırla
+    final history = state.map((msg) {
+      return {'role': msg.isUser ? 'user' : 'assistant', 'content': msg.text};
+    }).toList();
+
     state = [...state, userMessage];
 
     try {
       final repository = ref.read(apiChatRepositoryProvider);
       // Farklı bir thread veya context gerekebilir ama şimdilik aynı endpoint
-      final response = await repository.sendMessage(text, threadId: _threadId);
+      final response = await repository.sendMessage(
+        text,
+        threadId: _threadId,
+        history: history,
+      );
       // _threadId = response.threadId ?? _threadId; // Remove override
 
       final aiMessage = CoachMessage(

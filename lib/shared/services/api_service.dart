@@ -153,6 +153,7 @@ class ApiService {
   Future<Map<String, dynamic>> sendChatMessage(
     String message, {
     String? threadId,
+    List<Map<String, dynamic>>? history,
   }) async {
     // LLM Backend'e tam URL ile istek atıyoruz (Port 8000)
     final url = '$baseUrlLLM/chat';
@@ -160,7 +161,11 @@ class ApiService {
 
     final response = await _dio.post<Map<String, dynamic>>(
       url,
-      data: {'message': message, if (threadId != null) 'threadId': threadId},
+      data: {
+        'message': message,
+        if (threadId != null) 'threadId': threadId,
+        if (history != null) 'history': history,
+      },
     );
     return response.data!;
   }

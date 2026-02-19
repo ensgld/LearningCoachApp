@@ -1,0 +1,4 @@
+2026-02-19 11:42:16,363 | INFO | Logging started. Log file: /Users/utar/Documents/GitHub/LearningCoachApp/llm_backend/logs/chat_log_20260219_114216.txt
+2026-02-19 11:42:22,207 | INFO | [GENERAL_CHAT] REQUEST: Merhaba, benim adım Antigravity....
+2026-02-19 11:42:22,207 | INFO | LLAMA isteği gönderildi
+2026-02-19 11:42:22,213 | ERROR | Chat error: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/chat (Caused by NewConnectionError("HTTPConnection(host='localhost', port=11434): Failed to establish a new connection: [Errno 61] Connection refused"))

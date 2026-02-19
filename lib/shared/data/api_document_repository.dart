@@ -88,12 +88,13 @@ class ApiDocumentRepository {
 
   Future<CoachMessage> chatWithDocument(
     String documentId,
-    String message,
-  ) async {
+    String message, {
+    List<Map<String, dynamic>>? history,
+  }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '/documents/$documentId/chat',
-        data: {'message': message},
+        data: {'message': message, if (history != null) 'history': history},
       );
 
       final data = response.data!;

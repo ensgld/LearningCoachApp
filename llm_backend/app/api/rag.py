@@ -26,7 +26,7 @@ def embeddings(req: EmbeddingRequest):
 def answer(req: RagAnswerRequest):
     try:
         logger.info("RAG cevap isteği alındı")
-        result = ask_document(req.question, req.context)
+        result = ask_document(req.question, req.context, req.history)
         return RagAnswerResponse(answer=result)
     except Exception as e:
         logger.exception("RAG answer error")

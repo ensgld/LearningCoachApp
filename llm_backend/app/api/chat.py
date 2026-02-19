@@ -15,7 +15,7 @@ def chat(req: ChatRequest):
         
         logger.info(f"[{chat_type}] REQUEST: {req.message[:50]}...")
         
-        answer = ask_llama(req.message)
+        answer = ask_llama(req.message, req.history)
         
         duration_ms = (time.time() - start_time) * 1000
         logger.info(f"[{chat_type}] RESPONSE ({duration_ms:.2f}ms): {answer[:50]}...")
