@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/embeddings", response_model=EmbeddingResponse)
 async def create_embeddings(request: EmbeddingRequest):
-    embeddings = get_embeddings(request.text)
+    embeddings = get_embeddings(request.texts)
     return EmbeddingResponse(embeddings=embeddings)
 
 @router.post("/ingest")

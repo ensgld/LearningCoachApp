@@ -19,7 +19,7 @@ def get_answer(req: RagAnswerRequest) -> RagAnswerResponse:
         try:
             vector_store = load_vector_store()
             if vector_store:
-                results = vector_store.similarity_search(question, k=3)
+                results = vector_store.similarity_search(question, k=10) # Adjust k as needed to 10 previous was 3
                 if results:
                     context = "\n\n".join([doc.page_content for doc in results])
                     # Extract sources

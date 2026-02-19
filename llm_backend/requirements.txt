@@ -4,9 +4,9 @@ python-dotenv
 requests
 python-multipart
 pydantic-settings
-sentence-transformers
 pypdf
-langchain-text-splitters
 faiss-cpu
+sentence-transformers
+langchain-text-splitters
 langchain-community
 langchain-huggingface

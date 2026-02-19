@@ -1,0 +1,1 @@
+2026-02-16 12:19:17,808 | INFO | Logging started. Log file: E:\ReadTeam\LearningCoachApp\llm_backend\logs\chat_log_20260216_121917.txt

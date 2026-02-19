@@ -31,11 +31,19 @@ def ingest_pdf(file_path: str, source_name: str) -> dict:
         raise ValueError("No text extracted from PDF")
 
     # 2. Chunk Text
+    """
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
         length_function=len,
-    )
+    )"""
+    text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,  # Smaller chunks for better precision
+    chunk_overlap=150,
+    separators=["\n\n", "\n", ".", " ", ""],
+    keep_separator=True,
+    is_separator_regex=False
+)
     chunks = text_splitter.split_text(text)
     
     if not chunks:

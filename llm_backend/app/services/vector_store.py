@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 from app.core.logger import logger
 
 FAISS_INDEX_PATH = os.path.join(os.getcwd(), "faiss_index")
-EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_MODEL_NAME = "intfloat/multilingual-e5-large"
 
 def get_embeddings():
     # Model kw_args map to sentence-transformers
