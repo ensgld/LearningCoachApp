@@ -4,7 +4,7 @@ from app.models.chat_models import ChatRequest, ChatResponse
 from app.services.llm_service import ask_llama
 from app.core.logger import logger
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+router = APIRouter(tags=["Chat"])
 
 @router.post("", response_model=ChatResponse)
 def chat(req: ChatRequest):

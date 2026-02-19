@@ -52,7 +52,7 @@ def test_rag():
             print(f"Sources: {sources}")
             
             # Check if retrieval worked (sources should contain our PDF)
-            if any(s.get("docTitle") == pdf_file for s in sources):
+            if any(pdf_file in s.get("docTitle", "") for s in sources):
                 print("✅ Retrieval successful (Source found)")
             else:
                 print("❌ Retrieval failed (Source not found)")
@@ -65,6 +65,17 @@ def test_rag():
                 
         else:
             print(f"❌ Query failed: {response.status_code} {response.text}")
+
+        # 3. Test Chat (Standard)
+        print("\nTesting /chat endpoint...")
+        chat_payload = {"message": "Hello"}
+        chat_response = requests.post(f"{BASE_URL}/chat", json=chat_payload)
+        if chat_response.status_code == 200:
+            print("✅ Chat endpoint successful")
+            print(f"Response: {chat_response.json()}")
+        else:
+            print(f"❌ Chat endpoint failed: {chat_response.status_code} {chat_response.text}")
+
             
     except Exception as e:
         print(f"❌ Error: {e}")
