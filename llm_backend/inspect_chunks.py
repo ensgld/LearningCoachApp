@@ -12,7 +12,7 @@ def inspect_query(question: str):
         print("❌ Error: FAISS index not found. Did you run ingestion?")
         return
 
-    results = vector_store.similarity_search(question, k=3)
+    results = vector_store.similarity_search(question, k=10)
     
     if not results:
         print("⚠️ No results found.")

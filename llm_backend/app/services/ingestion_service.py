@@ -38,8 +38,8 @@ def ingest_pdf(file_path: str, source_name: str) -> dict:
         length_function=len,
     )"""
     text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,  # Smaller chunks for better precision
-    chunk_overlap=150,
+    chunk_size=800,  # Smaller chunks for better precision
+    chunk_overlap=100,
     separators=["\n\n", "\n", ".", " ", ""],
     keep_separator=True,
     is_separator_regex=False
