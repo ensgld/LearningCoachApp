@@ -1,5 +1,12 @@
 fastapi
 uvicorn
-requests
 python-dotenv
-pydantic
+requests
+python-multipart
+pydantic-settings
+sentence-transformers
+pypdf
+langchain-text-splitters
+faiss-cpu
+langchain-community
+langchain-huggingface

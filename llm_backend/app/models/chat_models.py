@@ -20,9 +20,10 @@ class EmbeddingResponse(BaseModel):
 
 class RagAnswerRequest(BaseModel):
     question: str = Field(..., min_length=1)
-    context: str = Field(..., min_length=1)
+    context: str | None = None
     history: list[dict] = Field(default_factory=list)
 
 
 class RagAnswerResponse(BaseModel):
     answer: str
+    sources: list[dict] | None = None
