@@ -92,7 +92,18 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
     
     messages.append({
         "role": "user",
-        "content": f"Bağlam:\n{context}\n\nSoru: {question}",
+        "content": f"""
+Aşağıdaki bağlamı kullanarak soruyu cevapla.
+
+BAĞLAM:
+---------------------
+{context}
+---------------------
+
+SORU: {question}
+
+Cevap:
+""",
     })
 
     payload = {
