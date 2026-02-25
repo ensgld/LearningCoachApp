@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:learning_coach/core/constants/app_strings.dart';
+import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CoachChatScreen extends ConsumerStatefulWidget {
   final String? initialPrompt;
@@ -93,8 +95,6 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
     });
 
     try {
-      // Mesajı gönder ve cevabı bekle
-      // (Provider'daki sendMessage fonksiyonunun Future<void> döndürdüğünden emin ol)
       await ref.read(coachTipMessagesProvider.notifier).sendMessage(text);
 
       // Mesaj gittikten sonra text alanını temizle
@@ -113,16 +113,147 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
         }
       });
     } catch (e) {
-      // Hata olursa kullanıcıya snackbar ile gösterilebilir
       debugPrint('Hata: $e');
     } finally {
-      // İşlem bitince (başarılı veya hatalı) loading'i kapat
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
       }
     }
+  }
+
+  /// Günlük özeti AI'ya gönderir.
+  /// widget.initialPrompt varsa onu kullanır;
+  /// yoksa dünkü istatistikleri toplayarak prompt'u kendisi oluşturur.
+  Future<void> _handleInfoSend() async {
+    if (_isLoading) return;
+
+    // Önce mevcut initialPrompt'u dene
+    if (widget.initialPrompt != null &&
+        widget.initialPrompt!.trim().isNotEmpty) {
+      setState(() => _isLoading = true);
+      try {
+        await ref
+            .read(coachTipMessagesProvider.notifier)
+            .sendMessage(widget.initialPrompt!);
+        _scrollToBottom();
+      } catch (e) {
+        debugPrint('Bilgi Ver hatası: $e');
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+      return;
+    }
+
+    // initialPrompt yoksa kendimiz oluşturalım
+    setState(() => _isLoading = true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      const lastTipDateKey = 'last_coach_tip_date';
+      final now = DateTime.now();
+      final todayStr = '${now.year}-${now.month}-${now.day}';
+      await prefs.setString(lastTipDateKey, todayStr);
+
+      final yesterday = now.subtract(const Duration(days: 1));
+      final yesterdayStr = yesterday.toIso8601String().split('T')[0];
+
+      final dailyStatsList = await ref.read(dailyStatsProvider.future);
+      final sessions = await ref
+          .read(apiStudySessionRepositoryProvider)
+          .getSessions();
+      final goals = await ref.read(goalsProvider.future);
+      final userStats = ref.read(userStatsProvider);
+
+      final yesterdayStats = dailyStatsList.firstWhere(
+        (s) => s.date == yesterdayStr,
+        orElse: () => DailyStats(date: yesterdayStr, minutes: 0, sessions: 0),
+      );
+
+      final yesterdaySessions = sessions.where((s) {
+        return s.startTime.year == yesterday.year &&
+            s.startTime.month == yesterday.month &&
+            s.startTime.day == yesterday.day;
+      }).toList();
+
+      final buffer = StringBuffer();
+      buffer.writeln(
+        'Merhaba Koç, benim "Learning Coach" asistanımsın. '
+        'İşte dünkü ($yesterdayStr) durumum:',
+      );
+      buffer.writeln('\n👤 **Kullanıcı Profili:**');
+      buffer.writeln(
+        '- Seviye: ${userStats.level} (${userStats.stage.name.toUpperCase()})',
+      );
+      buffer.writeln(
+        '- XP: ${userStats.xp} / ${userStats.xpRequiredForNextLevel}',
+      );
+      buffer.writeln('- Toplam Altın: ${userStats.gold}');
+      buffer.writeln('\n📅 **Dünkü Özet:**');
+      buffer.writeln('- Toplam Çalışma: ${yesterdayStats.minutes} dakika');
+      buffer.writeln('- Oturum Sayısı: ${yesterdayStats.sessions}');
+
+      if (yesterdaySessions.isNotEmpty) {
+        buffer.writeln('\n📝 **Oturum Detayları:**');
+        for (final session in yesterdaySessions) {
+          final goal = goals.firstWhere(
+            (g) => g.id == session.goalId,
+            orElse: () => Goal(title: 'Bilinmeyen Hedef', description: ''),
+          );
+          final h = session.startTime.hour.toString().padLeft(2, '0');
+          final m = session.startTime.minute.toString().padLeft(2, '0');
+          buffer.write(
+            '- **$h:$m** | ${goal.title} (${session.durationMinutes} dk)',
+          );
+          if (session.quizScore != null) {
+            buffer.write(' | Quiz Başarısı: %${session.quizScore}');
+          }
+          if (session.actualDurationSeconds != null) {
+            final actualMins = (session.actualDurationSeconds! / 60).round();
+            if (actualMins >= session.durationMinutes) {
+              buffer.write(
+                ' | ⚡ Verimli (Hedef: ${session.durationMinutes}dk, Gerçekleşen: ${actualMins}dk)',
+              );
+            } else {
+              buffer.write(
+                ' | 🐢 Hedefin altında (Hedef: ${session.durationMinutes}dk, Gerçekleşen: ${actualMins}dk)',
+              );
+            }
+          }
+          buffer.writeln();
+        }
+      } else {
+        buffer.writeln('\nDün detaylı bir çalışma kaydım yoktu.');
+      }
+
+      buffer.writeln(
+        '\nLütfen bu verilere dayanarak bana özel, motive edici ve '
+        'gelişim odaklı bir tavsiye ver. Eğer dün verimsiz geçtiyse '
+        'nazikçe uyar, boşa geçtiyse teşvik et, iyiyse kutla. Tavsiyeler ver.',
+      );
+
+      if (!mounted) return;
+      await ref
+          .read(coachTipMessagesProvider.notifier)
+          .sendMessage(buffer.toString());
+      _scrollToBottom();
+    } catch (e) {
+      debugPrint('Bilgi Ver hatası: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -280,7 +411,7 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
             Container(
               padding: EdgeInsets.fromLTRB(
                 16,
-                16,
+                12,
                 16,
                 MediaQuery.of(context).padding.bottom + 16,
               ),
@@ -292,69 +423,122 @@ class _CoachChatScreenState extends ConsumerState<CoachChatScreen> {
                   ),
                 ),
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: TextField(
-                        controller: _textController,
-                        onSubmitted: _isLoading ? null : (_) => _handleSend(),
-                        enabled: !_isLoading,
-                        decoration: const InputDecoration(
-                          hintText: AppStrings.askCoachHint,
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 14,
+                  // "Bilgi Ver" butonu — her zaman görünür
+                  SizedBox(
+                    width: double.infinity,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      child: OutlinedButton.icon(
+                        onPressed: _isLoading ? null : _handleInfoSend,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF6366F1),
+                          side: const BorderSide(
+                            color: Color(0xFF6366F1),
+                            width: 1.5,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF6366F1),
+                                ),
+                              )
+                            : const Icon(Icons.info_outline_rounded, size: 18),
+                        label: const Text(
+                          'Bilgi Ver',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: _isLoading
-                            ? [Colors.grey.shade400, Colors.grey.shade500]
-                            : [
-                                const Color(0xFF6366F1),
-                                const Color(0xFF8B5CF6),
-                              ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              (_isLoading
-                                      ? Colors.grey
-                                      : const Color(0xFF6366F1))
-                                  .withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: IconButton(
-                      onPressed: _isLoading ? null : _handleSend,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
+                  const SizedBox(height: 8),
+                  // Mesaj giriş satırı
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: TextField(
+                            controller: _textController,
+                            onSubmitted: _isLoading
+                                ? null
+                                : (_) => _handleSend(),
+                            enabled: !_isLoading,
+                            decoration: const InputDecoration(
+                              hintText: AppStrings.askCoachHint,
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 14,
                               ),
-                            )
-                          : const Icon(Icons.send_rounded, color: Colors.white),
-                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: _isLoading
+                                ? [Colors.grey.shade400, Colors.grey.shade500]
+                                : [
+                                    const Color(0xFF6366F1),
+                                    const Color(0xFF8B5CF6),
+                                  ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  (_isLoading
+                                          ? Colors.grey
+                                          : const Color(0xFF6366F1))
+                                      .withValues(alpha: 0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          onPressed: _isLoading ? null : _handleSend,
+                          icon: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.send_rounded,
+                                  color: Colors.white,
+                                ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

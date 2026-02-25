@@ -38,11 +38,15 @@ export async function embedTexts(texts: string[]): Promise<number[][]> {
     throw lastError!;
 }
 
-export async function answerWithContext(question: string, context: string): Promise<string> {
+export async function answerWithContext(
+    question: string,
+    context: string,
+    history: Array<{ role: string; content: string }> = []
+): Promise<string> {
     const response = await fetch(`${config.LLM_BACKEND_URL}/rag/answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, context }),
+        body: JSON.stringify({ question, context, history }),
     });
 
     if (!response.ok) {

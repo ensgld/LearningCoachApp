@@ -9,6 +9,7 @@ import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/providers/auth_provider.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'providers.g.dart';
 
@@ -73,31 +74,65 @@ Future<List<DailyStats>> dailyStats(Ref ref) async {
 
 // --- CHAT PROVIDER (1. DOSYADAKİ ÇALIŞAN KOD) ---
 
+/// Kullanıcı e-postasından güvenli bir SharedPreferences anahtarı üretir.
+/// E-posta geçersiz karakterlerden arındırılır.
+String _emailToKey(String email) {
+  return email.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+}
+
 @Riverpod(keepAlive: true)
 class ChatMessages extends _$ChatMessages {
-  final String _threadId = 'general_chat'; // Explicit thread ID
-  bool _loaded = false;
+  String? _threadId;
+
+  /// Aktif kullanıcının e-postasını auth state'den okuyarak
+  /// kullanıcıya özgü bir threadId döndürür.
+  Future<String> _resolveThreadId() async {
+    if (_threadId != null) return _threadId!;
+
+    // 1. Önce auth state'den e-postayı almaya çalış (zaten watch edildi)
+    final authState = ref.read(authStateProvider);
+    final profile = authState.value;
+    final email = profile?['email'] as String? ?? profile?['Email'] as String?;
+
+    if (email != null && email.isNotEmpty) {
+      _threadId = '${_emailToKey(email)}_general_chat';
+      return _threadId!;
+    }
+
+    // 2. Fallback: SharedPreferences'tan token varsa genel anahtar kullan
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token != null && token.isNotEmpty) {
+      final prefix = token.length >= 8 ? token.substring(0, 8) : token;
+      _threadId = '${prefix}_general_chat';
+      return _threadId!;
+    }
+
+    _threadId = 'general_chat';
+    return _threadId!;
+  }
 
   @override
   List<CoachMessage> build() {
-    if (!_loaded) {
-      _loaded = true;
-      _loadHistory();
-    }
+    // authStateProvider'ı watch ediyoruz: kullanıcı değiştiğinde
+    // Riverpod bu provider'ı otomatik olarak yeniden oluşturur,
+    // böylece _threadId sıfırlanır ve yeni kullanıcının geçmişi yüklenir.
+    ref.watch(authStateProvider);
+
+    // Her build'de temiz başla ve geçmişi yükle
+    _threadId = null;
+    _loadHistory();
 
     return [];
   }
 
   Future<void> _loadHistory() async {
     try {
+      final threadId = await _resolveThreadId();
       final repository = ref.read(apiChatRepositoryProvider);
-      final result = await repository.getHistory(
-        threadId: _threadId,
-      ); // Pass threadId
+      final result = await repository.getHistory(threadId: threadId);
       if (result.messages.isNotEmpty) {
         state = result.messages;
-        // Optionally update threadId if backend returns a new one, but we prefer keeping ours if possible
-        // _threadId = result.threadId ?? _threadId;
         return;
       }
       state = List.from(MockDataRepository.initialChat);
@@ -125,14 +160,14 @@ class ChatMessages extends _$ChatMessages {
     state = [...state, userMessage];
 
     try {
+      final threadId = await _resolveThreadId();
       // 2. API üzerinden cevabı al
       final repository = ref.read(apiChatRepositoryProvider);
       final response = await repository.sendMessage(
         text,
-        threadId: _threadId,
+        threadId: threadId,
         history: history,
       );
-      // _threadId = response.threadId ?? _threadId; // Remove override to keep distinct threadId
 
       // 3. AI Cevabını listeye ekle
       final aiMessage = CoachMessage(

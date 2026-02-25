@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +5,6 @@ import 'package:learning_coach/features/auth/application/auth_controller.dart';
 import 'package:learning_coach/features/auth/domain/auth_validators.dart';
 import 'package:learning_coach/features/auth/presentation/widgets/auth_button.dart';
 import 'package:learning_coach/features/auth/presentation/widgets/auth_text_field.dart';
-import 'package:learning_coach/features/auth/presentation/widgets/social_button.dart';
 
 /// Login Screen
 ///
@@ -90,24 +87,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  /// Demo kullanıcı ile hızlı giriş
-  ///
-  /// demo@demo.com / 123456 ile otomatik giriş yapar
-  Future<void> _handleDemoLogin() async {
-    await ref.read(authControllerProvider.notifier).loginAsDemo();
-    // Router guard otomatik /home'a yönlendirir
-  }
-
-  /// Google ile giriş (mock)
-  Future<void> _handleGoogleSignIn() async {
-    await ref.read(authControllerProvider.notifier).loginWithGoogle();
-  }
-
-  /// Apple ile giriş (mock)
-  Future<void> _handleAppleSignIn() async {
-    await ref.read(authControllerProvider.notifier).loginWithApple();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,56 +152,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     );
                   },
                 ),
-
-                const SizedBox(height: 12),
-
-                // Demo Login butonu
-                OutlinedButton.icon(
-                  onPressed: _handleDemoLogin,
-                  icon: const Icon(Icons.rocket_launch_outlined),
-                  label: const Text('Demo ile Giriş (demo@demo.com)'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider: "veya"
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'veya',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Google ile giriş
-                SocialButton(
-                  icon: Icons.g_mobiledata, // Google icon placeholder
-                  label: 'Google ile devam et',
-                  onPressed: _handleGoogleSignIn,
-                ),
-
-                const SizedBox(height: 12),
-
-                // Apple ile giriş (sadece iOS'ta göster)
-                if (Platform.isIOS)
-                  SocialButton(
-                    icon: Icons.apple,
-                    label: 'Apple ile devam et',
-                    onPressed: _handleAppleSignIn,
-                    backgroundColor: Colors.black,
-                    iconColor: Colors.white,
-                  ),
 
                 const SizedBox(height: 24),
 

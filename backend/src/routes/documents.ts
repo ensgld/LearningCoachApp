@@ -134,6 +134,10 @@ router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunct
             throw new BadRequestError('message alanı zorunludur');
         }
 
+        const history: Array<{ role: string; content: string }> = Array.isArray(req.body.history)
+            ? req.body.history
+            : [];
+
         const thread = await chatService.getOrCreateThread(userId, doc.id);
 
         await chatService.addMessage({
@@ -146,6 +150,7 @@ router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunct
             documentId: doc.id,
             question: req.body.message,
             docTitle: doc.title,
+            history,
         });
 
         const aiMessage = await chatService.addMessage({

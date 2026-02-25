@@ -150,6 +150,7 @@ export async function chatWithDocument(params: {
     documentId: string;
     question: string;
     docTitle: string;
+    history?: Array<{ role: string; content: string }>;
 }): Promise<{ answer: string; sources: RagSource[] }> {
     const [queryEmbedding] = await embedTexts([params.question]);
     const vector = `[${queryEmbedding.join(',')}]`;
@@ -170,8 +171,15 @@ export async function chatWithDocument(params: {
         metadata: any;
     }>;
 
+    if (chunks.length === 0) {
+        return {
+            answer: 'Bu doküman için henüz işlenmiş içerik bulunamadı. Lütfen dokümanı yeniden yükleyin.',
+            sources: [],
+        };
+    }
+
     const context = chunks.map((c) => c.chunk_text).join('\n\n---\n\n');
-    const answer = await answerWithContext(params.question, context);
+    const answer = await answerWithContext(params.question, context, params.history ?? []);
 
     const sources: RagSource[] = chunks.map((c) => {
         const page = c.metadata?.page;

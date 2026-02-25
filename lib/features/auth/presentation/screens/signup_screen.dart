@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +5,6 @@ import 'package:learning_coach/features/auth/application/auth_controller.dart';
 import 'package:learning_coach/features/auth/domain/auth_validators.dart';
 import 'package:learning_coach/features/auth/presentation/widgets/auth_button.dart';
 import 'package:learning_coach/features/auth/presentation/widgets/auth_text_field.dart';
-import 'package:learning_coach/features/auth/presentation/widgets/social_button.dart';
 
 /// Signup Screen
 ///
@@ -94,46 +91,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Hata: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  /// Google ile kayıt (mock)
-  Future<void> _handleGoogleSignup() async {
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authControllerProvider.notifier).loginWithGoogle();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google ile kayıt: Yakında')),
-        );
-        context.go('/home');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  /// Apple ile kayıt (mock)
-  Future<void> _handleAppleSignup() async {
-    setState(() => _isLoading = true);
-
-    try {
-      await ref.read(authControllerProvider.notifier).loginWithApple();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Apple ile kayıt: Yakında')),
-        );
-        context.go('/home');
       }
     } finally {
       if (mounted) {
@@ -268,43 +225,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   onPressed: _handleSignup,
                   isLoading: _isLoading,
                 ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'veya',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Social butonlar
-                SocialButton(
-                  icon: Icons.g_mobiledata,
-                  label: 'Google ile kayıt ol',
-                  onPressed: _handleGoogleSignup,
-                ),
-
-                const SizedBox(height: 12),
-
-                if (Platform.isIOS)
-                  SocialButton(
-                    icon: Icons.apple,
-                    label: 'Apple ile kayıt ol',
-                    onPressed: _handleAppleSignup,
-                    backgroundColor: Colors.black,
-                    iconColor: Colors.white,
-                  ),
 
                 const SizedBox(height: 24),
 
