@@ -35,6 +35,8 @@ class ApiService {
     return 'http://localhost:3000/api/v1';
   }
 
+  late final Future<void> _tokenReady;
+
   ApiService() {
     _dio = Dio(
       BaseOptions(
@@ -46,14 +48,16 @@ class ApiService {
     );
     print('🔌 ApiService Initialized');
     print('🔗 Resolved API_BASE_URL: ${_dio.options.baseUrl}');
+    _tokenReady = loadToken();
     _setupInterceptors();
-    loadToken();
   }
 
   void _setupInterceptors() {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+          // Token yüklenene kadar bekle — race condition önlemi
+          await _tokenReady;
           if (_accessToken != null) {
             options.headers['Authorization'] = 'Bearer $_accessToken';
           }
