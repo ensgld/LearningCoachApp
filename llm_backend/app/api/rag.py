@@ -8,6 +8,8 @@ from app.models.chat_models import (
 )
 from app.services.llm_service import get_embeddings, ask_document
 
+from fastapi.responses import StreamingResponse
+
 router = APIRouter(prefix="/rag", tags=["RAG"])
 
 
@@ -22,12 +24,16 @@ def embeddings(req: EmbeddingRequest):
         raise HTTPException(status_code=500, detail=f"Embedding error: {e}")
 
 
-@router.post("/answer", response_model=RagAnswerResponse)
+@router.post("/answer")
 def answer(req: RagAnswerRequest):
     try:
         logger.info("RAG cevap isteği alındı")
-        result = ask_document(req.question, req.context, req.history)
-        return RagAnswerResponse(answer=result)
+        if req.stream:
+            generator = ask_document(req.question, req.context, req.history, stream=True)
+            return StreamingResponse(generator, media_type="text/plain")
+        else:
+            result = ask_document(req.question, req.context, req.history, stream=False)
+            return RagAnswerResponse(answer=result)
     except Exception as e:
         logger.exception("RAG answer error")
         raise HTTPException(status_code=500, detail=f"RAG answer error: {e}")

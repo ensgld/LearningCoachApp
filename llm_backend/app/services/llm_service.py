@@ -1,5 +1,7 @@
 import time
+import json
 import requests
+from typing import Generator
 from app.core.config import (
     OLLAMA_URL,
     MODEL_NAME,
@@ -11,7 +13,7 @@ from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
 from app.core.logger import logger
 
 
-def ask_llama(user_message: str, history: list[dict] = []) -> str:
+def ask_llama(user_message: str, history: list[dict] = [], stream: bool = False) -> str | Generator:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     # Add history messages if any
@@ -25,23 +27,40 @@ def ask_llama(user_message: str, history: list[dict] = []) -> str:
     payload = {
         "model": MODEL_NAME,
         "messages": messages,
-        "stream": False,
+        "stream": stream,
+        "options": {
+            "num_ctx": 8192,
+            "temperature": 0.3
+        }
     }
 
     logger.info(f"[GENERAL_CHAT] REQUEST: {user_message}")
     logger.info("LLAMA isteği gönderildi.")
 
     start_time = time.time()
-    response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
-    response.raise_for_status()
-    end_time = time.time()
+    
+    if stream:
+        response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT, stream=True)
+        response.raise_for_status()
+        
+        def generate():
+            for line in response.iter_lines():
+                if line:
+                    data = json.loads(line)
+                    if "message" in data and "content" in data["message"]:
+                        yield data["message"]["content"]
+        return generate()
+    else:
+        response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        end_time = time.time()
 
-    elapsed_ms = (end_time - start_time) * 1000
+        elapsed_ms = (end_time - start_time) * 1000
 
-    data = response.json()
-    response_content = data["message"]["content"]
-    logger.info(f"[GENERAL_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
-    return response_content
+        data = response.json()
+        response_content = data["message"]["content"]
+        logger.info(f"[GENERAL_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
+        return response_content
 
 
 def get_embeddings(texts: list[str]) -> list[list[float]]:
@@ -89,7 +108,7 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
     return embeddings
 
 
-def ask_document(question: str, context: str, history: list[dict] = []) -> str:
+def ask_document(question: str, context: str, history: list[dict] = [], stream: bool = False) -> str | Generator:
     messages = [{"role": "system", "content": RAG_SYSTEM_PROMPT}]
     
     # Add history messages if any
@@ -105,24 +124,46 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
     payload = {
         "model": MODEL_NAME,
         "messages": messages,
-        "stream": False,
+        "stream": stream,
+        "options": {
+            "num_ctx": 4096,
+            "temperature": 0.3
+        }
     }
 
     logger.info(f"[DOCUMENT_CHAT] REQUEST: {question}")
     logger.info("LLAMA isteği gönderildi.")
 
     start_time = time.time()
-    response = requests.post(
-        OLLAMA_URL,
-        json=payload,
-        timeout=REQUEST_TIMEOUT,
-    )
-    response.raise_for_status()
-    end_time = time.time()
+    
+    if stream:
+        response = requests.post(
+            OLLAMA_URL,
+            json=payload,
+            timeout=REQUEST_TIMEOUT,
+            stream=True
+        )
+        response.raise_for_status()
+        
+        def generate():
+            for line in response.iter_lines():
+                if line:
+                    data = json.loads(line)
+                    if "message" in data and "content" in data["message"]:
+                        yield data["message"]["content"]
+        return generate()
+    else:
+        response = requests.post(
+            OLLAMA_URL,
+            json=payload,
+            timeout=REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+        end_time = time.time()
 
-    elapsed_ms = (end_time - start_time) * 1000
+        elapsed_ms = (end_time - start_time) * 1000
 
-    data = response.json()
-    response_content = data["message"]["content"]
-    logger.info(f"[DOCUMENT_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
-    return response_content
+        data = response.json()
+        response_content = data["message"]["content"]
+        logger.info(f"[DOCUMENT_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
+        return response_content
