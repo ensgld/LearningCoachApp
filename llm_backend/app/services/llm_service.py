@@ -29,7 +29,7 @@ def ask_llama(user_message: str, history: list[dict] = []) -> str:
     }
 
     logger.info("LLAMA isteği gönderiliyor...")
-    logger.info(f"Gönderilen mesajlar: {messages}")
+    logger.info(f"Gönderilen kullanıcı mesajı: {user_message}")
 
     response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
@@ -105,7 +105,7 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
     }
 
     logger.info("LLAMA belge isteği gönderiliyor...")
-    logger.info(f"Gönderilen mesajlar: {messages}")
+    logger.info(f"Gönderilen kullanıcı sorusu: {question}")
 
     response = requests.post(
         OLLAMA_URL,
