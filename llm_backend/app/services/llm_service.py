@@ -28,13 +28,16 @@ def ask_llama(user_message: str, history: list[dict] = []) -> str:
         "stream": False,
     }
 
-    logger.info("LLAMA isteği gönderildi")
+    logger.info("LLAMA isteği gönderiliyor...")
+    logger.info(f"Gönderilen mesajlar: {messages}")
 
     response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
 
     data = response.json()
-    return data["message"]["content"]
+    response_content = data["message"]["content"]
+    logger.info(f"Alınan yanıt: {response_content}")
+    return response_content
 
 
 def get_embeddings(texts: list[str]) -> list[list[float]]:
@@ -101,6 +104,9 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
         "stream": False,
     }
 
+    logger.info("LLAMA belge isteği gönderiliyor...")
+    logger.info(f"Gönderilen mesajlar: {messages}")
+
     response = requests.post(
         OLLAMA_URL,
         json=payload,
@@ -108,4 +114,6 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
     )
     response.raise_for_status()
     data = response.json()
-    return data["message"]["content"]
+    response_content = data["message"]["content"]
+    logger.info(f"Alınan yanıt: {response_content}")
+    return response_content
