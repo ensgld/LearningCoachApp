@@ -8,7 +8,7 @@ from app.core.config import (
     REQUEST_TIMEOUT,
 )
 from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
-from app.core.logger import logger
+from app.core.logger import logger, log_llm_interaction
 
 
 def ask_llama(user_message: str, history: list[dict] = []) -> str:
@@ -37,6 +37,10 @@ def ask_llama(user_message: str, history: list[dict] = []) -> str:
     data = response.json()
     response_content = data["message"]["content"]
     logger.info(f"Alınan yanıt: {response_content}")
+    
+    # Her çalışmada tam içeriği yeni bir log dosyasına yaz
+    log_llm_interaction("llama", user_message, response_content)
+    
     return response_content
 
 
@@ -116,4 +120,8 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
     data = response.json()
     response_content = data["message"]["content"]
     logger.info(f"Alınan yanıt: {response_content}")
+    
+    # Her çalışmada tam içeriği yeni bir log dosyasına yaz
+    log_llm_interaction("document", f"Bağlam:\n{context}\n\nSoru: {question}", response_content)
+    
     return response_content
