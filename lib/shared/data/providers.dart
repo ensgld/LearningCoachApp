@@ -159,32 +159,52 @@ class ChatMessages extends _$ChatMessages {
 
     state = [...state, userMessage];
 
+    // Placeholder for AI message that will be updated in real-time
+    final aiMessageId = DateTime.now().millisecondsSinceEpoch.toString();
+    var aiMessage = CoachMessage(
+      id: aiMessageId,
+      text: '',
+      isUser: false,
+      timestamp: DateTime.now(),
+    );
+
+    state = [...state, aiMessage];
+
     try {
       final threadId = await _resolveThreadId();
-      // 2. API üzerinden cevabı al
+      // 2. API üzerinden cevabı al (stream olarak)
       final repository = ref.read(apiChatRepositoryProvider);
-      final response = await repository.sendMessage(
+      final stream = await repository.sendMessageStream(
         text,
         threadId: threadId,
         history: history,
       );
 
-      // 3. AI Cevabını listeye ekle
-      final aiMessage = CoachMessage(
-        text: response.answer,
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
+      String fullResponse = '';
 
-      state = [...state, aiMessage];
+      await for (final chunk in stream) {
+        fullResponse += chunk;
+        
+        // Update the state with the progressive message
+        state = state.map((msg) {
+          if (msg.id == aiMessageId) {
+            return msg.copyWith(text: fullResponse);
+          }
+          return msg;
+        }).toList();
+      }
     } catch (e) {
       // Hata durumunda kullanıcıya bilgi ver
-      final errorMessage = CoachMessage(
-        text: 'Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}',
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
-      state = [...state, errorMessage];
+      state = state.map((msg) {
+        if (msg.id == aiMessageId) {
+          return msg.copyWith(
+            text: msg.text.isEmpty
+                ? 'Üzgünüm, şu an bağlantı kuramıyorum. Hata: ${e.toString()}'
+                : '${msg.text}\n\n[Bağlantı koptu : ${e.toString()}]'
+          );
+        }
+        return msg;
+      }).toList();
     }
   }
 }
@@ -220,30 +240,48 @@ class CoachTipMessages extends _$CoachTipMessages {
 
     state = [...state, userMessage];
 
+    final aiMessageId = DateTime.now().millisecondsSinceEpoch.toString();
+    var aiMessage = CoachMessage(
+      id: aiMessageId,
+      text: '',
+      isUser: false,
+      timestamp: DateTime.now(),
+    );
+
+    state = [...state, aiMessage];
+
     try {
       final repository = ref.read(apiChatRepositoryProvider);
-      // Farklı bir thread veya context gerekebilir ama şimdilik aynı endpoint
-      final response = await repository.sendMessage(
+      
+      final stream = await repository.sendMessageStream(
         text,
         threadId: _threadId,
         history: history,
       );
-      // _threadId = response.threadId ?? _threadId; // Remove override
 
-      final aiMessage = CoachMessage(
-        text: response.answer,
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
+      String fullResponse = '';
 
-      state = [...state, aiMessage];
+      await for (final chunk in stream) {
+        fullResponse += chunk;
+        
+        state = state.map((msg) {
+          if (msg.id == aiMessageId) {
+            return msg.copyWith(text: fullResponse);
+          }
+          return msg;
+        }).toList();
+      }
     } catch (e) {
-      final errorMessage = CoachMessage(
-        text: 'Bağlantı hatası: ${e.toString()}',
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
-      state = [...state, errorMessage];
+      state = state.map((msg) {
+        if (msg.id == aiMessageId) {
+          return msg.copyWith(
+            text: msg.text.isEmpty
+                ? 'Bağlantı hatası: ${e.toString()}'
+                : '${msg.text}\n\n[Bağlantı koptu : ${e.toString()}]'
+          );
+        }
+        return msg;
+      }).toList();
     }
   }
 }

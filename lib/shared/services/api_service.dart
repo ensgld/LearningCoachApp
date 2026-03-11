@@ -1,6 +1,5 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'dart:io';import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -172,6 +171,29 @@ class ApiService {
       },
     );
     return response.data!;
+  }
+
+  Future<Stream<String>> sendChatMessageStream(
+    String message, {
+    String? threadId,
+    List<Map<String, dynamic>>? history,
+  }) async {
+    final url = '$baseUrlLLM/chat';
+    print('🤖 Sending Chat Stream Request to: $url');
+
+    final response = await _dio.post(
+      url,
+      data: {
+        'message': message,
+        if (threadId != null) 'threadId': threadId,
+        if (history != null) 'history': history,
+        'stream': true,
+      },
+      options: Options(responseType: ResponseType.stream),
+    );
+
+    final responseBody = response.data as ResponseBody;
+    return responseBody.stream.map((list) => list.toList()).transform(utf8.decoder);
   }
 
   Future<Map<String, dynamic>> getChatHistory({String? threadId}) async {

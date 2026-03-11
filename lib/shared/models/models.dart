@@ -193,6 +193,22 @@ class CoachMessage extends Equatable {
   }) : id = id ?? uuid.v4(),
        timestamp = timestamp ?? DateTime.now();
 
+  CoachMessage copyWith({
+    String? id,
+    String? text,
+    bool? isUser,
+    DateTime? timestamp,
+    List<Source>? sources,
+  }) {
+    return CoachMessage(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      isUser: isUser ?? this.isUser,
+      timestamp: timestamp ?? this.timestamp,
+      sources: sources ?? this.sources,
+    );
+  }
+
   @override
   List<Object?> get props => [id, text, isUser, timestamp, sources];
 }

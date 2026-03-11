@@ -37,6 +37,18 @@ class ApiChatRepository {
     );
   }
 
+  Future<Stream<String>> sendMessageStream(
+    String message, {
+    String? threadId,
+    List<Map<String, dynamic>>? history,
+  }) async {
+    return _apiService.sendChatMessageStream(
+      message,
+      threadId: threadId,
+      history: history,
+    );
+  }
+
   Future<ChatHistoryResult> getHistory({String? threadId}) async {
     final data = await _apiService.getChatHistory(threadId: threadId);
     final rawMessages = data['messages'] as List<dynamic>? ?? [];
