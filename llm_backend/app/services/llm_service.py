@@ -8,7 +8,7 @@ from app.core.config import (
     REQUEST_TIMEOUT,
 )
 from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
-from app.core.logger import logger, log_llm_interaction
+from app.core.logger import logger
 
 
 def ask_llama(user_message: str, history: list[dict] = []) -> str:
@@ -28,19 +28,19 @@ def ask_llama(user_message: str, history: list[dict] = []) -> str:
         "stream": False,
     }
 
-    logger.info("LLAMA isteği gönderiliyor...")
-    logger.info(f"Gönderilen kullanıcı mesajı: {user_message}")
+    logger.info(f"[GENERAL_CHAT] REQUEST: {user_message}")
+    logger.info("LLAMA isteği gönderildi.")
 
+    start_time = time.time()
     response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
+    end_time = time.time()
+
+    elapsed_ms = (end_time - start_time) * 1000
 
     data = response.json()
     response_content = data["message"]["content"]
-    logger.info(f"Alınan yanıt: {response_content}")
-    
-    # Her çalışmada tam içeriği yeni bir log dosyasına yaz
-    log_llm_interaction("llama", user_message, response_content)
-    
+    logger.info(f"[GENERAL_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
     return response_content
 
 
@@ -108,20 +108,21 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
         "stream": False,
     }
 
-    logger.info("LLAMA belge isteği gönderiliyor...")
-    logger.info(f"Gönderilen kullanıcı sorusu: {question}")
+    logger.info(f"[DOCUMENT_CHAT] REQUEST: {question}")
+    logger.info("LLAMA isteği gönderildi.")
 
+    start_time = time.time()
     response = requests.post(
         OLLAMA_URL,
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
     response.raise_for_status()
+    end_time = time.time()
+
+    elapsed_ms = (end_time - start_time) * 1000
+
     data = response.json()
     response_content = data["message"]["content"]
-    logger.info(f"Alınan yanıt: {response_content}")
-    
-    # Her çalışmada tam içeriği yeni bir log dosyasına yaz
-    log_llm_interaction("document", f"Bağlam:\n{context}\n\nSoru: {question}", response_content)
-    
+    logger.info(f"[DOCUMENT_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
     return response_content
