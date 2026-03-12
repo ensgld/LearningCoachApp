@@ -14,10 +14,10 @@ router = APIRouter(prefix="/rag", tags=["RAG"])
 
 
 @router.post("/embeddings", response_model=EmbeddingResponse)
-def embeddings(req: EmbeddingRequest):
+async def embeddings(req: EmbeddingRequest):
     try:
         logger.info("Embedding isteği alındı")
-        vectors = get_embeddings(req.texts)
+        vectors = await get_embeddings(req.texts)
         return EmbeddingResponse(embeddings=vectors)
     except Exception as e:
         logger.exception("Embedding error")
@@ -25,14 +25,14 @@ def embeddings(req: EmbeddingRequest):
 
 
 @router.post("/answer")
-def answer(req: RagAnswerRequest):
+async def answer(req: RagAnswerRequest):
     try:
         logger.info("RAG cevap isteği alındı")
         if req.stream:
-            generator = ask_document(req.question, req.context, req.history, stream=True)
+            generator = await ask_document(req.question, req.context, req.history, stream=True)
             return StreamingResponse(generator, media_type="text/plain")
         else:
-            result = ask_document(req.question, req.context, req.history, stream=False)
+            result = await ask_document(req.question, req.context, req.history, stream=False)
             return RagAnswerResponse(answer=result)
     except Exception as e:
         logger.exception("RAG answer error")

@@ -8,17 +8,17 @@ from app.core.logger import logger
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 @router.post("")
-def chat(req: ChatRequest):
+async def chat(req: ChatRequest):
     start_time = time.time()
     try:
         # Determine chat type based on message content
         chat_type = "COACH_TIP" if "Merhaba Koç, benim \"Learning Coach\" asistanımsın" in req.message else "GENERAL_CHAT"
         
         if req.stream:
-            generator = ask_llama(req.message, req.history, stream=True)
+            generator = await ask_llama(req.message, req.history, stream=True)
             return StreamingResponse(generator, media_type="text/plain")
         else:
-            answer = ask_llama(req.message, req.history, stream=False)
+            answer = await ask_llama(req.message, req.history, stream=False)
             duration_ms = (time.time() - start_time) * 1000
             return ChatResponse(answer=answer)
     except Exception as e:
