@@ -14,6 +14,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up Learning Coach Backend. Preloading models in background...")
     asyncio.create_task(preload_models())
     yield
+    await close_client()
     logger.info("Shutting down Backend.")
 
 app = FastAPI(title="Learning Coach Backend", version="1.0.0", lifespan=lifespan)
