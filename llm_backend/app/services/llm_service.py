@@ -24,6 +24,7 @@ async def preload_models():
     logger.info(f"[{MODEL_NAME}] Preloading model...")
     payload = {
         "model": MODEL_NAME,
+        "prompt": "",
         "keep_alive": OLLAMA_KEEP_ALIVE
     }
     try:
