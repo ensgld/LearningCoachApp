@@ -12,7 +12,12 @@ from app.core.config import (
     OLLAMA_KEEP_ALIVE,
     OLLAMA_GENERATE_URL,
 )
-from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
+from app.core.prompts import (
+    SYSTEM_PROMPT,
+    RAG_SYSTEM_PROMPT,
+    QUIZ_SYSTEM_PROMPT,
+    FLASHCARD_SYSTEM_PROMPT,
+)
 from app.core.logger import logger
 
 # Global client to reuse connections (Connection Pooling)
@@ -29,7 +34,6 @@ async def close_client():
     if _client:
         await _client.aclose()
         _client = None
-
 
 async def preload_models():
     """
@@ -49,7 +53,6 @@ async def preload_models():
         logger.info(f"[{MODEL_NAME}] Model preloaded successfully.")
     except Exception as e:
         logger.error(f"[{MODEL_NAME}] Failed to preload model: {e}")
-
 
 async def ask_llama(user_message: str, history: list[dict] = [], stream: bool = False) -> str | AsyncGenerator:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -102,7 +105,6 @@ async def ask_llama(user_message: str, history: list[dict] = [], stream: bool = 
         logger.info(f"[GENERAL_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
         return response_content
 
-
 async def get_embeddings(texts: list[str]) -> list[list[float]]:
     if not OLLAMA_EMBEDDINGS_URL:
         raise ValueError("OLLAMA_EMBEDDINGS_URL is not configured")
@@ -148,7 +150,6 @@ async def get_embeddings(texts: list[str]) -> list[list[float]]:
             raise RuntimeError(f"Embedding request failed{detail}") from last_exc
 
     return embeddings
-
 
 async def ask_document(question: str, context: str, history: list[dict] = [], stream: bool = False) -> str | AsyncGenerator:
     messages = [{"role": "system", "content": RAG_SYSTEM_PROMPT}]
@@ -202,3 +203,55 @@ async def ask_document(question: str, context: str, history: list[dict] = [], st
         response_content = data["message"]["content"]
         logger.info(f"[DOCUMENT_CHAT] RESPONSE ({elapsed_ms:.2f}ms): {response_content}")
         return response_content
+
+async def generate_quiz(context: str, count: int, difficulty: str, instructions: str | None = None) -> str:
+    messages = [{"role": "system", "content": QUIZ_SYSTEM_PROMPT}]
+    
+    req_text = f"Bağlam:\n{context}\n\nİstek: Lütfen bu bağlama göre {count} adet {difficulty} (zorluk) seviyede soru içeren bir seçenekli test hazırla."
+    if instructions:
+        req_text += f"\n\nÖzel Talimatlar:\n{instructions}"
+
+    messages.append({
+        "role": "user",
+        "content": req_text,
+    })
+
+    payload = {
+        "model": MODEL_NAME,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "messages": messages,
+        "stream": False,
+        "format": "json",
+    }
+
+    client = get_client()
+    response = await client.post(OLLAMA_URL, json=payload)
+    response.raise_for_status()
+    data = response.json()
+    return data["message"]["content"]
+
+async def generate_flashcards(context: str, count: int, difficulty: str, instructions: str | None = None) -> str:
+    messages = [{"role": "system", "content": FLASHCARD_SYSTEM_PROMPT}]
+    
+    req_text = f"Bağlam:\n{context}\n\nİstek: Lütfen bu bağlama göre {count} adet {difficulty} (zorluk) seviyede flash kart hazırla."
+    if instructions:
+        req_text += f"\n\nÖzel Talimatlar:\n{instructions}"
+
+    messages.append({
+        "role": "user",
+        "content": req_text,
+    })
+
+    payload = {
+        "model": MODEL_NAME,
+        "keep_alive": OLLAMA_KEEP_ALIVE,
+        "messages": messages,
+        "stream": False,
+        "format": "json",
+    }
+
+    client = get_client()
+    response = await client.post(OLLAMA_URL, json=payload)
+    response.raise_for_status()
+    data = response.json()
+    return data["message"]["content"]

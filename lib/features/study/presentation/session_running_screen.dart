@@ -184,6 +184,7 @@ class _SessionRunningScreenState extends ConsumerState<SessionRunningScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FloatingActionButton.large(
+                      heroTag: 'fab_session_pause',
                       onPressed: () {
                         setState(() {
                           _isPaused = !_isPaused;
