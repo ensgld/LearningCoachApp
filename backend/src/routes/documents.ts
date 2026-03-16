@@ -181,7 +181,64 @@ router.post('/:id/chat', async (req: AuthRequest, res: Response, next: NextFunct
     }
 });
 
-// GET /documents/:id/chat/history - Document chat history
+// POST /documents/:id/quiz - Quiz soruları üret
+router.post('/:id/quiz', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const doc = await documentService.getDocument(userId, req.params.id);
+
+        if (doc.status !== 'ready') {
+            throw new ConflictError('Doküman henüz işlenmedi. Lütfen bekleyin.');
+        }
+
+        const count = Math.min(Math.max(parseInt(req.body?.count ?? '10', 10), 1), 20);
+        const difficulty = ['easy', 'medium', 'hard'].includes(req.body?.difficulty)
+            ? (req.body.difficulty as 'easy' | 'medium' | 'hard')
+            : 'medium';
+        const instructions = req.body?.instructions as string | undefined;
+
+        const questions = await documentRagService.generateQuiz({
+            documentId: doc.id,
+            count,
+            difficulty,
+            instructions,
+        });
+
+        res.json({ questions, count: questions.length, difficulty });
+    } catch (e) {
+        next(e);
+    }
+});
+
+// POST /documents/:id/flashcards - Flash kart üret
+router.post('/:id/flashcards', async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const doc = await documentService.getDocument(userId, req.params.id);
+
+        if (doc.status !== 'ready') {
+            throw new ConflictError('Doküman henüz işlenmedi. Lütfen bekleyin.');
+        }
+
+        const count = Math.min(Math.max(parseInt(req.body?.count ?? '15', 10), 1), 25);
+        const difficulty = ['easy', 'medium', 'hard'].includes(req.body?.difficulty)
+            ? (req.body.difficulty as 'easy' | 'medium' | 'hard')
+            : 'medium';
+        const instructions = req.body?.instructions as string | undefined;
+
+        const cards = await documentRagService.generateFlashcards({
+            documentId: doc.id,
+            count,
+            difficulty,
+            instructions,
+        });
+
+        res.json({ cards, count: cards.length, difficulty });
+    } catch (e) {
+        next(e);
+    }
+});
+
 router.get('/:id/chat/history', async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const userId = req.user!.userId;

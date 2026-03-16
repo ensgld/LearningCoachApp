@@ -5,6 +5,7 @@ import 'package:learning_coach/shared/data/api_goal_repository.dart';
 import 'package:learning_coach/shared/data/api_stats_repository.dart';
 import 'package:learning_coach/shared/data/api_study_session_repository.dart';
 import 'package:learning_coach/shared/data/mock_data_repository.dart';
+
 import 'package:learning_coach/shared/models/models.dart';
 import 'package:learning_coach/shared/providers/auth_provider.dart';
 import 'package:learning_coach/shared/services/gamification_service.dart';

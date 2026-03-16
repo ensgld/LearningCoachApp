@@ -58,6 +58,46 @@ export async function answerWithContext(
     return data.answer;
 }
 
+export async function generateQuiz(
+    context: string,
+    count: number,
+    difficulty: string,
+    instructions?: string
+): Promise<any> {
+    const response = await fetch(`${config.LLM_BACKEND_URL}/rag/quiz`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context, count, difficulty, instructions }),
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`LLM quiz error: ${response.status} ${body}`);
+    }
+
+    return response.json();
+}
+
+export async function generateFlashcards(
+    context: string,
+    count: number,
+    difficulty: string,
+    instructions?: string
+): Promise<any> {
+    const response = await fetch(`${config.LLM_BACKEND_URL}/rag/flashcards`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context, count, difficulty, instructions }),
+    });
+
+    if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`LLM flashcard error: ${response.status} ${body}`);
+    }
+
+    return response.json();
+}
+
 export async function askCoach(message: string): Promise<string> {
     const response = await fetch(`${config.LLM_BACKEND_URL}/chat`, {
         method: 'POST',

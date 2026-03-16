@@ -7,7 +7,12 @@ from app.core.config import (
     OLLAMA_EMBEDDINGS_URL,
     REQUEST_TIMEOUT,
 )
-from app.core.prompts import SYSTEM_PROMPT, RAG_SYSTEM_PROMPT
+from app.core.prompts import (
+    SYSTEM_PROMPT,
+    RAG_SYSTEM_PROMPT,
+    QUIZ_SYSTEM_PROMPT,
+    FLASHCARD_SYSTEM_PROMPT,
+)
 from app.core.logger import logger
 
 
@@ -106,6 +111,56 @@ def ask_document(question: str, context: str, history: list[dict] = []) -> str:
         json=payload,
         timeout=REQUEST_TIMEOUT,
     )
+    response.raise_for_status()
+    data = response.json()
+    return data["message"]["content"]
+
+
+def generate_quiz(context: str, count: int, difficulty: str, instructions: str | None = None) -> str:
+    messages = [{"role": "system", "content": QUIZ_SYSTEM_PROMPT}]
+    
+    req_text = f"Bağlam:\n{context}\n\nİstek: Lütfen bu bağlama göre {count} adet {difficulty} (zorluk) seviyede soru içeren bir seçenekli test hazırla."
+    if instructions:
+        req_text += f"\n\nÖzel Talimatlar:\n{instructions}"
+
+    messages.append({
+        "role": "user",
+        "content": req_text,
+    })
+
+    payload = {
+        "model": MODEL_NAME,
+        "messages": messages,
+        "stream": False,
+        "format": "json",
+    }
+
+    response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
+    response.raise_for_status()
+    data = response.json()
+    return data["message"]["content"]
+
+
+def generate_flashcards(context: str, count: int, difficulty: str, instructions: str | None = None) -> str:
+    messages = [{"role": "system", "content": FLASHCARD_SYSTEM_PROMPT}]
+    
+    req_text = f"Bağlam:\n{context}\n\nİstek: Lütfen bu bağlama göre {count} adet {difficulty} (zorluk) seviyede flash kart hazırla."
+    if instructions:
+        req_text += f"\n\nÖzel Talimatlar:\n{instructions}"
+
+    messages.append({
+        "role": "user",
+        "content": req_text,
+    })
+
+    payload = {
+        "model": MODEL_NAME,
+        "messages": messages,
+        "stream": False,
+        "format": "json",
+    }
+
+    response = requests.post(OLLAMA_URL, json=payload, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     data = response.json()
     return data["message"]["content"]

@@ -159,4 +159,37 @@ class ApiDocumentRepository {
       rethrow;
     }
   }
+
+  Future<List<QuizQuestion>> generateQuiz({
+    required String documentId,
+    required int count,
+    required String difficulty, // 'easy' | 'medium' | 'hard'
+    String? instructions,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/documents/$documentId/quiz',
+      data: {'count': count, 'difficulty': difficulty, 'instructions': instructions},
+    );
+    final data = response.data!['questions'] as List<dynamic>;
+    return data
+        .map((q) => QuizQuestion.fromJson(q as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<FlashCard>> generateFlashcards({
+    required String documentId,
+    required int count,
+    required String difficulty, // 'easy' | 'medium' | 'hard'
+    String? instructions,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/documents/$documentId/flashcards',
+      data: {'count': count, 'difficulty': difficulty, 'instructions': instructions},
+    );
+    final data = response.data!['cards'] as List<dynamic>;
+    return data
+        .map((c) => FlashCard.fromJson(c as Map<String, dynamic>))
+        .toList();
+  }
 }
+
