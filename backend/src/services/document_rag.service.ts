@@ -10,7 +10,12 @@ import { createWorker } from 'tesseract.js';
 import textract from 'textract';
 import xlsx from 'xlsx';
 import { pool } from '../db/pool';
-import { answerWithContext, embedTexts } from './llm_backend.service';
+import {
+    answerWithContext,
+    embedTexts,
+    generateFlashcards as llmGenerateFlashcards,
+    generateQuiz as llmGenerateQuiz,
+} from './llm_backend.service';
 
 const CHUNK_WORDS = 150;
 const CHUNK_OVERLAP = 20;
@@ -179,9 +184,19 @@ export async function chatWithDocument(params: {
     }
 
     const context = chunks.map((c) => c.chunk_text).join('\n\n---\n\n');
-    const answer = await answerWithContext(params.question, context, params.history ?? []);
+    let answer = await answerWithContext(
+        params.question,
+        context,
+        params.history ?? [],
+    );
 
-    const sources: RagSource[] = chunks.map((c) => {
+    let usedContext = true;
+    if (answer.includes('[BAĞLAM_KULLANILMADI]')) {
+        usedContext = false;
+        answer = answer.replace(/\[BAĞLAM_KULLANILMADI\]/g, '').trim();
+    }
+
+    const sources: RagSource[] = usedContext ? chunks.map((c) => {
         const page = c.metadata?.page;
         const label = page ? `Sayfa ${page}` : `Bölüm ${c.chunk_index + 1}`;
         return {
@@ -190,10 +205,119 @@ export async function chatWithDocument(params: {
             pageLabel: label,
             docTitle: params.docTitle,
         };
-    });
+    }) : [];
 
     return { answer, sources };
 }
+
+// ── Quiz / Test Sorusu Üretimi ────────────────────────────────────────────────
+
+export interface QuizQuestion {
+    question: string;
+    options: [string, string, string, string]; // A, B, C, D
+    answer: string;                             // 'A' | 'B' | 'C' | 'D'
+    explanation: string;
+}
+
+const DIFFICULTY_PROMPTS: Record<string, string> = {
+    easy: 'ZORLUK: KOLAY. Sorular doğrudan metindeki temel tanımları ve en açık bilgileri sormalıdır.',
+    medium: 'ZORLUK: ORTA. Sorular metindeki olayların/kavramların ilişkilerini anlamayı gerektirmelidir.',
+    hard: 'ZORLUK: ZOR. Sorular metin üzerinden analiz ve derin çıkarım yapmayı gerektirmelidir.',
+};
+
+export async function generateQuiz(params: {
+    documentId: string;
+    count: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    instructions?: string;
+}): Promise<QuizQuestion[]> {
+    const chunkRes = await pool.query(
+        `SELECT chunk_text FROM document_chunks
+         WHERE document_id = $1
+         ORDER BY RANDOM()
+         LIMIT $2`,
+        [params.documentId, Math.min(params.count * 3, 30)]
+    );
+
+    if (chunkRes.rows.length === 0) {
+        throw new Error('Belgede işlenmiş içerik bulunamadı.');
+    }
+
+    const context = chunkRes.rows.map((r: { chunk_text: string }) => r.chunk_text).join('\n\n---\n\n');
+
+    // Call the dedicated LLM endpoint
+    const data = await llmGenerateQuiz(
+        context.slice(0, 8000),
+        params.count,
+        params.difficulty,
+        params.instructions,
+    );
+
+    // The endpoint returns a dict: { "questions": [...] }
+    let questions: QuizQuestion[] = data.questions || [];
+
+    return questions
+        .filter(
+            (q) =>
+                q.question &&
+                Array.isArray(q.options) &&
+                q.answer &&
+                q.explanation
+        )
+        .slice(0, params.count);
+}
+
+// ── Flash Kart Üretimi ───────────────────────────────────────────────────────
+
+export interface Flashcard {
+    front: string;     // ön yüz: kavram / soru
+    back: string;      // arka yüz: tanım / cevap
+}
+
+const FLASHCARD_DIFFICULTY_PROMPTS: Record<string, string> = {
+    easy: 'ZORLUK: KOLAY. Kartlar temel tanımları ve en açık kavramları içermelidir.',
+    medium: 'ZORLUK: ORTA. Kartlar kavramlar arası ilişkileri ve nedenleri kapsamalıdır.',
+    hard: 'ZORLUK: ZOR. Kartlar derin analiz ve çıkarım gerektiren bilgileri içermelidir.',
+};
+
+export async function generateFlashcards(params: {
+    documentId: string;
+    count: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+    instructions?: string;
+}): Promise<Flashcard[]> {
+    const chunkRes = await pool.query(
+        `SELECT chunk_text FROM document_chunks
+         WHERE document_id = $1
+         ORDER BY RANDOM()
+         LIMIT $2`,
+        [params.documentId, Math.min(params.count * 3, 30)]
+    );
+
+    if (chunkRes.rows.length === 0) {
+        throw new Error('Belgede işlenmiş içerik bulunamadı.');
+    }
+
+    const context = chunkRes.rows.map((r: { chunk_text: string }) => r.chunk_text).join('\n\n---\n\n');
+
+    const data = await llmGenerateFlashcards(
+        context.slice(0, 8000),
+        params.count,
+        params.difficulty,
+        params.instructions,
+    );
+
+    let cards: Flashcard[] = data.cards || [];
+
+    return cards
+        .filter(
+            (c) =>
+                c.front &&
+                c.back
+        )
+        .slice(0, params.count);
+}
+
 
 async function extractText(filePath: string, mimeType: string): Promise<string> {
     const extension = path.extname(filePath).toLowerCase();

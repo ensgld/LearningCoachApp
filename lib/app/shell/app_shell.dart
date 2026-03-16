@@ -69,6 +69,7 @@ class AppShell extends ConsumerWidget {
       ),
       floatingActionButton: navigationShell.currentIndex == 2
           ? FloatingActionButton(
+              heroTag: 'fab_upload_document',
               onPressed: () {
                 showDocumentUploadOptions(
                   context: context,

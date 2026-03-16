@@ -131,6 +131,7 @@ class Document extends Equatable {
   final DocStatus status;
   final DateTime uploadedAt;
   final double processingProgress;
+  final int totalChunks;
 
   Document({
     String? id,
@@ -139,6 +140,7 @@ class Document extends Equatable {
     this.status = DocStatus.processing,
     DateTime? uploadedAt,
     this.processingProgress = 0,
+    this.totalChunks = 0,
   }) : id = id ?? uuid.v4(),
        uploadedAt = uploadedAt ?? DateTime.now();
 
@@ -156,6 +158,9 @@ class Document extends Equatable {
       uploadedAt = DateTime.tryParse(uploadedAtRaw);
     }
 
+    final totalChunksRaw = json['total_chunks'];
+    final totalChunks = totalChunksRaw is num ? totalChunksRaw.toInt() : 0;
+
     return Document(
       id: json['id'] as String?,
       title: (json['title'] as String?) ?? 'Untitled',
@@ -163,6 +168,7 @@ class Document extends Equatable {
       status: status,
       uploadedAt: uploadedAt,
       processingProgress: progress,
+      totalChunks: totalChunks,
     );
   }
 
@@ -174,7 +180,63 @@ class Document extends Equatable {
     status,
     uploadedAt,
     processingProgress,
+    totalChunks,
   ];
+}
+
+// --- Quiz ---
+
+class QuizQuestion extends Equatable {
+  final String question;
+  final List<String> options; // [A, B, C, D]
+  final String answer;        // 'A' | 'B' | 'C' | 'D'
+  final String explanation;
+
+  const QuizQuestion({
+    required this.question,
+    required this.options,
+    required this.answer,
+    required this.explanation,
+  });
+
+  factory QuizQuestion.fromJson(Map<String, dynamic> json) {
+    return QuizQuestion(
+      question: json['question'] as String? ?? '',
+      options: List<String>.from(json['options'] as List? ?? []),
+      answer: json['answer'] as String? ?? 'A',
+      explanation: json['explanation'] as String? ?? '',
+    );
+  }
+
+  @override
+  List<Object?> get props => [question, options, answer, explanation];
+}
+
+// --- Flashcard ---
+
+class FlashCard extends Equatable {
+  final String front;       // ön yüz: kavram / soru
+  final String back;        // arka yüz: tanım / cevap
+
+  const FlashCard({
+    required this.front,
+    required this.back,
+  });
+
+  factory FlashCard.fromJson(Map<String, dynamic> json) {
+    return FlashCard(
+      front: json['front'] as String? ?? '',
+      back:  json['back']  as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'front': front,
+    'back':  back,
+  };
+
+  @override
+  List<Object?> get props => [front, back];
 }
 
 class CoachMessage extends Equatable {

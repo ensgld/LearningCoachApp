@@ -308,6 +308,10 @@ class AppStrings {
       locale == 'tr' ? 'Plan oluştur' : 'Create Plan';
   static String getGenerateQuiz(String locale) =>
       locale == 'tr' ? 'Quiz üret' : 'Generate Quiz';
+  static String getPrepareTest(String locale) =>
+      locale == 'tr' ? 'Test Hazırla' : 'Create a Test';
+  static String getCreateFlashcards(String locale) =>
+      locale == 'tr' ? 'Flash Kart Oluştur' : 'Create Flashcards';
   static String getStruggledToday(String locale) =>
       locale == 'tr' ? 'Bugün zorlandım' : 'Struggled Today';
   static String getMotivateMe(String locale) =>
