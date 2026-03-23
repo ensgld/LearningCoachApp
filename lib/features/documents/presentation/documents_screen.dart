@@ -9,7 +9,6 @@ import 'package:learning_coach/core/providers/locale_provider.dart';
 import 'package:learning_coach/shared/data/providers.dart';
 import 'package:learning_coach/shared/models/models.dart';
 
-
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
 
@@ -17,20 +16,111 @@ class DocumentsScreen extends ConsumerStatefulWidget {
   ConsumerState<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
-class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
-  Timer? _poller;
+class _PollingConfig {
+  final Duration fastInterval;
+  final Duration mediumInterval;
+  final Duration slowInterval;
+  final int mediumAfterUnchangedTicks;
+  final int slowAfterUnchangedTicks;
 
-  void _startPolling() {
+  const _PollingConfig({
+    required this.fastInterval,
+    required this.mediumInterval,
+    required this.slowInterval,
+    required this.mediumAfterUnchangedTicks,
+    required this.slowAfterUnchangedTicks,
+  });
+}
+
+class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
+  static const _PollingConfig _pollingConfig = _PollingConfig(
+    fastInterval: Duration(seconds: 3),
+    mediumInterval: Duration(seconds: 5),
+    slowInterval: Duration(seconds: 8),
+    mediumAfterUnchangedTicks: 2,
+    slowAfterUnchangedTicks: 4,
+  );
+
+  Timer? _poller;
+  bool _isPollingRequestInFlight = false;
+  Duration _currentPollingInterval = _pollingConfig.fastInterval;
+  int _unchangedPollTicks = 0;
+  String _lastProgressSignature = '';
+
+  void _startPolling(List<Document> currentDocs) {
     if (_poller != null) return;
-    // 500ms — embedding request'leri aralarında bile yakalayabilmek için
-    _poller = Timer.periodic(const Duration(milliseconds: 500), (_) {
-      ref.invalidate(documentsProvider);
+    _lastProgressSignature = _buildProcessingSignature(currentDocs);
+    _unchangedPollTicks = 0;
+    _setPollingTimer(_pollingConfig.fastInterval);
+  }
+
+  void _setPollingTimer(Duration interval) {
+    _poller?.cancel();
+    _currentPollingInterval = interval;
+
+    _poller = Timer.periodic(interval, (_) async {
+      if (_isPollingRequestInFlight) return;
+      _isPollingRequestInFlight = true;
+      try {
+        ref.invalidate(documentsProvider);
+        final docs = await ref.read(documentsProvider.future);
+
+        final hasProcessing = docs.any(
+          (doc) => doc.status == DocStatus.processing,
+        );
+        if (!hasProcessing) {
+          _stopPolling();
+          return;
+        }
+
+        final nextSignature = _buildProcessingSignature(docs);
+        if (nextSignature == _lastProgressSignature) {
+          _unchangedPollTicks += 1;
+        } else {
+          _lastProgressSignature = nextSignature;
+          _unchangedPollTicks = 0;
+        }
+
+        final nextInterval = _nextPollingInterval();
+        if (nextInterval != _currentPollingInterval) {
+          _setPollingTimer(nextInterval);
+        }
+      } finally {
+        _isPollingRequestInFlight = false;
+      }
     });
+  }
+
+  Duration _nextPollingInterval() {
+    if (_unchangedPollTicks >= _pollingConfig.slowAfterUnchangedTicks) {
+      return _pollingConfig.slowInterval;
+    }
+    if (_unchangedPollTicks >= _pollingConfig.mediumAfterUnchangedTicks) {
+      return _pollingConfig.mediumInterval;
+    }
+    return _pollingConfig.fastInterval;
+  }
+
+  String _buildProcessingSignature(List<Document> docs) {
+    final signatures =
+        docs
+            .where((doc) => doc.status == DocStatus.processing)
+            .map(
+              (doc) => '${doc.id}:${(doc.processingProgress * 1000).round()}',
+            )
+            .toList()
+          ..sort();
+
+    return signatures.join('|');
   }
 
   void _stopPolling() {
     _poller?.cancel();
     _poller = null;
+    _isPollingRequestInFlight = false;
+    _currentPollingInterval = _pollingConfig.fastInterval;
+    _unchangedPollTicks = 0;
+    _lastProgressSignature = '';
   }
 
   @override
@@ -49,7 +139,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final hasProcessing =
         docs?.any((doc) => doc.status == DocStatus.processing) ?? false;
     if (hasProcessing) {
-      _startPolling();
+      _startPolling(docs ?? const []);
     } else {
       _stopPolling();
     }
@@ -227,7 +317,8 @@ class _DocumentCardState extends State<_DocumentCard> {
     if (chunks <= 0) {
       incrementPerTick = 0.008; // bilinmiyorsa orta hız
     } else {
-      final batchCount = (chunks / 10).ceil(); // batch başına ~2s (local Ollama)
+      final batchCount = (chunks / 10)
+          .ceil(); // batch başına ~2s (local Ollama)
       final estimatedSeconds = batchCount * 2.0;
       // %5'ten %90'a = 0.85 mesafe, estimatedSeconds * 5 tick
       incrementPerTick = (0.85 / (estimatedSeconds * 5)).clamp(0.0005, 0.01);
@@ -240,7 +331,9 @@ class _DocumentCardState extends State<_DocumentCard> {
       final base = real > _localProgress ? real : _localProgress;
       // %99'a kadar hiç durmadan ilerle (summary aşaması dahil)
       if (base < 0.99) {
-        setState(() => _localProgress = (base + incrementPerTick).clamp(0, 0.99));
+        setState(
+          () => _localProgress = (base + incrementPerTick).clamp(0, 0.99),
+        );
       }
     });
   }
@@ -278,7 +371,9 @@ class _DocumentCardState extends State<_DocumentCard> {
     String statusLabel;
 
     final isProcessing = doc.status == DocStatus.processing;
-    final displayProgress = isProcessing ? _localProgress : doc.processingProgress;
+    final displayProgress = isProcessing
+        ? _localProgress
+        : doc.processingProgress;
     final progressPercent = (displayProgress * 100).round().clamp(0, 99);
 
     switch (doc.status) {
@@ -395,7 +490,9 @@ class _DocumentCardState extends State<_DocumentCard> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                DateFormat('d MMM, HH:mm').format(doc.uploadedAt),
+                                DateFormat(
+                                  'd MMM, HH:mm',
+                                ).format(doc.uploadedAt),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: scheme.onSurfaceVariant,
@@ -434,10 +531,12 @@ class _DocumentCardState extends State<_DocumentCard> {
                         return LinearProgressIndicator(
                           value: value,
                           minHeight: 6,
-                          backgroundColor:
-                              gradientStart.withValues(alpha: 0.15),
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(gradientStart),
+                          backgroundColor: gradientStart.withValues(
+                            alpha: 0.15,
+                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            gradientStart,
+                          ),
                         );
                       },
                     ),

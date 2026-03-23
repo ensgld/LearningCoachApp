@@ -17,11 +17,11 @@ import {
     generateQuiz as llmGenerateQuiz,
 } from './llm_backend.service';
 
-const CHUNK_WORDS = 150;
-const CHUNK_OVERLAP = 20;
+const CHUNK_WORDS = 500;
+const CHUNK_OVERLAP = 50;
 const TOP_K = 5;
-const EMBEDDING_BATCH_SIZE = 10;
-const MAX_EMBEDDING_CHARS = 500;
+const EMBEDDING_BATCH_SIZE = 32;
+const MAX_EMBEDDING_CHARS = 4000;
 const EMBEDDING_RETRIES = 3;
 const EMBEDDING_RETRY_DELAY_MS = 750;
 const MIN_TEXT_LENGTH = 50;
